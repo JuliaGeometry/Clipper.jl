@@ -1,5 +1,6 @@
 
-using Cxx
+# this just takes a few seconds to compile with clang 
+# so it is here for simplicity
 
 cxx"""
 /*******************************************************************************
