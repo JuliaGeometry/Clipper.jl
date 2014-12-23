@@ -4,28 +4,60 @@ using ImmutableArrays
 
 include("clipper_cpp.jl")
 
-cxx"""
-    #include <iostream>
-"""
+typealias __ClipperIntPoint Union(CppValue{symbol("ClipperLib::IntPoint"),()},
+                                  CppRef{symbol("ClipperLib::IntPoint"),()},
+                                  CppPtr{symbol("ClipperLib::IntPoint"),()})
+
+typealias __ClipperPath Union(CppValue{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})},
+                              CppRef{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})},
+                              CppPtr{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})})
+
+
+function IntPoint(x::Int64, y::Int64)
+    @cxx ClipperLib::IntPoint(x, y)
+end
 
 function IntPoint(v::Vector2{Int64})
     @cxx ClipperLib::IntPoint(v[1], v[2])
 end
 
-function Path(ct::Integer=1)
+function Path(ct::Integer=0)
     @cxx ClipperLib::Path(ct)
 end
 
-function Base.push!(a::CppValue{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})},
-               b::CppValue{symbol("ClipperLib::IntPoint"),()})
+function Paths(ct::Integer=0)
+    @cxx ClipperLib::Paths(ct)
+end
+
+function Base.push!(a::__ClipperPath,
+               b::__ClipperIntPoint)
     @cxx a->push_back(b)
 end
 
-function Base.show(io::IO, v::CppValue{symbol("ClipperLib::IntPoint"),()})
+function Base.length(p::__ClipperPath)
+    @cxx p->size()
+end
+
+function Base.getindex(p::__ClipperPath, i::Integer)
+    @cxx p->at(i-1)
+end
+
+function Base.show(io::IO, v::__ClipperIntPoint)
     x = @cxx v->X
     y = @cxx v->Y
     print(io, string("(", x,",", y,")"))
 end
+
+function Base.show(io::IO, p::__ClipperPath)
+    n = length(p)
+    print(io, "Path => [")
+    for i = 1:n
+        show(io, p[i])
+        n > 1 && i < n && print(io, ",")
+    end
+    print(io, "]")
+end
+
 
 function offset()
 icxx"""
