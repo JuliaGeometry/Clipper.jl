@@ -67,3 +67,15 @@ push!(p, IntPoint(0,10))
 clean!(p)
 @test length(p) == 4
 
+println("Testing isinside...")
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(0,2))
+push!(p, IntPoint(2,2))
+push!(p, IntPoint(2,0))
+@test isinside(IntPoint(-1,-1), p) == 0
+@test isinside(IntPoint(0,0), p) == -1
+@test isinside(IntPoint(1,1), p) == 1
+@test isinside(IntPoint(0,1), p) == -1
+@test isinside(IntPoint(1,0), p) == -1
+

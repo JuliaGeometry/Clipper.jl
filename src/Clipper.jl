@@ -219,6 +219,16 @@ function clean!(p::__ClipperPaths, distance = 1.415)
     @cxx ClipperLib::CleanPolygons(p, distance)
 end
 
+@doc """
+Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
+
+## Notes
+- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/PointInPolygon.htm)
+""" ->
+function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
+    @cxx ClipperLib::PointInPolygon(pt, poly)
+end
+
 function offset(p::__ClipperPath, dist::Real)
     new_p = Paths()
     co = @cxx ClipperLib::ClipperOffset()
@@ -228,6 +238,7 @@ function offset(p::__ClipperPath, dist::Real)
     @cxx co->Execute(new_p, dist);
     return new_p
 end
+
 #
 # Some "julian" encapsulation of Clipper types.
 #
