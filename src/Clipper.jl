@@ -45,7 +45,7 @@ solutions.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyType.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyType.htm)
 """ ->
 abstract AbstractPolyType
 type SubjectPoly <: AbstractPolyType end
@@ -71,7 +71,7 @@ same regardless of whether or not the first and last vertices in the path match.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm)
 """ ->
 abstract AbstractEndType
 type ClosedPolygon <: AbstractEndType end
@@ -188,7 +188,7 @@ See also the notes on [rounding](http://www.angusj.com/delphi/clipper/documentat
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/IntPoint.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/IntPoint.htm)
 """ ->
 function IntPoint(x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
@@ -209,7 +209,7 @@ Multiple paths can be grouped into a Paths structure.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Path.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Path.htm)
 
 """ ->
 function Path(ct::Integer=0)
@@ -237,7 +237,7 @@ contours or 'hole' contours. Which they are depends on orientation.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Paths.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Paths.htm)
 """ ->
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
@@ -255,7 +255,7 @@ conversely, if Orientation is false, then the area will be negative.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Area.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Area.htm)
 """ ->
 function area(p::__ClipperPath)
     @cxx ClipperLib::Area(p)
@@ -271,7 +271,7 @@ p
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/ReversePath.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/ReversePath.htm)
 """ ->
 function Base.reverse!(p::__ClipperPath)
     @cxx ClipperLib::ReversePath(p)
@@ -304,7 +304,7 @@ semi-adjacent the out-lying vertex will be removed too.)
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/CleanPolygon.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/CleanPolygon.htm)
 """ ->
 function clean!(p::__ClipperPath, distance = 1.415)
     @cxx ClipperLib::CleanPolygon(p, distance)
@@ -318,7 +318,7 @@ Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/PointInPolygon.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/PointInPolygon.htm)
 """ ->
 function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
     @cxx ClipperLib::PointInPolygon(pt, poly)
@@ -355,7 +355,7 @@ Notes:
 
 ## Notes
 
-- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Orientation.htm)
+[Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Orientation.htm)
 """ ->
 function orientation(p::__ClipperPath)
     @cxx ClipperLib::Orientation(p)
