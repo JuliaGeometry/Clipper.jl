@@ -70,7 +70,13 @@ function Base.getindex(p::__ClipperPaths, i::Integer)
 end
 
 @doc """
-Compute the area of a path
+This function returns the area of the supplied polygon. (It's assumed that the
+path will be closed.) Depending on orientation, this value may be positive or
+negative. If Orientation is true, then the area will be positive and
+conversely, if Orientation is false, then the area will be negative.
+
+# Notes
+C++: http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Area.htm
 """ ->
 function area(p::__ClipperPath)
     @cxx ClipperLib::Area(p)
