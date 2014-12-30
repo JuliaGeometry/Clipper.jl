@@ -168,6 +168,9 @@ type NegativeFill <: AbstractFillType end
 
 
 @doc """
+
+![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/jointype.png?token=AB_WDFb-zfb5TvOlOHBOxoBYnfkZ4pRTks5UrGOgwA%3D%3D)
+
 - **MiterJoin:** There's a necessary limit to mitered joins since offsetting
   edges that join at very acute angles will produce excessively long and narrow
   'spikes'. Offset's MiterLimit property specifies a maximum distance that
