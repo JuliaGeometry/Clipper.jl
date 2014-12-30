@@ -4,14 +4,18 @@ using ImmutableArrays
 
 include("clipper_cpp.jl")
 
-typealias __ClipperIntPoint Union(CppValue{symbol("ClipperLib::IntPoint"),()},
-                                  CppRef{symbol("ClipperLib::IntPoint"),()},
-                                  CppPtr{symbol("ClipperLib::IntPoint"),()})
+typealias __ClipperIntPoint Union(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
+                                  CppRef{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
+                                  CppPtr{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)})
 
-typealias __ClipperPath Union(CppValue{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})},
-                              CppRef{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})},
-                              CppPtr{symbol("std::vector"),(CppValue{symbol("ClipperLib::IntPoint"),()},CppValue{symbol("std::allocator"),(CppValue{symbol("ClipperLib::IntPoint"),()},)})})
+typealias __ClipperPath Union(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+                              CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+                              CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
+
+typealias __ClipperPaths Union(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
 function IntPoint(x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
@@ -25,6 +29,16 @@ function Path(ct::Integer=0)
     @cxx ClipperLib::Path(ct)
 end
 
+function Path(poly::Polygon{Vertex{Vector2{Int64}}})
+    n = length(poly.vertices)
+    p = Path()
+    @cxx p->reserve(n)
+    for vert in poly.vertices
+        push!(p, IntPoint(vert.location))
+    end
+    return p
+end
+
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
 end
@@ -34,7 +48,16 @@ function Base.push!(a::__ClipperPath,
     @cxx a->push_back(b)
 end
 
+function Base.push!(a::__ClipperPaths,
+               b::__ClipperPath)
+    @cxx a->push_back(b)
+end
+
 function Base.length(p::__ClipperPath)
+    @cxx p->size()
+end
+
+function Base.length(p::__ClipperPaths)
     @cxx p->size()
 end
 
@@ -42,6 +65,13 @@ function Base.getindex(p::__ClipperPath, i::Integer)
     @cxx p->at(i-1)
 end
 
+function Base.getindex(p::__ClipperPaths, i::Integer)
+    @cxx p->at(i-1)
+end
+
+@doc """
+Compute the area of a path
+""" ->
 function area(p::__ClipperPath)
     @cxx ClipperLib::Area(p)
 end
@@ -62,41 +92,32 @@ function Base.show(io::IO, p::__ClipperPath)
     print(io, "]")
 end
 
+function Base.show(io::IO, p::__ClipperPath)
+    n = length(p)
+    print(io, "Path => [")
+    for i = 1:n
+        show(io, p[i])
+        n > 1 && i < n && print(io, ",")
+    end
+    print(io, "]")
+end
 
-function offset()
-icxx"""
-	
-	//from clipper.hpp ...
-	//typedef signed long long cInt;
-	//struct IntPoint {cInt X; cInt Y;};
-	//typedef std::vector<IntPoint> Path;
-	//typedef std::vector<Path> Paths;
-	
-	ClipperLib::Paths subj(2), clip(1), solution;
-	
-	//define outer blue 'subject' polygon
-	subj[0].reserve(4);
-	subj[0] << 
-	  ClipperLib::IntPoint(180,200) << ClipperLib::IntPoint(260,200) <<
-	  ClipperLib::IntPoint(260,150) << ClipperLib::IntPoint(180,150);
-	
-	//define subject's inner triangular 'hole' (with reverse orientation)
-	subj[1].reserve(3);
-	subj[1] << 
-	  ClipperLib::IntPoint(215,160) << ClipperLib::IntPoint(230,190)
-	   << ClipperLib::IntPoint(200,190);
-	
-	//define orange 'clipping' polygon
-	clip[0].reserve(4);
-	clip[0] << 
-	  ClipperLib::IntPoint(190,210) << ClipperLib::IntPoint(240,210) << 
-	  ClipperLib::IntPoint(240,130) << ClipperLib::IntPoint(190,130);
-	
-	//perform intersection ...
-	ClipperLib::Clipper c;
-	c.AddPaths(subj, ClipperLib::ptSubject, true);
-	c.AddPaths(clip, ClipperLib::ptClip, true);
-	c.Execute(ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
-	std::cout << solution;
-"""
+function Base.show(io::IO, p::__ClipperPaths)
+    n = length(p)
+    print(io, "Paths => [")
+    for i = 1:n
+        show(io, p[i])
+        n > 1 && i < n && println(io, ",")
+    end
+    print(io, "]")
+end
+
+function offset(p::__ClipperPath, dist::Real)
+    new_p = Paths()
+    co = @cxx ClipperLib::ClipperOffset()
+    jt = @cxx ClipperLib::jtRound
+    et = @cxx ClipperLib::etClosedPolygon
+    @cxx co->AddPath(p, jt, et);
+    @cxx co->Execute(new_p, dist);
+    return new_p
 end
