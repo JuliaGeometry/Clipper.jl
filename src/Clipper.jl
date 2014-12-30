@@ -166,6 +166,25 @@ type NonZeroFill <: AbstractFillType end
 type PositiveFill <: AbstractFillType end
 type NegativeFill <: AbstractFillType end
 
+
+@doc """
+- **MiterJoin:** There's a necessary limit to mitered joins since offsetting
+  edges that join at very acute angles will produce excessively long and narrow
+  'spikes'. Offset's MiterLimit property specifies a maximum distance that
+  vertices will be offset (in multiples of delta). For any given edge join, when
+  miter offsetting would exceed that maximum distance, 'square' joining is
+  applied.
+- **RoundJoin:** While flattened paths can never perfectly trace an arc, they
+  are approximated by a series of arc chords (see ClipperObject's ArcTolerance
+  property).
+- **SquareJoin:** Squaring is applied uniformally at all convex edge joins at
+  1 × delta.
+""" ->
+abstract AbstractJoinType
+type SquareJoin <: AbstractJoinType end
+type RoundJoin <: AbstractJoinType end
+type MiterJoin <: AbstractJoinType end
+
 #
 # Clipper Types
 #
