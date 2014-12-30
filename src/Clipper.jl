@@ -44,6 +44,7 @@ other boolean operations require both sets of polygons to derive meaningful
 solutions.
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyType.htm)
 """ ->
 abstract AbstractPolyType
@@ -69,6 +70,7 @@ same regardless of whether or not the first and last vertices in the path match.
 ![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/endtypes.png?token=AB_WDL566awwi_dkT6kRkJFCbZvKb4Rrks5UrEQiwA%3D%3D)
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm)
 """ ->
 abstract AbstractEndType
@@ -100,6 +102,7 @@ IntPoints.
 See also the notes on [rounding](http://www.angusj.com/delphi/clipper/documentation/Docs/Overview/Rounding.htm).
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/IntPoint.htm)
 """ ->
 function IntPoint(x::Int64, y::Int64)
@@ -118,7 +121,9 @@ polygons. Whether or not a path is open depends on context. Closed paths may be
 'outer' contours or 'hole' contours. Which they are depends on orientation.
 
 Multiple paths can be grouped into a Paths structure.
+
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Path.htm)
 
 """ ->
@@ -146,6 +151,7 @@ Whether or not a path is open depends on context. Closed paths may be 'outer'
 contours or 'hole' contours. Which they are depends on orientation.
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Paths.htm)
 """ ->
 function Paths(ct::Integer=0)
@@ -163,6 +169,7 @@ negative. If Orientation is true, then the area will be positive and
 conversely, if Orientation is false, then the area will be negative.
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Area.htm)
 """ ->
 function area(p::__ClipperPath)
@@ -178,6 +185,7 @@ p
     The path to reverse
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/ReversePath.htm)
 """ ->
 function Base.reverse!(p::__ClipperPath)
@@ -210,6 +218,7 @@ and Y coordinates differing by no more than 1 unit. (If the egdes are
 semi-adjacent the out-lying vertex will be removed too.)
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/CleanPolygon.htm)
 """ ->
 function clean!(p::__ClipperPath, distance = 1.415)
@@ -223,6 +232,7 @@ end
 Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
 
 ## Notes
+
 - [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/PointInPolygon.htm)
 """ ->
 function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
@@ -240,8 +250,10 @@ Orientation is also dependent on axis direction:
 - On Y-axis positive downward displays, Orientation will return true if the
   polygon's orientation is clockwise.
 
+![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/orientation.png?token=AB_WDHGa2pqOPQ7nTLGAGcMGMwGA3nzPks5UrFgMwA%3D%3D)
 
 Notes:
+
 - Self-intersecting polygons have indeterminate orientations in which case this
   function won't return a meaningful value.
 - The majority of 2D graphic display libraries (eg GDI, GDI+, XLib, Cairo, AGG,
@@ -255,6 +267,10 @@ Notes:
 - For closed paths (polygons) in the solution returned by Clipper's Execute
   method, their orientations will always be true for outer polygons and false
   for hole polygons (unless the ReverseSolution property has been enabled).
+
+## Notes
+
+- [C++](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Orientation.htm)
 """ ->
 function orientation(p::__ClipperPath)
     @cxx ClipperLib::Orientation(p)
