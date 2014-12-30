@@ -121,3 +121,17 @@ function offset(p::__ClipperPath, dist::Real)
     @cxx co->Execute(new_p, dist);
     return new_p
 end
+
+@doc """
+Reverses the vertex order (and hence orientation) in the specified path.
+
+# Parameters
+p
+    The path to reverse
+
+# Notes
+C++: http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/ReversePath.htm
+""" ->
+function Base.reverse!(p::__ClipperPath)
+    @cxx ClipperLib::ReversePath(p)
+end
