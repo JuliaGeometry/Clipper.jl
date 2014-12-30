@@ -2,8 +2,14 @@ using Cxx
 using Polygons
 using ImmutableArrays
 
+
+# The CPP source for clipper. It is put inside a cxx block so that we dont have
+# and external dependencies. Likewise, the extra compilation time is negligable
+# part of the total load time.
 include("clipper_cpp.jl")
 
+# C++ type aliases. Cxx.jl automatically handles the conversion between these
+# three, so we can refer to these as the same thing through the type union.
 typealias __ClipperIntPoint Union(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
                                   CppRef{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
                                   CppPtr{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)})
