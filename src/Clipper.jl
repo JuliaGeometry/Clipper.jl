@@ -229,6 +229,37 @@ function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
     @cxx ClipperLib::PointInPolygon(pt, poly)
 end
 
+@doc """
+Orientation is only important to closed paths. Given that vertices are declared
+in a specific order, orientation refers to the direction (clockwise or
+counter-clockwise) that these vertices progress around a closed path.
+
+Orientation is also dependent on axis direction:
+- On Y-axis positive upward displays, Orientation will return true if the
+  polygon's orientation is counter-clockwise.
+- On Y-axis positive downward displays, Orientation will return true if the
+  polygon's orientation is clockwise.
+
+
+Notes:
+- Self-intersecting polygons have indeterminate orientations in which case this
+  function won't return a meaningful value.
+- The majority of 2D graphic display libraries (eg GDI, GDI+, XLib, Cairo, AGG,
+  Graphics32) and even the SVG file format have their coordinate origins at the
+  top-left corner of their respective viewports with their Y axes increasing
+  downward. However, some display libraries (eg Quartz, OpenGL) have their
+  coordinate origins undefined or in the classic bottom-left position with
+  their Y axes increasing upward.
+- For Non-Zero filled polygons, the orientation of holes must be opposite that
+  of outer polygons.
+- For closed paths (polygons) in the solution returned by Clipper's Execute
+  method, their orientations will always be true for outer polygons and false
+  for hole polygons (unless the ReverseSolution property has been enabled).
+""" ->
+function orientation(p::__ClipperPath)
+    @cxx ClipperLib::Orientation(p)
+end
+
 function offset(p::__ClipperPath, dist::Real)
     new_p = Paths()
     co = @cxx ClipperLib::ClipperOffset()

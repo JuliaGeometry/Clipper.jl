@@ -79,3 +79,12 @@ push!(p, IntPoint(2,0))
 @test isinside(IntPoint(0,1), p) == -1
 @test isinside(IntPoint(1,0), p) == -1
 
+println("Testing orientation...")
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(0,2))
+push!(p, IntPoint(2,2))
+push!(p, IntPoint(2,0))
+@test orientation(p) == false
+reverse!(p)
+@test orientation(p) == true
