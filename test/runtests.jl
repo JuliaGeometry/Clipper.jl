@@ -54,3 +54,16 @@ push!(p, IntPoint(1,0))
 @test area(p) == -1.0
 reverse!(p)
 @test area(p) == 1.0
+
+println("Testing clean...")
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(5,0))
+push!(p, IntPoint(10,0))
+push!(p, IntPoint(10,10))
+push!(p, IntPoint(5,10))
+push!(p, IntPoint(0,10))
+@test length(p) == 6
+clean!(p)
+@test length(p) == 4
+

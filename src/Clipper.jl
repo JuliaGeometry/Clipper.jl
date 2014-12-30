@@ -150,3 +150,32 @@ end
 function Base.reverse!(p::__ClipperPaths)
     @cxx ClipperLib::ReversePaths(p)
 end
+
+@doc """
+Removes vertices:
+
+- that join co-linear edges, or join edges that are almost co-linear
+  (such that if the vertex was moved no more than the specified distance
+  the edges would be co-linear)
+- that are within the specified distance of an adjacent vertex
+- that are within the specified distance of a semi-adjacent vertex together
+  with their out-lying vertices
+
+Vertices are semi-adjacent when they are separated by a single (out-lying)
+vertex.
+
+The distance parameter's default value is approximately √2 so that a vertex will
+be removed when adjacent or semi-adjacent vertices having their corresponding X
+and Y coordinates differing by no more than 1 unit. (If the egdes are
+semi-adjacent the out-lying vertex will be removed too.)
+
+# Notes
+C++: http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/CleanPolygon.htm
+""" ->
+function clean!(p::__ClipperPath, distance = 1.415)
+    @cxx ClipperLib::CleanPolygon(p, distance)
+end
+function clean!(p::__ClipperPaths, distance = 1.415)
+    @cxx ClipperLib::CleanPolygons(p, distance)
+end
+
