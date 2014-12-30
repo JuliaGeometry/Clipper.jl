@@ -42,6 +42,10 @@ function Base.getindex(p::__ClipperPath, i::Integer)
     @cxx p->at(i-1)
 end
 
+function area(p::__ClipperPath)
+    @cxx ClipperLib::Area(p)
+end
+
 function Base.show(io::IO, v::__ClipperIntPoint)
     x = @cxx v->X
     y = @cxx v->Y
