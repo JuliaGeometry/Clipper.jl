@@ -1,6 +1,4 @@
 using Cxx
-using Polygons
-using ImmutableArrays
 
 #
 # The CPP source for clipper. It is put inside a cxx block so that we dont have
@@ -221,10 +219,6 @@ function IntPoint(x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
 end
 
-function IntPoint(v::Vector2{Int64})
-    @cxx ClipperLib::IntPoint(v[1], v[2])
-end
-
 
 @doc """
 This structure contains a sequence of IntPoint vertices defining a single
@@ -242,16 +236,6 @@ Multiple paths can be grouped into a Paths structure.
 """ ->
 function Path(ct::Integer=0)
     @cxx ClipperLib::Path(ct)
-end
-
-function Path(poly::Polygon{Vertex{Vector2{Int64}}})
-    n = length(poly.vertices)
-    p = Path()
-    @cxx p->reserve(n)
-    for vert in poly.vertices
-        push!(p, IntPoint(vert.location))
-    end
-    return p
 end
 
 
