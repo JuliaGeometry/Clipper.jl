@@ -29,11 +29,20 @@ typealias __ClipperPaths Union(CppValue{CppTemplate{CppBaseType{symbol("std::vec
     CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
 #
-# Clipper Flags. In C++ these are enums, but here we use abstract types so we
-# always get specialized code.
+# Clipper Enums
 #
 
-@doc """
+const ioReverseSolution = CppEnum{symbol("ClipperLib::InitOptions")}(1)
+const ioStrictlySimple = CppEnum{symbol("ClipperLib::InitOptions")}(2)
+const ioPreserveCollinear = CppEnum{symbol("ClipperLib::InitOptions")}(4)
+
+
+const ctIntersection = CppEnum{symbol("ClipperLib::ClipType")}(0)
+const ctUnion = CppEnum{symbol("ClipperLib::ClipType")}(1)
+const ctDifference = CppEnum{symbol("ClipperLib::ClipType")}(2)
+const ctXor = CppEnum{symbol("ClipperLib::ClipType")}(3)
+
+"""
 Boolean (clipping) operations are mostly applied to two sets of Polygons,
 represented in this library as subject and clip polygons. Whenever Polygons are
 added to the Clipper object, they must be assigned to either subject or clip
@@ -46,12 +55,11 @@ solutions.
 ## Notes
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyType.htm)
-""" ->
-abstract AbstractPolyType
-type SubjectPoly <: AbstractPolyType end
-type ClipPoly <: AbstractPolyType end
+"""
+const ptSubject = CppEnum{symbol("ClipperLib::PolyType")}(0)
+const ptClip = CppEnum{symbol("ClipperLib::PolyType")}(1)
 
-@doc """
+"""
  The AbstractEndType has 5 decendent options:
 
 - ClosedPolygon: Ends are joined using the JoinType value and the path filled as
@@ -72,24 +80,23 @@ same regardless of whether or not the first and last vertices in the path match.
 ## Notes
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm)
-""" ->
-abstract AbstractEndType
-type ClosedPolygon <: AbstractEndType end
-type ClosedLine <: AbstractEndType end
-type OpenSquare <: AbstractEndType end
-type OpenRound <: AbstractEndType end
-type OpenButt <: AbstractEndType end
+"""
+const etClosedPolygon = CppEnum{symbol("ClipperLib::EndType")}(0)
+const etClosedLine = CppEnum{symbol("ClipperLib::EndType")}(1)
+const etOpenSquare = CppEnum{symbol("ClipperLib::EndType")}(2)
+const etOpenRound = CppEnum{symbol("ClipperLib::EndType")}(3)
+const etOpenButt = CppEnum{symbol("ClipperLib::EndType")}(4)
 
 
-@doc """
+"""
 Filling indicates those regions that are inside a closed path (ie 'filled' with
 a brush color or pattern in a graphical display) and those regions that are
 outside. The Clipper Library supports 4 filling rules:
 
- - Even-Odd (EvenOddFill)
- - Non-Zero (NonZeroFill)
- - Positive (PositiveFill)
- - Negative (NegativeFill)
+ - Even-Odd (pftEvenOdd)
+ - Non-Zero (pftNonZero)
+ - Positive (pftPositive)
+ - Negative (pftNegative)
 
 The simplest filling rule is Even-Odd filling (sometimes called alternate
 filling). Given a group of closed paths start from a point outside the paths and
@@ -159,15 +166,14 @@ filling.
 ## Notes
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyFillType.htm)
-""" ->
-abstract AbstractFillType
-type EvenOddFill <: AbstractFillType end
-type NonZeroFill <: AbstractFillType end
-type PositiveFill <: AbstractFillType end
-type NegativeFill <: AbstractFillType end
+"""
+const pftEvenOdd = CppEnum{symbol("ClipperLib::PolyFillType")}(0)
+const pftNonZero = CppEnum{symbol("ClipperLib::PolyFillType")}(1)
+const pftPositive = CppEnum{symbol("ClipperLib::PolyFillType")}(2)
+const pftNegative = CppEnum{symbol("ClipperLib::PolyFillType")}(3)
 
 
-@doc """
+"""
 
 ![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/jointype.png?token=AB_WDFb-zfb5TvOlOHBOxoBYnfkZ4pRTks5UrGOgwA%3D%3D)
 
@@ -182,11 +188,10 @@ type NegativeFill <: AbstractFillType end
   property).
 - **SquareJoin:** Squaring is applied uniformally at all convex edge joins at
   1 × delta.
-""" ->
-abstract AbstractJoinType
-type SquareJoin <: AbstractJoinType end
-type RoundJoin <: AbstractJoinType end
-type MiterJoin <: AbstractJoinType end
+"""
+const jtSquare = CppEnum{symbol("ClipperLib::JoinType")}(0)
+const jtRound = CppEnum{symbol("ClipperLib::JoinType")}(1)
+const jtMiter = CppEnum{symbol("ClipperLib::JoinType")}(2)
 
 #
 # Clipper Types
@@ -266,6 +271,12 @@ contours or 'hole' contours. Which they are depends on orientation.
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
 end
+
+#
+# Clipper Classes
+#
+
+
 
 
 #
@@ -404,23 +415,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 ![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/simplifypolygons.png?token=AB_WDGPhKj2xE6uaeVrSDKv3eNQx0hPSks5UrLNSwA%3D%3D)
 """->
-function simplify!(p::__ClipperPaths, ::Type{EvenOddFill})
-    t = @cxx ClipperLib::pftEvenOdd
-    @cxx ClipperLib::SimplifyPolygons(p, t)
-end
-
-function simplify!(p::__ClipperPaths, ::Type{NonZeroFill})
-    t = @cxx ClipperLib::pftNonZero
-    @cxx ClipperLib::SimplifyPolygons(p, t)
-end
-
-function simplify!(p::__ClipperPaths, ::Type{PositiveFill})
-    t = @cxx ClipperLib::pftPositive
-    @cxx ClipperLib::SimplifyPolygons(p, t)
-end
-
-function simplify!(p::__ClipperPaths, ::Type{NegativeFill})
-    t = @cxx ClipperLib::pftNegative
+function simplify!(p::__ClipperPaths, t::CppEnum{symbol("ClipperLib::PolyFillType")})
     @cxx ClipperLib::SimplifyPolygons(p, t)
 end
 

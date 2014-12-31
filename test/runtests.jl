@@ -98,7 +98,7 @@ push!(p, IntPoint(2,0))
 push!(p, IntPoint(1,3))
 q = Paths()
 push!(q,p)
-simplify!(q, EvenOddFill)
+simplify!(q, pftEvenOdd)
 @test length(q) == 2
 @test length(q[1]) == 3
 @test length(q[2]) == 3
