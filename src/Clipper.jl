@@ -220,6 +220,7 @@ function IntPoint(v::Vector2{Int64})
     @cxx ClipperLib::IntPoint(v[1], v[2])
 end
 
+
 @doc """
 This structure contains a sequence of IntPoint vertices defining a single
 contour (see also terminology). Paths may be open and represent a series of line
@@ -248,6 +249,7 @@ function Path(poly::Polygon{Vertex{Vector2{Int64}}})
     return p
 end
 
+
 @doc """
 This structure is fundamental to the Clipper Library. It's a list or array of
 one or more Path structures. (The Path structure contains an ordered list of
@@ -264,6 +266,7 @@ contours or 'hole' contours. Which they are depends on orientation.
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
 end
+
 
 #
 # Clipper Functions
@@ -299,12 +302,14 @@ function Base.reverse!(p::__ClipperPath)
     @cxx ClipperLib::ReversePath(p)
 end
 
+
 @doc """
 Reverses the vertex order (and hence orientation) in the specified paths.
 """ ->
 function Base.reverse!(p::__ClipperPaths)
     @cxx ClipperLib::ReversePaths(p)
 end
+
 
 @doc """
 Removes vertices:
@@ -331,9 +336,11 @@ semi-adjacent the out-lying vertex will be removed too.)
 function clean!(p::__ClipperPath, distance = 1.415)
     @cxx ClipperLib::CleanPolygon(p, distance)
 end
+
 function clean!(p::__ClipperPaths, distance = 1.415)
     @cxx ClipperLib::CleanPolygons(p, distance)
 end
+
 
 @doc """
 Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
@@ -345,6 +352,7 @@ Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
 function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
     @cxx ClipperLib::PointInPolygon(pt, poly)
 end
+
 
 @doc """
 Orientation is only important to closed paths. Given that vertices are declared
@@ -382,6 +390,40 @@ Notes:
 function orientation(p::__ClipperPath)
     @cxx ClipperLib::Orientation(p)
 end
+
+
+@doc """
+
+Removes self-intersections from the supplied polygon (by performing a boolean
+union operation using the nominated PolyFillType).
+Polygons with non-contiguous duplicate vertices (ie 'touching') will be split
+into two polygons.
+
+Note: There's currently no guarantee that polygons will be strictly simple since
+'simplifying' is still a work in progress.
+
+![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/simplifypolygons.png?token=AB_WDGPhKj2xE6uaeVrSDKv3eNQx0hPSks5UrLNSwA%3D%3D)
+"""->
+function simplify!(p::__ClipperPaths, ::Type{EvenOddFill})
+    t = @cxx ClipperLib::pftEvenOdd
+    @cxx ClipperLib::SimplifyPolygons(p, t)
+end
+
+function simplify!(p::__ClipperPaths, ::Type{NonZeroFill})
+    t = @cxx ClipperLib::pftNonZero
+    @cxx ClipperLib::SimplifyPolygons(p, t)
+end
+
+function simplify!(p::__ClipperPaths, ::Type{PositiveFill})
+    t = @cxx ClipperLib::pftPositive
+    @cxx ClipperLib::SimplifyPolygons(p, t)
+end
+
+function simplify!(p::__ClipperPaths, ::Type{NegativeFill})
+    t = @cxx ClipperLib::pftNegative
+    @cxx ClipperLib::SimplifyPolygons(p, t)
+end
+
 
 function offset(p::__ClipperPath, dist::Real)
     new_p = Paths()

@@ -88,3 +88,17 @@ push!(p, IntPoint(2,0))
 @test orientation(p) == false
 reverse!(p)
 @test orientation(p) == true
+
+println("Testing simplify...")
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(0,2))
+push!(p, IntPoint(2,2))
+push!(p, IntPoint(2,0))
+push!(p, IntPoint(1,3))
+q = Paths()
+push!(q,p)
+simplify!(q, EvenOddFill)
+@test length(q) == 2
+@test length(q[1]) == 3
+@test length(q[2]) == 3
