@@ -102,3 +102,18 @@ simplify!(q, pftEvenOdd)
 @test length(q) == 2
 @test length(q[1]) == 3
 @test length(q[2]) == 3
+
+println("Testing clip...")
+c = Clip()
+strictly_simple(c,true)
+preserve_collinear(c,true)
+reverse_solution(c,true)
+clear(c)
+
+
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(0,2))
+push!(p, IntPoint(2,2))
+push!(p, IntPoint(2,0))
+

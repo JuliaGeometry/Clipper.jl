@@ -27,6 +27,9 @@ typealias __ClipperPaths Union(CppValue{CppTemplate{CppBaseType{symbol("std::vec
     CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
+typealias __ClipperClip Union(CppValue{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
+                                CppRef{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
+                                CppPtr{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
 
 #
 # Clipper Types
@@ -97,8 +100,124 @@ end
 # Clipper Classes
 #
 
+function Clip(enum::CppEnum{symbol("ClipperLib::InitOptions")} = CppEnum{symbol("ClipperLib::InitOptions")}(0))
+    @cxx ClipperLib::Clipper(enum)
+end
+
+@doc """
+By default, when three or more vertices are collinear in input polygons (subject
+or clip), the Clipper object removes the 'inner' vertices before clipping. When
+enabled the PreserveCollinear property prevents this default behavior to allow
+these inner vertices to appear in the solution.
+""" ->
+function preserve_collinear(clip::__ClipperClip, val::Bool)
+    @cxx clip->PreserveCollinear(val)
+end
+
+@doc """
+When this property is set to true, polygons returned in the solution parameter
+of the Execute() method will have orientations opposite to their normal
+orientations.
+""" ->
+function reverse_solution(clip::__ClipperClip, val::Bool)
+    @cxx clip->ReverseSolution(val)
+end
+
+@doc """
+Terminology:
+
+- A simple polygon is one that does not self-intersect.
+- A weakly simple polygon is a simple polygon that contains 'touching' vertices,
+  or 'touching' edges.
+- A strictly simple polygon is a simple polygon that does not contain 'touching'
+  vertices, or 'touching' edges.
+
+Vertices 'touch' if they share the same coordinates (and are not adjacent). An
+edge touches another if one of its end vertices touches another edge excluding
+its adjacent edges, or if they are co-linear and overlapping (including adjacent
+edges).
+
+Polygons returned by clipping operations (see Clipper.Execute()) should always
+be simple polygons. When the StrictlySimply property is enabled, polygons
+returned will be strictly simple, otherwise they may be weakly simple. It's
+computationally expensive ensuring polygons are strictly simple and so this
+property is disabled by default.
+
+Note: There's currently no guarantee that polygons will be strictly simple since
+'simplifying' is still a work in progress.
 
 
+See also the article on Simple Polygons on Wikipedia.
+""" ->
+function strictly_simple(clip::__ClipperClip, val::Bool)
+    @cxx clip->StrictlySimple(val)
+end
+
+@doc """
+The Clear method removes any existing subject and clip polygons allowing the
+Clipper object to be reused for clipping operations on different polygon sets.
+""" ->
+function clear(clip::__ClipperClip)
+    @cxx clip->Clear()
+end
+
+@doc """
+Any number of subject and clip paths can be added to a clipping task, either
+individually via the AddPath() method, or as groups via the AddPaths() method,
+or even using both methods.
+
+'Subject' paths may be either open (lines) or closed (polygons) or even a
+mixture of both, but 'clipping' paths must always be closed. Clipper allows
+polygons to clip both lines and other polygons, but doesn't allow lines to clip
+either lines or polygons.
+
+With closed paths, orientation should conform with the filling rule that will be
+passed via Clippper's Execute method.
+
+Path Coordinate range:
+Path coordinates must be between ± 0x3FFFFFFFFFFFFFFF (± 4.6e+18), otherwise a
+range error will be thrown when attempting to add the path to the Clipper
+object. If coordinates can be kept between ± 0x3FFFFFFF (± 1.0e+9), a modest
+increase in performance (approx. 15-20%) over the larger range can be achieved
+by avoiding large integer math. If the preprocessor directive use_int32 is
+defined (allowing a further increase in performance of 20-30%), then the maximum
+range is restricted to ± 32,767.
+
+Return Value:
+The function will return false if the path is invalid for clipping. A path is
+invalid for clipping when:
+
+- it has less than 2 vertices
+- it has 2 vertices but is not an open path
+0 the vertices are all co-linear and it is not an open path
+""" ->
+function add(clip::__ClipperClip, ppg::__ClipperPaths, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+    @cxx clip->AddPaths(ppg, pt, closed)
+end
+
+function add(clip::__ClipperClip, pg::__ClipperPath, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+    @cxx clip->AddPath(pg, pt, closed)
+end
+
+# TODO:
+#C++ »
+#bool Execute(ClipType clipType,
+#  Paths &solution,
+#  PolyFillType subjFillType = pftEvenOdd,
+#  PolyFillType clipFillType = pftEvenOdd);
+
+#bool Execute(ClipType clipType,
+#  PolyTree &solution,
+#  PolyFillType subjFillType = pftEvenOdd,
+#  PolyFillType clipFillType = pftEvenOdd);
+
+@doc """
+This method returns the axis-aligned bounding rectangle of all polygons that
+have been added to the Clipper object.
+""" ->
+function IntRect(clip::__ClipperClip)
+    @cxx clip->GetBounds()
+end
 
 #
 # Clipper Functions
