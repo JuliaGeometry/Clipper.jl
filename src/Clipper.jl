@@ -30,6 +30,11 @@ typealias __ClipperClip Union(CppValue{CppBaseType{symbol("ClipperLib::Clipper")
                                 CppRef{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
                                 CppPtr{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
 
+typealias __ClipperPolyTree Union(CppValue{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
+                                    CppRef{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
+                                    CppPtr{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)})
+
+
 #
 # Clipper Enums
 #
@@ -382,6 +387,45 @@ have been added to the Clipper object.
 function IntRect(clip::__ClipperClip)
     @cxx clip->GetBounds()
 end
+
+function PolyTree()
+    @cxx ClipperLib::PolyTree()
+end
+
+@doc """
+This method clears any PolyNode children contained by PolyTree the object.
+
+Clear does not need to be called explicitly. The Clipper.Execute method that
+accepts a PolyTree parameter will automatically clear the PolyTree object before
+propagating it with new PolyNodes. Likewise, PolyTree's destructor will also
+automatically clear any contained PolyNodes.
+""" ->
+function clear(c::__ClipperPolyTree)
+    @cxx c->Clear()
+end
+
+@doc """
+This method returns the first outer polygon contour if any, otherwise a null
+pointer.
+
+This function is almost equivalent to calling Childs[0] except that when a
+PolyTree object is empty (has no children), calling Childs[0] would raise an out
+of range exception.
+""" ->
+function get_first(c::__ClipperPolyTree)
+    @cxx c->GetFirst()
+end
+
+@doc """
+Returns the total number of PolyNodes (polygons) contained within the PolyTree.
+This value is not to be confused with ChildCount which returns the number of
+immediate children only (Childs) contained by PolyTree.
+""" ->
+function length(c::__ClipperPolyTree)
+    @cxx c->Total()
+end
+
+
 
 #
 # Clipper Functions

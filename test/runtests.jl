@@ -117,3 +117,8 @@ push!(p, IntPoint(0,2))
 push!(p, IntPoint(2,2))
 push!(p, IntPoint(2,0))
 
+println("Testing PolyTree...")
+pt = PolyTree()
+clear(pt)
+@test length(pt) == 0
+@test get_first(pt).ptr == Ptr{Void}(0) # Null ptr
