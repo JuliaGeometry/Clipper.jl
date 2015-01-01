@@ -34,6 +34,9 @@ typealias __ClipperPolyTree Union(CppValue{CppBaseType{symbol("ClipperLib::PolyT
                                     CppRef{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
                                     CppPtr{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)})
 
+typealias __ClipperPolyNode Union(CppValue{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
+                                    CppRef{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
+                                    CppPtr{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)})
 
 #
 # Clipper Enums
@@ -412,7 +415,7 @@ This function is almost equivalent to calling Childs[0] except that when a
 PolyTree object is empty (has no children), calling Childs[0] would raise an out
 of range exception.
 """ ->
-function get_first(c::__ClipperPolyTree)
+function first(c::__ClipperPolyTree)
     @cxx c->GetFirst()
 end
 
@@ -425,7 +428,69 @@ function length(c::__ClipperPolyTree)
     @cxx c->Total()
 end
 
+@doc """
+The returned Polynode will be the first child if any, otherwise the next
+sibling, otherwise the next sibling of the Parent etc.
 
+A PolyTree can be traversed very easily by calling GetFirst() followed by
+GetNext() in a loop until the returned object is a null pointer ...
+""" ->
+function next(c::__ClipperPolyNode)
+    @cxx c->GetNext()
+end
+
+@doc """
+Returns a path list which contains any number of vertices.
+""" ->
+function Path(c::__ClipperPolyNode)
+    @cxx c->Contour
+end
+
+@doc """
+Returns the number of PolyNode Childs directly owned by the PolyNode object.
+""" ->
+function child_count(c::__ClipperPolyNode)
+    @cxx c->ChildCount()
+end
+
+@doc """
+A read-only list of PolyNode.
+Outer PolyNode childs contain hole PolyNodes, and hole PolyNode childs contain
+nested outer PolyNodes.
+""" ->
+function children(c::__ClipperPolyNode)
+    @cxx c->Childs
+end
+
+@doc """
+Returns true when the PolyNode's polygon (Contour) is a hole.
+
+Children of outer polygons are always holes, and children of holes are always
+(nested) outer polygons.
+The IsHole property of a PolyTree object is undefined but its children are
+always top-level outer polygons.
+""" ->
+function is_hole(c::__ClipperPolyNode)
+    @cxx c->IsHole
+end
+
+@doc """
+Returns true when the PolyNode's Contour results from a clipping operation on an
+open contour (path). Only top-level PolyNodes can contain open contours.
+""" ->
+function is_open(c::__ClipperPolyNode)
+    @cxx c->IsOpen
+end
+
+@doc """
+Returns the parent PolyNode.
+
+The PolyTree object (which is also a PolyNode) does not have a parent and will
+return a null pointer.
+""" ->
+function parent(c::__ClipperPolyNode)
+    @cxx c->Parent
+end
 
 #
 # Clipper Functions
