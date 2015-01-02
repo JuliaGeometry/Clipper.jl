@@ -26,7 +26,11 @@ typealias __ClipperPaths Union(CppValue{CppTemplate{CppBaseType{symbol("std::vec
     CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
-typealias __ClipperClip Union(CppValue{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
+typealias __ClipperClipperBase Union(CppValue{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
+                                    CppRef{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
+                                    CppPtr{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)})
+
+typealias __ClipperClipper Union(CppValue{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
                                 CppRef{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
                                 CppPtr{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
 
@@ -37,6 +41,11 @@ typealias __ClipperPolyTree Union(CppValue{CppBaseType{symbol("ClipperLib::PolyT
 typealias __ClipperPolyNode Union(CppValue{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
                                     CppRef{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
                                     CppPtr{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)})
+
+typealias __ClipperClipperOffset Union(CppValue{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
+                                        CppRef{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
+                                        CppPtr{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)})
+
 
 #
 # Clipper Enums
@@ -282,7 +291,7 @@ or clip), the Clipper object removes the 'inner' vertices before clipping. When
 enabled the PreserveCollinear property prevents this default behavior to allow
 these inner vertices to appear in the solution.
 """ ->
-function preserve_collinear(clip::__ClipperClip, val::Bool)
+function preserve_collinear(clip::__ClipperClipper, val::Bool)
     @cxx clip->PreserveCollinear(val)
 end
 
@@ -291,7 +300,7 @@ When this property is set to true, polygons returned in the solution parameter
 of the Execute() method will have orientations opposite to their normal
 orientations.
 """ ->
-function reverse_solution(clip::__ClipperClip, val::Bool)
+function reverse_solution(clip::__ClipperClipper, val::Bool)
     @cxx clip->ReverseSolution(val)
 end
 
@@ -321,7 +330,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 See also the article on Simple Polygons on Wikipedia.
 """ ->
-function strictly_simple(clip::__ClipperClip, val::Bool)
+function strictly_simple(clip::__ClipperClipper, val::Bool)
     @cxx clip->StrictlySimple(val)
 end
 
@@ -329,7 +338,7 @@ end
 The Clear method removes any existing subject and clip polygons allowing the
 Clipper object to be reused for clipping operations on different polygon sets.
 """ ->
-function clear(clip::__ClipperClip)
+function clear(clip::__ClipperClipper)
     @cxx clip->Clear()
 end
 
@@ -363,11 +372,11 @@ invalid for clipping when:
 - it has 2 vertices but is not an open path
 0 the vertices are all co-linear and it is not an open path
 """ ->
-function add(clip::__ClipperClip, ppg::__ClipperPaths, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add(clip::__ClipperClipper, ppg::__ClipperPaths, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPaths(ppg, pt, closed)
 end
 
-function add(clip::__ClipperClip, pg::__ClipperPath, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add(clip::__ClipperClipper, pg::__ClipperPath, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPath(pg, pt, closed)
 end
 
@@ -387,7 +396,7 @@ end
 This method returns the axis-aligned bounding rectangle of all polygons that
 have been added to the Clipper object.
 """ ->
-function IntRect(clip::__ClipperClip)
+function IntRect(clip::__ClipperClipper)
     @cxx clip->GetBounds()
 end
 
