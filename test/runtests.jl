@@ -121,5 +121,5 @@ println("Testing PolyTree...")
 pt = PolyTree()
 clear(pt)
 @test length(pt) == 0
-@test first(pt).ptr == Ptr{Void}(0) # Null ptr
+@test first(pt).ptr == C_NULL # Null ptr
 
