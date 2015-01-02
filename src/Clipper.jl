@@ -240,7 +240,6 @@ function IntPoint(x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
 end
 
-
 @doc """
 This structure contains a sequence of IntPoint vertices defining a single
 contour (see also terminology). Paths may be open and represent a series of line
@@ -275,6 +274,15 @@ contours or 'hole' contours. Which they are depends on orientation.
 """ ->
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
+end
+
+@doc """
+This function converts a PolyTree structure into a Paths structure.
+""" ->
+function Paths(pt::__ClipperPolyTree)
+    paths = Paths()
+    @cxx ClipperLib::PolyTreeToPaths(pt, paths)
+    return paths
 end
 
 #
@@ -501,6 +509,57 @@ function parent(c::__ClipperPolyNode)
     @cxx c->Parent
 end
 
+@doc """
+The ClipperOffset constructor takes 2 optional parameters: MiterLimit and
+ArcTolerance. Thes two parameters corresponds to properties of the same name.
+MiterLimit is only relevant when JoinType is jtMiter, and ArcTolerance is only
+relevant when JoinType is jtRound or when EndType is etOpenRound.
+""" ->
+function Offset(miterLimit = 2.0, roundPrecision = 0.25)
+    @cxx ClipperLib::ClipperOffset(miterLimit, roundPrecision)
+end
+
+@doc """
+This method clears all paths from the ClipperOffset object, allowing new paths
+to be assigned.
+""" ->
+function clear(c::__ClipperClipperOffset)
+    @cxx c->Clear()
+end
+
+
+@doc """
+Adds a Path to a ClipperOffset object in preparation for offsetting.
+
+Any number of paths can be added, and each has its own JoinType and EndType. All 'outer' Paths must have the same orientation, and any 'hole' paths must have reverse orientation. Closed paths must have at least 3 vertices. Open paths may have as few as one vertex. Open paths can only be offset with positive deltas.
+""" ->
+function add(c::__ClipperClipperOffset, path::__ClipperPath, jt::CppEnum{symbol("ClipperLib::JoinType")}, et::CppEnum{symbol("ClipperLib::EndType")})
+    @cxx c->AddPath(path, jt, et)
+end
+
+function add(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::CppEnum{symbol("ClipperLib::JoinType")}, et::CppEnum{symbol("ClipperLib::EndType")})
+    @cxx c->AddPaths(paths, jt, et)
+end
+
+
+@doc """
+This method takes two parameters. The first is the structure (either PolyTree or
+Paths) that will receive the result of the offset operation. The second
+parameter is the amount to which the supplied paths will be offset - negative
+delta values to shrink polygons and positive delta to expand them.
+
+This method can be called multiple times, offsetting the same paths by different
+amounts (ie using different deltas).
+""" ->
+function execute!(c::__ClipperClipperOffset, sol::__ClipperPaths, delta)
+    @cxx c->Execute(sol, delta)
+end
+
+function execute!(c::__ClipperClipperOffset, sol::__ClipperPolyTree, delta)
+    @cxx c->Execute(sol, delta)
+end
+
+
 #
 # Clipper Functions
 #
@@ -642,19 +701,22 @@ function simplify!(p::__ClipperPaths, t::CppEnum{symbol("ClipperLib::PolyFillTyp
 end
 
 
-function offset(p::__ClipperPath, dist::Real)
-    new_p = Paths()
-    co = @cxx ClipperLib::ClipperOffset()
-    jt = @cxx ClipperLib::jtRound
-    et = @cxx ClipperLib::etClosedPolygon
-    @cxx co->AddPath(p, jt, et);
-    @cxx co->Execute(new_p, dist);
-    return new_p
-end
-
 #
 # Some "julian" encapsulation of Clipper types.
 #
+
+function x(ip::__ClipperIntPoint)
+    @cxx ip->X
+end
+function y(ip::__ClipperIntPoint)
+    @cxx ip->Y
+end
+function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+    x(i1) == x(i2) && y(i1) == y(i2)
+end
+function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+    isequal(x(i1),x(i2)) && isequal(y(i1),y(i2))
+end
 
 function Base.push!(a::__ClipperPath,
                b::__ClipperIntPoint)

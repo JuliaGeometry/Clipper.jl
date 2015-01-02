@@ -26,15 +26,6 @@ push!(p, IntPoint(1,1))
 push!(p, IntPoint(1,0))
 @test area(p) == -1.0
 
-# testing offset
-p = Path()
-push!(p, IntPoint(0,0))
-push!(p, IntPoint(100,0))
-push!(p, IntPoint(100,100))
-push!(p, IntPoint(0,100))
-p_n = offset(p, 10.0)
-@show p_n
-
 # test reverse
 println("Testing reverse...")
 p = Path()
@@ -122,4 +113,28 @@ pt = PolyTree()
 clear(pt)
 @test length(pt) == 0
 @test first(pt).ptr == C_NULL # Null ptr
+
+# testing offset
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(10,0))
+push!(p, IntPoint(10,10))
+push!(p, IntPoint(0,10))
+o = Offset()
+r1 = Paths()
+r2 = PolyTree()
+add(o, p, jtMiter, etClosedPolygon)
+execute!(o, r1, 1)
+execute!(o, r2, 1)
+clear(o)
+p1 = Paths(r2)
+# paths
+@test length(p1) == length(r1) == 1
+p1 = p1[1]
+r1 = r1[1]
+# now just path
+@test length(p1) == length(r1)
+for i = 1:length(p1)
+    @test p1[i] == r1[i]
+end
 
