@@ -736,7 +736,6 @@ end
 
 
 @doc """
-
 Removes self-intersections from the supplied polygon (by performing a boolean
 union operation using the nominated PolyFillType).
 Polygons with non-contiguous duplicate vertices (ie 'touching') will be split
@@ -749,6 +748,58 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 """->
 function simplify!(p::__ClipperPaths, t::CppEnum{symbol("ClipperLib::PolyFillType")})
     @cxx ClipperLib::SimplifyPolygons(p, t)
+end
+
+
+@doc """
+This function filters out open paths from the PolyTree structure and returns
+only closed paths in a Paths structure.
+""" ->
+function closed_paths(pt::__ClipperPolyTree)
+    paths = Paths()
+    @cxx ClipperLib::ClosedPathsFromPolyTree(pt, paths)
+    return paths
+end
+
+@doc """
+This function filters out closed paths from the PolyTree structure and returns
+only open paths in a Paths structure.
+""" ->
+function open_paths(pt::__ClipperPolyTree)
+    paths = Paths()
+    @cxx ClipperLib::OpenPathsFromPolyTree(pt, paths)
+    return paths
+end
+
+@doc """
+Minkowski Difference is performed by subtracting each point in a polygon from
+the set of points in an open or closed path. A key feature of Minkowski
+Difference is that when it's applied to two polygons, the resulting polygon will
+contain the coordinate space origin whenever the two polygons touch or overlap.
+(This function is often used to determine when polygons collide.)
+""" ->
+function minkowski_diff(p1::__ClipperPath, p2::__ClipperPath)
+    paths = Paths()
+    @cxx MinkowskiDiff(p1, p2, paths)
+    return paths
+end
+
+@doc """
+Minkowski Addition is performed by adding each point in a polygon 'pattern' to
+the set of points in an open or closed path. The resulting polygon (or polygons)
+defines the region that the 'pattern' would pass over in moving from the
+beginning to the end of the 'path'.
+""" ->
+function minkowski_sum(p1::__ClipperPath, p2::__ClipperPath, closed::Bool)
+    paths = Paths()
+    @cxx ClipperLib::MinkowskiSum(p1, p2, paths, closed)
+    return paths
+end
+
+function minkowski_sum(p1::__ClipperPath, p2::__ClipperPaths, pft::CppEnum{symbol("ClipperLib::PolyFillType")}, closed::Bool)
+    paths = Paths()
+    @cxx ClipperLib::MinkowskiSum(p1, p2, paths, pft, closed)
+    return paths
 end
 
 
