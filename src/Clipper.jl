@@ -432,7 +432,7 @@ This function is almost equivalent to calling Childs[0] except that when a
 PolyTree object is empty (has no children), calling Childs[0] would raise an out
 of range exception.
 """ ->
-function first(c::__ClipperPolyTree)
+function Base.first(c::__ClipperPolyTree)
     @cxx c->GetFirst()
 end
 
@@ -441,7 +441,7 @@ Returns the total number of PolyNodes (polygons) contained within the PolyTree.
 This value is not to be confused with ChildCount which returns the number of
 immediate children only (Childs) contained by PolyTree.
 """ ->
-function length(c::__ClipperPolyTree)
+function Base.length(c::__ClipperPolyTree)
     @cxx c->Total()
 end
 
@@ -452,7 +452,7 @@ sibling, otherwise the next sibling of the Parent etc.
 A PolyTree can be traversed very easily by calling GetFirst() followed by
 GetNext() in a loop until the returned object is a null pointer ...
 """ ->
-function next(c::__ClipperPolyNode)
+function Base.next(c::__ClipperPolyNode)
     @cxx c->GetNext()
 end
 
@@ -505,7 +505,7 @@ Returns the parent PolyNode.
 The PolyTree object (which is also a PolyNode) does not have a parent and will
 return a null pointer.
 """ ->
-function parent(c::__ClipperPolyNode)
+function Base.parent(c::__ClipperPolyNode)
     @cxx c->Parent
 end
 
