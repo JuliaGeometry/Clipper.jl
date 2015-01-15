@@ -847,37 +847,38 @@ function Base.getindex(p::__ClipperPaths, i::Integer)
 end
 
 function Base.show(io::IO, v::__ClipperIntPoint)
-    x = @cxx v->X
-    y = @cxx v->Y
-    print(io, string("(", x,",", y,")"))
+    show(io, string("(", x(v),",", y(v),")"))
 end
 
-function Base.show(io::IO, p::__ClipperPath)
-    n = length(p)
-    print(io, "Path => [")
-    for i = 1:n
-        show(io, p[i])
-        n > 1 && i < n && print(io, ",")
-    end
-    print(io, "]")
+function Base.isempty(p::__ClipperPath)
+    length(p) == 0
 end
 
+function Base.isempty(p::__ClipperPaths)
+    length(p) == 0
+end
+
+function Base.endof(p::__ClipperPath)
+    length(p)
+end
+
+function Base.endof(p::__ClipperPaths)
+    length(p)
+end
+
+
 function Base.show(io::IO, p::__ClipperPath)
-    n = length(p)
-    print(io, "Path => [")
-    for i = 1:n
-        show(io, p[i])
-        n > 1 && i < n && print(io, ",")
+    if isempty(p)
+        return
     end
-    print(io, "]")
+    for i = 1:length(p)-1
+        print(io, string("(", x(p[i]), ",", y(p[i]), "), "))
+    end
+    print(io, string("(", x(p[end]), ",", y(p[end]), ")"))
 end
 
 function Base.show(io::IO, p::__ClipperPaths)
-    n = length(p)
-    print(io, "Paths => [")
-    for i = 1:n
+    for i = 1:length(p)
         show(io, p[i])
-        n > 1 && i < n && println(io, ",")
     end
-    print(io, "]")
 end
