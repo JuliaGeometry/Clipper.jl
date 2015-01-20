@@ -1,4 +1,28 @@
+module Clipper
+
 using Cxx
+
+# Export Clipper types
+export Path, Paths, IntPoint
+
+# Export Clipper Classes and Methods
+export Clip, preserve_collinear, reverse_solution, strictly_simple, clear,
+       add, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
+       arc_tolerance, execute!, area, clean!, isinside, orientation, simplify!,
+       closed_paths, open_paths, minkowski_diff, minkowski_sum
+
+# enum exports
+export ioReverseSolution, ioStrictlySimple, ioPreserveCollinear
+
+export ctIntersection, ctUnion, ctDifference, ctXor
+
+export ptSubject, ptClip
+
+export etClosedPolygon, etClosedLine, etOpenSquare, etOpenRound, etOpenButt
+
+export pftEvenOdd, pftNonZero, pftPositive, pftNegative
+
+export jtSquare, jtRound, jtMiter
 
 #
 # The CPP source for clipper. It is put inside a cxx block so that we dont have
@@ -13,53 +37,53 @@ include("clipper_cpp.jl")
 # three, so we can refer to these as the same thing through the type union.
 #
 
-typealias __ClipperIntPoint Union(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
-                                  CppRef{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
-                                  CppPtr{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)})
+typealias __ClipperIntPoint Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
+                                  Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
+                                  Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)})
 
-typealias __ClipperPath Union(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)})
+typealias __ClipperPath Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+                              Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+                              Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
 
-typealias __ClipperPaths Union(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    CppRef{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    CppPtr{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppTemplate{CppBaseType{symbol("std::vector")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},CppValue{CppTemplate{CppBaseType{symbol("std::allocator")},(CppValue{CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
+typealias __ClipperPaths Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
-typealias __ClipperClipperBase Union(CppValue{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
-                                    CppRef{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
-                                    CppPtr{CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)})
+typealias __ClipperClipperBase Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
+                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
+                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)})
 
-typealias __ClipperClipper Union(CppValue{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
-                                CppRef{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
-                                CppPtr{CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
+typealias __ClipperClipper Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
+                                Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
+                                Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
 
-typealias __ClipperPolyTree Union(CppValue{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
-                                    CppRef{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
-                                    CppPtr{CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)})
+typealias __ClipperPolyTree Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
+                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
+                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)})
 
-typealias __ClipperPolyNode Union(CppValue{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
-                                    CppRef{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
-                                    CppPtr{CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)})
+typealias __ClipperPolyNode Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
+                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
+                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)})
 
-typealias __ClipperClipperOffset Union(CppValue{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
-                                        CppRef{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
-                                        CppPtr{CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)})
+typealias __ClipperClipperOffset Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
+                                        Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
+                                        Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)})
 
 
 #
 # Clipper Enums
 #
 
-const ioReverseSolution = CppEnum{symbol("ClipperLib::InitOptions")}(1)
-const ioStrictlySimple = CppEnum{symbol("ClipperLib::InitOptions")}(2)
-const ioPreserveCollinear = CppEnum{symbol("ClipperLib::InitOptions")}(4)
+const ioReverseSolution = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(1)
+const ioStrictlySimple = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(2)
+const ioPreserveCollinear = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(4)
 
 
-const ctIntersection = CppEnum{symbol("ClipperLib::ClipType")}(0)
-const ctUnion = CppEnum{symbol("ClipperLib::ClipType")}(1)
-const ctDifference = CppEnum{symbol("ClipperLib::ClipType")}(2)
-const ctXor = CppEnum{symbol("ClipperLib::ClipType")}(3)
+const ctIntersection = Cxx.CppEnum{symbol("ClipperLib::ClipType")}(0)
+const ctUnion = Cxx.CppEnum{symbol("ClipperLib::ClipType")}(1)
+const ctDifference = Cxx.CppEnum{symbol("ClipperLib::ClipType")}(2)
+const ctXor = Cxx.CppEnum{symbol("ClipperLib::ClipType")}(3)
 
 """
 Boolean (clipping) operations are mostly applied to two sets of Polygons,
@@ -75,8 +99,8 @@ solutions.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyType.htm)
 """
-const ptSubject = CppEnum{symbol("ClipperLib::PolyType")}(0)
-const ptClip = CppEnum{symbol("ClipperLib::PolyType")}(1)
+const ptSubject = Cxx.CppEnum{symbol("ClipperLib::PolyType")}(0)
+const ptClip = Cxx.CppEnum{symbol("ClipperLib::PolyType")}(1)
 
 """
  The AbstractEndType has 5 decendent options:
@@ -100,11 +124,11 @@ same regardless of whether or not the first and last vertices in the path match.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/EndType.htm)
 """
-const etClosedPolygon = CppEnum{symbol("ClipperLib::EndType")}(0)
-const etClosedLine = CppEnum{symbol("ClipperLib::EndType")}(1)
-const etOpenSquare = CppEnum{symbol("ClipperLib::EndType")}(2)
-const etOpenRound = CppEnum{symbol("ClipperLib::EndType")}(3)
-const etOpenButt = CppEnum{symbol("ClipperLib::EndType")}(4)
+const etClosedPolygon = Cxx.CppEnum{symbol("ClipperLib::EndType")}(0)
+const etClosedLine = Cxx.CppEnum{symbol("ClipperLib::EndType")}(1)
+const etOpenSquare = Cxx.CppEnum{symbol("ClipperLib::EndType")}(2)
+const etOpenRound = Cxx.CppEnum{symbol("ClipperLib::EndType")}(3)
+const etOpenButt = Cxx.CppEnum{symbol("ClipperLib::EndType")}(4)
 
 
 """
@@ -186,10 +210,10 @@ filling.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/PolyFillType.htm)
 """
-const pftEvenOdd = CppEnum{symbol("ClipperLib::PolyFillType")}(0)
-const pftNonZero = CppEnum{symbol("ClipperLib::PolyFillType")}(1)
-const pftPositive = CppEnum{symbol("ClipperLib::PolyFillType")}(2)
-const pftNegative = CppEnum{symbol("ClipperLib::PolyFillType")}(3)
+const pftEvenOdd = Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}(0)
+const pftNonZero = Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}(1)
+const pftPositive = Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}(2)
+const pftNegative = Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}(3)
 
 
 """
@@ -208,9 +232,9 @@ const pftNegative = CppEnum{symbol("ClipperLib::PolyFillType")}(3)
 - **SquareJoin:** Squaring is applied uniformally at all convex edge joins at
   1 × delta.
 """
-const jtSquare = CppEnum{symbol("ClipperLib::JoinType")}(0)
-const jtRound = CppEnum{symbol("ClipperLib::JoinType")}(1)
-const jtMiter = CppEnum{symbol("ClipperLib::JoinType")}(2)
+const jtSquare = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(0)
+const jtRound = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(1)
+const jtMiter = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(2)
 
 #
 # Clipper Types
@@ -289,7 +313,7 @@ end
 # Clipper Classes
 #
 
-function Clip(enum::CppEnum{symbol("ClipperLib::InitOptions")} = CppEnum{symbol("ClipperLib::InitOptions")}(0))
+function Clip(enum::Cxx.CppEnum{symbol("ClipperLib::InitOptions")} = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(0))
     @cxx ClipperLib::Clipper(enum)
 end
 
@@ -380,11 +404,11 @@ invalid for clipping when:
 - it has 2 vertices but is not an open path
 0 the vertices are all co-linear and it is not an open path
 """ ->
-function add(clip::__ClipperClipper, ppg::__ClipperPaths, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add(clip::__ClipperClipper, ppg::__ClipperPaths, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPaths(ppg, pt, closed)
 end
 
-function add(clip::__ClipperClipper, pg::__ClipperPath, pt::CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add(clip::__ClipperClipper, pg::__ClipperPath, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPath(pg, pt, closed)
 end
 
@@ -584,11 +608,11 @@ Adds a Path to a ClipperOffset object in preparation for offsetting.
 
 Any number of paths can be added, and each has its own JoinType and EndType. All 'outer' Paths must have the same orientation, and any 'hole' paths must have reverse orientation. Closed paths must have at least 3 vertices. Open paths may have as few as one vertex. Open paths can only be offset with positive deltas.
 """ ->
-function add(c::__ClipperClipperOffset, path::__ClipperPath, jt::CppEnum{symbol("ClipperLib::JoinType")}, et::CppEnum{symbol("ClipperLib::EndType")})
+function add(c::__ClipperClipperOffset, path::__ClipperPath, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPath(path, jt, et)
 end
 
-function add(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::CppEnum{symbol("ClipperLib::JoinType")}, et::CppEnum{symbol("ClipperLib::EndType")})
+function add(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPaths(paths, jt, et)
 end
 
@@ -746,7 +770,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 ![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/simplifypolygons.png?token=AB_WDGPhKj2xE6uaeVrSDKv3eNQx0hPSks5UrLNSwA%3D%3D)
 """->
-function simplify!(p::__ClipperPaths, t::CppEnum{symbol("ClipperLib::PolyFillType")})
+function simplify!(p::__ClipperPaths, t::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")})
     @cxx ClipperLib::SimplifyPolygons(p, t)
 end
 
@@ -796,7 +820,7 @@ function minkowski_sum(p1::__ClipperPath, p2::__ClipperPath, closed::Bool)
     return paths
 end
 
-function minkowski_sum(p1::__ClipperPath, p2::__ClipperPaths, pft::CppEnum{symbol("ClipperLib::PolyFillType")}, closed::Bool)
+function minkowski_sum(p1::__ClipperPath, p2::__ClipperPaths, pft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}, closed::Bool)
     paths = Paths()
     @cxx ClipperLib::MinkowskiSum(p1, p2, paths, pft, closed)
     return paths
@@ -882,3 +906,5 @@ function Base.show(io::IO, p::__ClipperPaths)
         show(io, p[i])
     end
 end
+
+end # module
