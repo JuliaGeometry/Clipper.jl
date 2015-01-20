@@ -594,6 +594,10 @@ function arc_tolerance(o::__ClipperClipperOffset)
     @cxx o->ArcTolerance
 end
 
+function arc_tolerance(o::__ClipperClipperOffset, v::Float64)
+    icxx"$o.ArcTolerance = $v;"
+end
+
 @doc """
 This method clears all paths from the ClipperOffset object, allowing new paths
 to be assigned.

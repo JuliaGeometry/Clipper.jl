@@ -138,5 +138,6 @@ for i = 1:length(p1)
     @test p1[i] == r1[i]
 end
 @test arc_tolerance(o) == 0.25
-
-
+# test changing the value
+arc_tolerance(o, 0.5)
+@test arc_tolerance(o) == 0.5
