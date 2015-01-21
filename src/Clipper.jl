@@ -53,26 +53,30 @@ typealias __ClipperPaths Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symb
     Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
-typealias __ClipperClipperBase Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
-                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)},
-                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::ClipperBase")},(false,false,false)})
+typealias __ClipperClipperBase Union(pcpp"ClipperLib::ClipperBase",
+                                  cpcpp"ClipperLib::ClipperBase",
+                                  vcpp"ClipperLib::ClipperBase",
+                                  rcpp"ClipperLib::ClipperBase")
 
-typealias __ClipperClipper Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
-                                Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)},
-                                Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::Clipper")},(false,false,false)})
+typealias __ClipperClipper Union(pcpp"ClipperLib::Clipper",
+                                  cpcpp"ClipperLib::Clipper",
+                                  vcpp"ClipperLib::Clipper",
+                                  rcpp"ClipperLib::Clipper")
 
-typealias __ClipperPolyTree Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
-                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)},
-                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::PolyTree")},(false,false,false)})
+typealias __ClipperPolyTree Union(pcpp"ClipperLib::PolyTree",
+                                  cpcpp"ClipperLib::PolyTree",
+                                  vcpp"ClipperLib::PolyTree",
+                                  rcpp"ClipperLib::PolyTree")
 
-typealias __ClipperPolyNode Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
-                                    Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},
-                                    Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)})
+typealias __ClipperPolyNode Union(pcpp"ClipperLib::PolyNode",
+                                  cpcpp"ClipperLib::PolyNode",
+                                  vcpp"ClipperLib::PolyNode",
+                                  rcpp"ClipperLib::PolyNode")
 
-typealias __ClipperClipperOffset Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
-                                        Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)},
-                                        Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::ClipperOffset")},(false,false,false)})
-
+typealias __ClipperClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
+                                  cpcpp"ClipperLib::ClipperOffset",
+                                  vcpp"ClipperLib::ClipperOffset",
+                                  rcpp"ClipperLib::ClipperOffset")
 
 #
 # Clipper Enums
