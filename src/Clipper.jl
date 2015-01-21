@@ -2,6 +2,8 @@ module Clipper
 
 using Cxx
 
+include("Basic.jl")
+
 # Export Clipper types
 export Path, Paths, IntPoint
 
