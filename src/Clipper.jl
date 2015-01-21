@@ -876,8 +876,8 @@ function Base.getindex(p::__ClipperPaths, i::Integer)
     @cxx p->at(i-1)
 end
 
-function Base.show(io::IO, v::__ClipperIntPoint)
-    show(io, string("(", x(v),",", y(v),")"))
+function Base.show(io::IO, v::vcpp"ClipperLib::IntPoint")
+    print(io, string("(", x(v),",", y(v),")"))
 end
 
 function Base.isempty(p::__ClipperPath)
