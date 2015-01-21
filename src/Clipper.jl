@@ -39,9 +39,10 @@ include("clipper_cpp.jl")
 # three, so we can refer to these as the same thing through the type union.
 #
 
-typealias __ClipperIntPoint Union(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
-                                  Cxx.CppRef{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},
-                                  Cxx.CppPtr{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)})
+typealias __ClipperIntPoint Union(pcpp"ClipperLib::IntPoint",
+                                  cpcpp"ClipperLib::IntPoint",
+                                  vcpp"ClipperLib::IntPoint",
+                                  rcpp"ClipperLib::IntPoint")
 
 typealias __ClipperPath Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
                               Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
