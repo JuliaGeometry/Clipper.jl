@@ -10,9 +10,10 @@ export Path, Paths, IntPoint
 # Export Clipper Classes and Methods
 export Clip, preserve_collinear, reverse_solution, strictly_simple, clear,
        add, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
-       arc_tolerance,miter_limit, execute!, area, clean!, isinside, orientation,
-       simplify!, closed_paths, open_paths, minkowski_diff, minkowski_sum, left,
-       right, top, bottom
+       arc_tolerance, arc_tolerance!, miter_limit, miter_limit!, execute!, area,
+       clean!, isinside, orientation, simplify!, closed_paths, open_paths,
+       minkowski_diff, minkowski_sum, left, right, top, bottom, left!, right!,
+       top!, bottom!
 
 # enum exports
 export ioReverseSolution, ioStrictlySimple, ioPreserveCollinear
@@ -461,19 +462,19 @@ function bottom(r::__ClipperIntRect)
     @cxx r->bottom
 end
 
-function left(r::__ClipperIntRect, v::Integer)
+function left!(r::__ClipperIntRect, v::Integer)
     icxx"$r.left = $v;"
 end
 
-function top(r::__ClipperIntRect, v::Integer)
+function top!(r::__ClipperIntRect, v::Integer)
     icxx"$r.top = $v;"
 end
 
-function right(r::__ClipperIntRect, v::Integer)
+function right!(r::__ClipperIntRect, v::Integer)
     icxx"$r.right = $v;"
 end
 
-function bottom(r::__ClipperIntRect, v::Integer)
+function bottom!(r::__ClipperIntRect, v::Integer)
     icxx"$r.bottom = $v;"
 end
 
@@ -639,7 +640,7 @@ function arc_tolerance(o::__ClipperClipperOffset)
     @cxx o->ArcTolerance
 end
 
-function arc_tolerance(o::__ClipperClipperOffset, v::Float64)
+function arc_tolerance!(o::__ClipperClipperOffset, v::Float64)
     icxx"$o.ArcTolerance = $v;"
 end
 
@@ -647,7 +648,7 @@ function miter_limit(o::__ClipperClipperOffset)
     @cxx o->MiterLimit
 end
 
-function miter_limit(o::__ClipperClipperOffset, v::Float64)
+function miter_limit!(o::__ClipperClipperOffset, v::Float64)
     icxx"$o.MiterLimit = $v;"
 end
 

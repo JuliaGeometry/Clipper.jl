@@ -139,10 +139,10 @@ for i = 1:length(p1)
 end
 @test arc_tolerance(o) == 0.25
 # test changing the value
-arc_tolerance(o, 0.5)
+arc_tolerance!(o, 0.5)
 @test arc_tolerance(o) == 0.5
 @test miter_limit(o) == 2.0
-miter_limit(o, 4.0)
+miter_limit!(o, 4.0)
 @test miter_limit(o) == 4.0
 
 # test IntRect
@@ -159,10 +159,10 @@ ir = IntRect(c)
 @test right(ir) == 10
 @test top(ir) == 0
 @test bottom(ir) == 10
-left(ir,1)
-right(ir,2)
-top(ir,3)
-bottom(ir,4)
+left!(ir,1)
+right!(ir,2)
+top!(ir,3)
+bottom!(ir,4)
 @test left(ir) == 1
 @test right(ir) == 2
 @test top(ir) == 3
