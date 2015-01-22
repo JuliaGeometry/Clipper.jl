@@ -11,7 +11,8 @@ export Path, Paths, IntPoint
 export Clip, preserve_collinear, reverse_solution, strictly_simple, clear,
        add, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
        arc_tolerance, execute!, area, clean!, isinside, orientation, simplify!,
-       closed_paths, open_paths, minkowski_diff, minkowski_sum
+       closed_paths, open_paths, minkowski_diff, minkowski_sum, left, right,
+       top, bottom
 
 # enum exports
 export ioReverseSolution, ioStrictlySimple, ioPreserveCollinear
@@ -77,6 +78,11 @@ typealias __ClipperClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
                                   cpcpp"ClipperLib::ClipperOffset",
                                   vcpp"ClipperLib::ClipperOffset",
                                   rcpp"ClipperLib::ClipperOffset")
+
+typealias __ClipperIntRect Union(pcpp"ClipperLib::IntRect",
+                                  cpcpp"ClipperLib::IntRect",
+                                  vcpp"ClipperLib::IntRect",
+                                  rcpp"ClipperLib::IntRect")
 
 #
 # Clipper Enums
@@ -437,6 +443,38 @@ have been added to the Clipper object.
 """ ->
 function IntRect(clip::__ClipperClipper)
     @cxx clip->GetBounds()
+end
+
+function left(r::__ClipperIntRect)
+    @cxx r->left
+end
+
+function top(r::__ClipperIntRect)
+    @cxx r->top
+end
+
+function right(r::__ClipperIntRect)
+    @cxx r->right
+end
+
+function bottom(r::__ClipperIntRect)
+    @cxx r->bottom
+end
+
+function left(r::__ClipperIntRect, v::Integer)
+    icxx"$r.left = $v;"
+end
+
+function top(r::__ClipperIntRect, v::Integer)
+    icxx"$r.top = $v;"
+end
+
+function right(r::__ClipperIntRect, v::Integer)
+    icxx"$r.right = $v;"
+end
+
+function bottom(r::__ClipperIntRect, v::Integer)
+    icxx"$r.bottom = $v;"
 end
 
 function PolyTree()
@@ -899,6 +937,10 @@ end
 
 function Base.show(io::IO, v::__ClipperIntPoint)
     print(io, string("(", x(v),",", y(v),")"))
+end
+
+function Base.show(io::IO, r::__ClipperIntRect)
+    print(io, "left: $(left(r)) right: $(right(r)) top: $(top(r)) bottom: $(bottom(r))")
 end
 
 function Base.show(io::IO, p::__ClipperPath)

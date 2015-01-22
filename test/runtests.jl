@@ -141,3 +141,27 @@ end
 # test changing the value
 arc_tolerance(o, 0.5)
 @test arc_tolerance(o) == 0.5
+
+# test IntRect
+println("Testing IntRect...")
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(10,0))
+push!(p, IntPoint(10,10))
+push!(p, IntPoint(0,10))
+c = Clip()
+add(c, p, ptSubject, true)
+ir = IntRect(c)
+@test left(ir) == 0
+@test right(ir) == 10
+@test top(ir) == 0
+@test bottom(ir) == 10
+left(ir,1)
+right(ir,2)
+top(ir,3)
+bottom(ir,4)
+@test left(ir) == 1
+@test right(ir) == 2
+@test top(ir) == 3
+@test bottom(ir) == 4
+println(ir)
