@@ -8,8 +8,8 @@ include("Basic.jl")
 export Path, Paths, IntPoint
 
 # Export Clipper Classes and Methods
-export Clip, preserve_collinear, reverse_solution, strictly_simple, clear,
-       add, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
+export Clip, preserve_collinear!, reverse_solution!, strictly_simple!, clear!,
+       add!, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
        arc_tolerance, arc_tolerance!, miter_limit, miter_limit!, execute!, area,
        clean!, isinside, orientation, simplify!, closed_paths, open_paths,
        minkowski_diff, minkowski_sum, left, right, top, bottom, left!, right!,
@@ -337,7 +337,7 @@ or clip), the Clipper object removes the 'inner' vertices before clipping. When
 enabled the PreserveCollinear property prevents this default behavior to allow
 these inner vertices to appear in the solution.
 """ ->
-function preserve_collinear(clip::__ClipperClipper, val::Bool)
+function preserve_collinear!(clip::__ClipperClipper, val::Bool)
     @cxx clip->PreserveCollinear(val)
 end
 
@@ -346,7 +346,7 @@ When this property is set to true, polygons returned in the solution parameter
 of the Execute() method will have orientations opposite to their normal
 orientations.
 """ ->
-function reverse_solution(clip::__ClipperClipper, val::Bool)
+function reverse_solution!(clip::__ClipperClipper, val::Bool)
     @cxx clip->ReverseSolution(val)
 end
 
@@ -376,7 +376,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 See also the article on Simple Polygons on Wikipedia.
 """ ->
-function strictly_simple(clip::__ClipperClipper, val::Bool)
+function strictly_simple!(clip::__ClipperClipper, val::Bool)
     @cxx clip->StrictlySimple(val)
 end
 
@@ -384,7 +384,7 @@ end
 The Clear method removes any existing subject and clip polygons allowing the
 Clipper object to be reused for clipping operations on different polygon sets.
 """ ->
-function clear(clip::__ClipperClipper)
+function clear!(clip::__ClipperClipper)
     @cxx clip->Clear()
 end
 
@@ -418,11 +418,11 @@ invalid for clipping when:
 - it has 2 vertices but is not an open path
 0 the vertices are all co-linear and it is not an open path
 """ ->
-function add(clip::__ClipperClipper, ppg::__ClipperPaths, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add!(clip::__ClipperClipper, ppg::__ClipperPaths, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPaths(ppg, pt, closed)
 end
 
-function add(clip::__ClipperClipper, pg::__ClipperPath, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add!(clip::__ClipperClipper, pg::__ClipperPath, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPath(pg, pt, closed)
 end
 
@@ -490,7 +490,7 @@ accepts a PolyTree parameter will automatically clear the PolyTree object before
 propagating it with new PolyNodes. Likewise, PolyTree's destructor will also
 automatically clear any contained PolyNodes.
 """ ->
-function clear(c::__ClipperPolyTree)
+function clear!(c::__ClipperPolyTree)
     @cxx c->Clear()
 end
 
@@ -656,7 +656,7 @@ end
 This method clears all paths from the ClipperOffset object, allowing new paths
 to be assigned.
 """ ->
-function clear(c::__ClipperClipperOffset)
+function clear!(c::__ClipperClipperOffset)
     @cxx c->Clear()
 end
 
@@ -666,11 +666,11 @@ Adds a Path to a ClipperOffset object in preparation for offsetting.
 
 Any number of paths can be added, and each has its own JoinType and EndType. All 'outer' Paths must have the same orientation, and any 'hole' paths must have reverse orientation. Closed paths must have at least 3 vertices. Open paths may have as few as one vertex. Open paths can only be offset with positive deltas.
 """ ->
-function add(c::__ClipperClipperOffset, path::__ClipperPath, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
+function add!(c::__ClipperClipperOffset, path::__ClipperPath, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPath(path, jt, et)
 end
 
-function add(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
+function add!(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPaths(paths, jt, et)
 end
 

@@ -96,10 +96,10 @@ simplify!(q, pftEvenOdd)
 
 println("Testing clip...")
 c = Clip()
-strictly_simple(c,true)
-preserve_collinear(c,true)
-reverse_solution(c,true)
-clear(c)
+strictly_simple!(c,true)
+preserve_collinear!(c,true)
+reverse_solution!(c,true)
+clear!(c)
 
 
 p = Path()
@@ -110,7 +110,7 @@ push!(p, IntPoint(2,0))
 
 println("Testing PolyTree...")
 pt = PolyTree()
-clear(pt)
+clear!(pt)
 @test length(pt) == 0
 @test first(pt).ptr == C_NULL # Null ptr
 
@@ -123,10 +123,10 @@ push!(p, IntPoint(0,10))
 o = Offset()
 r1 = Paths()
 r2 = PolyTree()
-add(o, p, jtMiter, etClosedPolygon)
+add!(o, p, jtMiter, etClosedPolygon)
 execute!(o, r1, 1)
 execute!(o, r2, 1)
-clear(o)
+clear!(o)
 p1 = Paths(r2)
 # paths
 @test length(p1) == length(r1) == 1
@@ -153,7 +153,7 @@ push!(p, IntPoint(10,0))
 push!(p, IntPoint(10,10))
 push!(p, IntPoint(0,10))
 c = Clip()
-add(c, p, ptSubject, true)
+add!(c, p, ptSubject, true)
 ir = IntRect(c)
 @test left(ir) == 0
 @test right(ir) == 10
