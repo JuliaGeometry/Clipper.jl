@@ -10,9 +10,9 @@ export Path, Paths, IntPoint
 # Export Clipper Classes and Methods
 export Clip, preserve_collinear, reverse_solution, strictly_simple, clear,
        add, IntRect, PolyTree, child_count, children, is_hole, is_open, Offset,
-       arc_tolerance, execute!, area, clean!, isinside, orientation, simplify!,
-       closed_paths, open_paths, minkowski_diff, minkowski_sum, left, right,
-       top, bottom
+       arc_tolerance,miter_limit, execute!, area, clean!, isinside, orientation,
+       simplify!, closed_paths, open_paths, minkowski_diff, minkowski_sum, left,
+       right, top, bottom
 
 # enum exports
 export ioReverseSolution, ioStrictlySimple, ioPreserveCollinear
@@ -641,6 +641,14 @@ end
 
 function arc_tolerance(o::__ClipperClipperOffset, v::Float64)
     icxx"$o.ArcTolerance = $v;"
+end
+
+function miter_limit(o::__ClipperClipperOffset)
+    @cxx o->MiterLimit
+end
+
+function miter_limit(o::__ClipperClipperOffset, v::Float64)
+    icxx"$o.MiterLimit = $v;"
 end
 
 @doc """
