@@ -881,10 +881,6 @@ function Base.getindex(p::__ClipperPaths, i::Integer)
     @cxx p->at(i-1)
 end
 
-function Base.show(io::IO, v::vcpp"ClipperLib::IntPoint")
-    print(io, string("(", x(v),",", y(v),")"))
-end
-
 function Base.isempty(p::__ClipperPath)
     length(p) == 0
 end
@@ -901,6 +897,9 @@ function Base.endof(p::__ClipperPaths)
     length(p)
 end
 
+function Base.show(io::IO, v::__ClipperIntPoint)
+    print(io, string("(", x(v),",", y(v),")"))
+end
 
 function Base.show(io::IO, p::__ClipperPath)
     if isempty(p)
