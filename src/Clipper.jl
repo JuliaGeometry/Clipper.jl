@@ -30,7 +30,7 @@ export jtSquare, jtRound, jtMiter
 
 #
 # The CPP source for clipper. It is put inside a cxx block so that we dont have
-# and external dependencies. Likewise, the extra compilation time is negligable
+# any external dependencies. Likewise, the extra compilation time is negligable
 # part of the total load time.
 #
 
