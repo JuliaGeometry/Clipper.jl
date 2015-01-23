@@ -122,6 +122,11 @@ execute!(o, r1, 1)
 execute!(o, r2, 1)
 clear!(o)
 p1 = Paths(r2)
+# TODO: Failing Polytree tests
+#f = first(r2)
+#@show Path(f)
+#@test length(Path(f)) == 4
+
 # paths
 @test length(p1) == length(r1) == 1
 p1 = p1[1]
@@ -213,3 +218,12 @@ strictly_simple!(c,true)
 preserve_collinear!(c,true)
 reverse_solution!(c,true)
 clear!(c)
+
+# TODO: Failing Polytree tests
+# polytree, use set ops
+# ctXor
+#c = setup_clip()
+#sol = PolyTree()
+#execute!(c, ctIntersection, sol)
+#@test length(sol) == 1
+@cxx sol->Contour
