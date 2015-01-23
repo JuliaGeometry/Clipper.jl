@@ -1,4 +1,5 @@
 using Clipper
+using Cxx
 using Base.Test
 
 # testing printing
@@ -94,14 +95,6 @@ simplify!(q, pftEvenOdd)
 @test length(q[1]) == 3
 @test length(q[2]) == 3
 
-println("Testing clip...")
-c = Clip()
-strictly_simple!(c,true)
-preserve_collinear!(c,true)
-reverse_solution!(c,true)
-clear!(c)
-
-
 p = Path()
 push!(p, IntPoint(0,0))
 push!(p, IntPoint(0,2))
@@ -115,6 +108,7 @@ clear!(pt)
 @test first(pt).ptr == C_NULL # Null ptr
 
 # testing offset
+println("Testing Offset...")
 p = Path()
 push!(p, IntPoint(0,0))
 push!(p, IntPoint(10,0))
@@ -168,3 +162,54 @@ bottom!(ir,4)
 @test top(ir) == 3
 @test bottom(ir) == 4
 println(ir)
+
+# test Clip
+println("Testing Clip...")
+
+function setup_clip()
+    c = Clip()
+    subj = Path()
+    push!(subj, IntPoint(0,0))
+    push!(subj, IntPoint(10,0))
+    push!(subj, IntPoint(10,10))
+    push!(subj, IntPoint(0,10))
+    clip = Path()
+    push!(clip, IntPoint(0,0))
+    push!(clip, IntPoint(10,0))
+    push!(clip, IntPoint(10,10))
+    push!(clip, IntPoint(0,10))
+    add!(c, subj, ptSubject, true)
+    add!(c, clip, ptClip, true)
+    c
+end
+
+# ctDifference
+c = setup_clip()
+sol = Paths()
+execute!(c, ctDifference, sol)
+@test length(sol) == 0
+
+# ctIntersection
+c = setup_clip()
+sol = Paths()
+execute!(c, ctIntersection, sol)
+@test length(sol) == 1
+@test length(sol[1]) == 4
+
+# ctUnion
+c = setup_clip()
+sol = Paths()
+execute!(c, ctUnion, sol)
+@test length(sol) == 1
+@test length(sol[1]) == 4
+
+# ctXor
+c = setup_clip()
+sol = Paths()
+execute!(c, ctXor, sol)
+@test length(sol) == 0
+
+strictly_simple!(c,true)
+preserve_collinear!(c,true)
+reverse_solution!(c,true)
+clear!(c)

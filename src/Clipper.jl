@@ -426,6 +426,15 @@ function add!(clip::__ClipperClipper, pg::__ClipperPath, pt::Cxx.CppEnum{symbol(
     @cxx clip->AddPath(pg, pt, closed)
 end
 
+function execute!(c::__ClipperClipper, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::__ClipperPaths, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
+    @cxx c->Execute(ty, sol, sft, cft)
+end
+
+function execute!(c::__ClipperClipper, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::__ClipperPolyTree, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
+    @cxx c->Execute(ty, sol, sft, cft)
+end
+
+
 # TODO:
 #C++ »
 #bool Execute(ClipType clipType,
