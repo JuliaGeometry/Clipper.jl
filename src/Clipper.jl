@@ -46,6 +46,7 @@ typealias __ClipperIntPoint Union(pcpp"ClipperLib::IntPoint",
                                   vcpp"ClipperLib::IntPoint",
                                   rcpp"ClipperLib::IntPoint")
 
+# TODO: Remove this when https://github.com/Keno/Cxx.jl/issues/72 is closed
 typealias __ClipperPath Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
                               Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
                               Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
