@@ -1,5 +1,4 @@
 using Clipper
-using Cxx
 using Base.Test
 
 # testing printing
@@ -101,11 +100,6 @@ push!(p, IntPoint(0,2))
 push!(p, IntPoint(2,2))
 push!(p, IntPoint(2,0))
 
-println("Testing PolyTree...")
-pt = PolyTree()
-clear!(pt)
-@test length(pt) == 0
-@test first(pt).ptr == C_NULL # Null ptr
 
 # testing offset
 println("Testing Offset...")
@@ -123,9 +117,8 @@ execute!(o, r2, 1)
 clear!(o)
 p1 = Paths(r2)
 # TODO: Failing Polytree tests
-#f = first(r2)
-#@show Path(f)
-#@test length(Path(f)) == 4
+f = first(r2)
+@test length(Path(f)) == 4
 
 # paths
 @test length(p1) == length(r1) == 1
@@ -219,11 +212,21 @@ preserve_collinear!(c,true)
 reverse_solution!(c,true)
 clear!(c)
 
-# TODO: Failing Polytree tests
-# polytree, use set ops
-# ctXor
-#c = setup_clip()
-#sol = PolyTree()
-#execute!(c, ctIntersection, sol)
-#@test length(sol) == 1
-@cxx sol->Contour
+# polytree and poly node tests, use set ops
+println("Testing PolyTree...")
+pt = PolyTree()
+clear!(pt)
+@test length(pt) == 0
+@test first(pt).ptr == C_NULL # Null ptr
+c = setup_clip()
+sol = PolyTree()
+execute!(c, ctIntersection, sol)
+@test length(sol) == 1
+f = first(sol)
+@test length(Path(f)) == 4
+@show children(f)
+@test !is_hole(f)
+@test !is_open(f)
+@test child_count(f) == 0
+@show next(f)
+@show parent(f)

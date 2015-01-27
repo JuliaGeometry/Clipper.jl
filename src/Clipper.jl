@@ -574,7 +574,7 @@ The IsHole property of a PolyTree object is undefined but its children are
 always top-level outer polygons.
 """ ->
 function is_hole(c::__ClipperPolyNode)
-    @cxx c->IsHole
+    @cxx c->IsHole()
 end
 
 @doc """
@@ -582,7 +582,7 @@ Returns true when the PolyNode's Contour results from a clipping operation on an
 open contour (path). Only top-level PolyNodes can contain open contours.
 """ ->
 function is_open(c::__ClipperPolyNode)
-    @cxx c->IsOpen
+    @cxx c->IsOpen()
 end
 
 @doc """
