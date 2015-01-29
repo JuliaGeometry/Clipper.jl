@@ -7,6 +7,18 @@ module Basic
 using Clipper
 
 
-p() = println("submodulaization")
+function offset(paths::Clipper.__ClipperPaths, dist::Int)
+    o = Offset()
+    pt = PolyTree()
+
+    for i = 1:length(paths)
+        path = paths[i]
+        add!(o, path, jtMiter, etClosedPolygon)
+    end
+    execute!(o, pt, dist)
+    clear!(o)
+
+    return pt
+end
 
 end # module

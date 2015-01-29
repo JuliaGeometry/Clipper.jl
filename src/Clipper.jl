@@ -2,8 +2,6 @@ module Clipper
 
 using Cxx
 
-include("Basic.jl")
-
 # Export Clipper types
 export Path, Paths, IntPoint
 
@@ -983,5 +981,8 @@ function Base.show(io::IO, p::__ClipperPaths)
         show(io, p[i])
     end
 end
+
+# Clipper basic interface
+include("Basic.jl")
 
 end # module

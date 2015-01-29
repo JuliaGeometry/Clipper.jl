@@ -230,3 +230,13 @@ f = first(sol)
 @test child_count(f) == 0
 @show next(f)
 @show parent(f)
+
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(10,0))
+push!(p, IntPoint(10,10))
+push!(p, IntPoint(0,10))
+ps = Paths()
+push!(ps, p)
+pt = Clipper.Basic.offset(ps, 2)
+@show pt
