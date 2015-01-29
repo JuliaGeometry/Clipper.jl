@@ -903,66 +903,66 @@ end
 # Some "julian" encapsulation of Clipper types.
 #
 
-function x(ip::__ClipperIntPoint)
+@inline function x(ip::__ClipperIntPoint)
     @cxx ip->X
 end
-function y(ip::__ClipperIntPoint)
+@inline function y(ip::__ClipperIntPoint)
     @cxx ip->Y
 end
-function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     x(i1) == x(i2) && y(i1) == y(i2)
 end
-function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     isequal(x(i1),x(i2)) && isequal(y(i1),y(i2))
 end
 
-function Base.push!(a::__ClipperPath,
+@inline function Base.push!(a::__ClipperPath,
                b::__ClipperIntPoint)
     @cxx a->push_back(b)
 end
 
-function Base.push!(a::__ClipperPaths,
+@inline function Base.push!(a::__ClipperPaths,
                b::__ClipperPath)
     @cxx a->push_back(b)
 end
 
-function Base.length(p::__ClipperPath)
+@inline function Base.length(p::__ClipperPath)
     @cxx p->size()
 end
 
-function Base.length(p::__ClipperPaths)
+@inline function Base.length(p::__ClipperPaths)
     @cxx p->size()
 end
 
-function Base.getindex(p::__ClipperPath, i::Integer)
+@inline function Base.getindex(p::__ClipperPath, i::Integer)
     @cxx p->at(i-1)
 end
 
-function Base.getindex(p::__ClipperPaths, i::Integer)
+@inline function Base.getindex(p::__ClipperPaths, i::Integer)
     @cxx p->at(i-1)
 end
 
-function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
+@inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
     icxx"$path[$i-1] = $pt;"
 end
 
-function Base.setindex!(paths::__ClipperPaths, path::__ClipperIntPoint, i::Integer)
+@inline function Base.setindex!(paths::__ClipperPaths, path::__ClipperIntPoint, i::Integer)
     icxx"$paths[$i-1] = $path;"
 end
 
-function Base.isempty(p::__ClipperPath)
+@inline function Base.isempty(p::__ClipperPath)
     length(p) == 0
 end
 
-function Base.isempty(p::__ClipperPaths)
+@inline function Base.isempty(p::__ClipperPaths)
     length(p) == 0
 end
 
-function Base.endof(p::__ClipperPath)
+@inline function Base.endof(p::__ClipperPath)
     length(p)
 end
 
-function Base.endof(p::__ClipperPaths)
+@inline function Base.endof(p::__ClipperPaths)
     length(p)
 end
 
