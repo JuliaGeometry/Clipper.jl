@@ -10,6 +10,14 @@ push!(a, b)
 push!(a, b)
 println(a)
 
+# test setindex
+p = Path(2)
+p[1] = IntPoint(1,1)
+p[2] = IntPoint(2,2)
+@test length(p) == 2
+@test p[1] == IntPoint(1,1)
+@test p[2] == IntPoint(2,2)
+
 # test area
 println("Testing area...")
 p = Path()

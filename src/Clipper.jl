@@ -942,6 +942,14 @@ function Base.getindex(p::__ClipperPaths, i::Integer)
     @cxx p->at(i-1)
 end
 
+function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
+    icxx"$path[$i-1] = $pt;"
+end
+
+function Base.setindex!(paths::__ClipperPaths, path::__ClipperIntPoint, i::Integer)
+    icxx"$paths[$i-1] = $path;"
+end
+
 function Base.isempty(p::__ClipperPath)
     length(p) == 0
 end
