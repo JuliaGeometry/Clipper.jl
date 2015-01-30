@@ -78,7 +78,12 @@ typealias __ClipperPolyTree Union(pcpp"ClipperLib::PolyTree",
 typealias __ClipperPolyNode Union(pcpp"ClipperLib::PolyNode",
                                   cpcpp"ClipperLib::PolyNode",
                                   vcpp"ClipperLib::PolyNode",
-                                  rcpp"ClipperLib::PolyNode")
+                                  rcpp"ClipperLib::PolyNode",
+                                  Cxx.CppRef{cpcpp"ClipperLib::PolyNode", (false,false,false)})
+
+typealias __ClipperPolyNodeArray Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
 typealias __ClipperClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
                                   cpcpp"ClipperLib::ClipperOffset",
@@ -934,11 +939,19 @@ end
     @cxx p->size()
 end
 
+@inline function Base.length(p::__ClipperPolyNodeArray)
+    @cxx p->size()
+end
+
 @inline function Base.getindex(p::__ClipperPath, i::Integer)
     icxx"$p[$i-1];"
 end
 
 @inline function Base.getindex(p::__ClipperPaths, i::Integer)
+    icxx"$p[$i-1];"
+end
+
+@inline function Base.getindex(p::__ClipperPolyNodeArray, i::Integer)
     icxx"$p[$i-1];"
 end
 
