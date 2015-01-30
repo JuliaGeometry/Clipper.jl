@@ -935,11 +935,11 @@ end
 end
 
 @inline function Base.getindex(p::__ClipperPath, i::Integer)
-    @cxx p->at(i-1)
+    icxx"$p[$i-1];"
 end
 
 @inline function Base.getindex(p::__ClipperPaths, i::Integer)
-    @cxx p->at(i-1)
+    icxx"$p[$i-1];"
 end
 
 @inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
