@@ -946,7 +946,7 @@ end
     icxx"$path[$i-1] = $pt;"
 end
 
-@inline function Base.setindex!(paths::__ClipperPaths, path::__ClipperIntPoint, i::Integer)
+@inline function Base.setindex!(paths::__ClipperPaths, path::__ClipperPath, i::Integer)
     icxx"$paths[$i-1] = $path;"
 end
 
