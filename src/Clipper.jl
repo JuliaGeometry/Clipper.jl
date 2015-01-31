@@ -720,7 +720,7 @@ parameter is the amount to which the supplied paths will be offset - negative
 delta values to shrink polygons and positive delta to expand them.
 
 This method can be called multiple times, offsetting the same paths by different
-amounts (ie using different deltas)
+amounts (ie using different deltas).
 """ ->
 function execute!(c::__ClipperClipperOffset, sol::__ClipperPaths, delta)
     @cxx c->Execute(sol, delta)
