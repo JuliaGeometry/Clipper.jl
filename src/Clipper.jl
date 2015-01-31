@@ -2,8 +2,6 @@ module Clipper
 
 using Cxx
 
-include("Basic.jl")
-
 # Export Clipper types
 export Path, Paths, IntPoint
 
@@ -80,7 +78,12 @@ typealias __ClipperPolyTree Union(pcpp"ClipperLib::PolyTree",
 typealias __ClipperPolyNode Union(pcpp"ClipperLib::PolyNode",
                                   cpcpp"ClipperLib::PolyNode",
                                   vcpp"ClipperLib::PolyNode",
-                                  rcpp"ClipperLib::PolyNode")
+                                  rcpp"ClipperLib::PolyNode",
+                                  Cxx.CppRef{cpcpp"ClipperLib::PolyNode", (false,false,false)})
+
+typealias __ClipperPolyNodeArray Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)})
 
 typealias __ClipperClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
                                   cpcpp"ClipperLib::ClipperOffset",
@@ -917,62 +920,78 @@ end
 # Some "julian" encapsulation of Clipper types.
 #
 
-function x(ip::__ClipperIntPoint)
+@inline function x(ip::__ClipperIntPoint)
     @cxx ip->X
 end
-function y(ip::__ClipperIntPoint)
+@inline function y(ip::__ClipperIntPoint)
     @cxx ip->Y
 end
-function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     x(i1) == x(i2) && y(i1) == y(i2)
 end
-function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     isequal(x(i1),x(i2)) && isequal(y(i1),y(i2))
 end
 
-function Base.push!(a::__ClipperPath,
+@inline function Base.push!(a::__ClipperPath,
                b::__ClipperIntPoint)
     @cxx a->push_back(b)
 end
 
-function Base.push!(a::__ClipperPath, b::(Int, Int))
+@inline function Base.push!(a::__ClipperPath, b::(Int, Int))
     push!(a, IntPoint(b...))
 end
 
-function Base.push!(a::__ClipperPaths,
+@inline function Base.push!(a::__ClipperPaths,
                b::__ClipperPath)
     @cxx a->push_back(b)
 end
 
-function Base.length(p::__ClipperPath)
+@inline function Base.length(p::__ClipperPath)
     @cxx p->size()
 end
 
-function Base.length(p::__ClipperPaths)
+@inline function Base.length(p::__ClipperPaths)
     @cxx p->size()
 end
 
-function Base.getindex(p::__ClipperPath, i::Integer)
-    @cxx p->at(i-1)
+@inline function Base.length(p::__ClipperPolyNodeArray)
+    @cxx p->size()
 end
 
-function Base.getindex(p::__ClipperPaths, i::Integer)
-    @cxx p->at(i-1)
+@inline function Base.getindex(p::__ClipperPath, i::Integer)
+    icxx"$p[$i-1];"
 end
 
-function Base.isempty(p::__ClipperPath)
+@inline function Base.getindex(p::__ClipperPaths, i::Integer)
+    icxx"$p[$i-1];"
+end
+
+@inline function Base.getindex(p::__ClipperPolyNodeArray, i::Integer)
+    icxx"$p[$i-1];"
+end
+
+@inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
+    icxx"$path[$i-1] = $pt;"
+end
+
+@inline function Base.setindex!(paths::__ClipperPaths, path::__ClipperPath, i::Integer)
+    icxx"$paths[$i-1] = $path;"
+end
+
+@inline function Base.isempty(p::__ClipperPath)
     length(p) == 0
 end
 
-function Base.isempty(p::__ClipperPaths)
+@inline function Base.isempty(p::__ClipperPaths)
     length(p) == 0
 end
 
-function Base.endof(p::__ClipperPath)
+@inline function Base.endof(p::__ClipperPath)
     length(p)
 end
 
-function Base.endof(p::__ClipperPaths)
+@inline function Base.endof(p::__ClipperPaths)
     length(p)
 end
 
@@ -1013,5 +1032,8 @@ function Base.show(io::IO, p::__ClipperPaths)
         end
     end
 end
+
+# Clipper basic interface
+include("Basic.jl")
 
 end # module

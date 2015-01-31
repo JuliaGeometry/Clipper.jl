@@ -23,6 +23,14 @@ p = Path()
 push!(p, (0, 0))
 @test p == Path([(0,0)])
 
+# test setindex
+p = Path(2)
+p[1] = IntPoint(1,1)
+p[2] = IntPoint(2,2)
+@test length(p) == 2
+@test p[1] == IntPoint(1,1)
+@test p[2] == IntPoint(2,2)
+
 # test area
 println("Testing area...")
 p = Path()
@@ -288,3 +296,13 @@ execute!(o, outpaths, -2)
 @test length(outpaths) == 2
 @show outpaths[1]
 @show outpaths
+
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(10,0))
+push!(p, IntPoint(10,10))
+push!(p, IntPoint(0,10))
+ps = Paths()
+push!(ps, p)
+pt = Clipper.Basic.offset(ps, 2)
+@show pt
