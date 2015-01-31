@@ -10,6 +10,19 @@ push!(a, b)
 push!(a, b)
 println(a)
 
+#test path constructor
+p1 = Path()
+push!(p1, IntPoint(0, 0))
+push!(p1, IntPoint(0, 10))
+push!(p1, IntPoint(10, 10))
+p2 = Path([(0,0), (0,10), (10,10)])
+@test p1 == p2
+
+#test push shortcut
+p = Path()
+push!(p, (0, 0))
+@test p == Path([(0,0)])
+
 # test area
 println("Testing area...")
 p = Path()
@@ -230,3 +243,48 @@ f = first(sol)
 @test child_count(f) == 0
 @show next(f)
 @show parent(f)
+
+# path equality
+println("Testing path equality")
+p1 = Path()
+push!(p1, IntPoint(0,0))
+push!(p1, IntPoint(10,0))
+push!(p1, IntPoint(10,10))
+p2 = Path()
+push!(p2, IntPoint(0,0))
+push!(p2, IntPoint(10,0))
+push!(p2, IntPoint(10,10))
+@test p1 == p2
+
+# offsetting a polygon with holes.
+println("Testing offset of a polygon with holes...")
+perimeter = Path()
+push!(perimeter, IntPoint(-10,-10))
+push!(perimeter, IntPoint(60,-10))
+push!(perimeter, IntPoint(60,60))
+push!(perimeter, IntPoint(-10,60))
+
+hole = Path()
+push!(hole, IntPoint(4,4))
+push!(hole, IntPoint(4,8))
+push!(hole, IntPoint(8,8))
+push!(hole, IntPoint(8,4))
+
+hole2 = Path()
+push!(hole2, IntPoint(12,4))
+push!(hole2, IntPoint(12,8))
+push!(hole2, IntPoint(16,8))
+push!(hole2, IntPoint(16,4))
+
+o = Offset()
+paths = Paths()
+push!(paths, perimeter)
+push!(paths, hole)
+push!(paths, hole2)
+add!(o, paths, jtMiter, etClosedPolygon)
+
+outpaths = Paths()
+execute!(o, outpaths, -2)
+@test length(outpaths) == 2
+@show outpaths[1]
+@show outpaths
