@@ -303,6 +303,14 @@ function Path(ct::Integer=0)
     @cxx ClipperLib::Path(ct)
 end
 
+function Path(pts::Vector{(Int, Int)}, ct::Integer=0)
+    p = Path(ct)
+    for point in pts
+        push!(p, IntPoint(point...))
+    end
+    p
+end
+
 
 @doc """
 This structure is fundamental to the Clipper Library. It's a list or array of
@@ -531,6 +539,10 @@ function Base.length(c::__ClipperPolyTree)
     @cxx c->Total()
 end
 
+function child_count(c::__ClipperPolyTree)
+    @cxx c->ChildCount()
+end
+
 @doc """
 The returned Polynode will be the first child if any, otherwise the next
 sibling, otherwise the next sibling of the Parent etc.
@@ -698,7 +710,7 @@ parameter is the amount to which the supplied paths will be offset - negative
 delta values to shrink polygons and positive delta to expand them.
 
 This method can be called multiple times, offsetting the same paths by different
-amounts (ie using different deltas).
+amounts (ie using different deltas)offset of a polygon with holes
 """ ->
 function execute!(c::__ClipperClipperOffset, sol::__ClipperPaths, delta)
     @cxx c->Execute(sol, delta)
@@ -923,6 +935,10 @@ function Base.push!(a::__ClipperPath,
     @cxx a->push_back(b)
 end
 
+function Base.push!(a::__ClipperPath, b::(Int, Int))
+    push!(a, IntPoint(b...))
+end
+
 function Base.push!(a::__ClipperPaths,
                b::__ClipperPath)
     @cxx a->push_back(b)
@@ -960,6 +976,14 @@ function Base.endof(p::__ClipperPaths)
     length(p)
 end
 
+function ==(a::__ClipperPath, b::__ClipperPath)
+    length(a) != length(b) && return false
+    for i = 1:length(a)
+        a[i] != b[i] && return false
+    end
+    return true
+end
+
 function Base.show(io::IO, v::__ClipperIntPoint)
     print(io, string("(", x(v),",", y(v),")"))
 end
@@ -972,15 +996,21 @@ function Base.show(io::IO, p::__ClipperPath)
     if isempty(p)
         return
     end
+    print("Path([")
     for i = 1:length(p)-1
         print(io, string("(", x(p[i]), ",", y(p[i]), "), "))
     end
     print(io, string("(", x(p[end]), ",", y(p[end]), ")"))
+    print(")]")
 end
 
 function Base.show(io::IO, p::__ClipperPaths)
-    for i = 1:length(p)
+    len = length(p)
+    for i = 1:len
         show(io, p[i])
+        if i < len
+            print(io, "; ")
+        end
     end
 end
 
