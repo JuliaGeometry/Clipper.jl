@@ -5,10 +5,8 @@ using Base.Test
 a = Path()
 b = IntPoint(1,0)
 push!(a, b)
-println(a)
 push!(a, b)
 push!(a, b)
-println(a)
 
 #test path constructor
 p1 = Path()
@@ -180,7 +178,6 @@ bottom!(ir,4)
 @test right(ir) == 2
 @test top(ir) == 3
 @test bottom(ir) == 4
-println(ir)
 
 # test Clip
 println("Testing Clip...")
@@ -245,12 +242,9 @@ execute!(c, ctIntersection, sol)
 @test length(sol) == 1
 f = first(sol)
 @test length(Path(f)) == 4
-@show children(f)
 @test !is_hole(f)
 @test !is_open(f)
 @test child_count(f) == 0
-@show next(f)
-@show parent(f)
 
 # path equality
 println("Testing path equality")
@@ -294,8 +288,8 @@ add!(o, paths, jtMiter, etClosedPolygon)
 outpaths = Paths()
 execute!(o, outpaths, -2)
 @test length(outpaths) == 2
-@show outpaths[1]
-@show outpaths
+@test outpaths[1] == Path([(58,58), (-8,58), (-8,-8), (58,-8)])
+@test outpaths[2] == Path([(18,2), (2,2), (2,10), (18,10)])
 
 p = Path()
 push!(p, IntPoint(0,0))
@@ -305,4 +299,3 @@ push!(p, IntPoint(0,10))
 ps = Paths()
 push!(ps, p)
 pt = Clipper.Basic.offset(ps, 2)
-@show pt
