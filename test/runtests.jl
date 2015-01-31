@@ -7,6 +7,12 @@ b = IntPoint(1,0)
 push!(a, b)
 push!(a, b)
 push!(a, b)
+o = IOBuffer()
+show(o, b)
+@test ASCIIString(o.data) == "(1,0)"
+o = IOBuffer()
+show(o, a)
+@test ASCIIString(o.data) == "Path([(1,0), (1,0), (1,0)])"
 
 #test path constructor
 p1 = Path()
@@ -245,6 +251,7 @@ f = first(sol)
 @test !is_hole(f)
 @test !is_open(f)
 @test child_count(f) == 0
+@test child_count(sol) == 1
 
 # path equality
 println("Testing path equality")
@@ -290,6 +297,15 @@ execute!(o, outpaths, -2)
 @test length(outpaths) == 2
 @test outpaths[1] == Path([(58,58), (-8,58), (-8,-8), (58,-8)])
 @test outpaths[2] == Path([(18,2), (2,2), (2,10), (18,10)])
+
+# test Paths() printing
+o = IOBuffer()
+show(o, outpaths)
+expected = """Paths([
+    Path([(58,58), (-8,58), (-8,-8), (58,-8)]),
+    Path([(18,2), (2,2), (2,10), (18,10)])
+)"""
+@test ASCIIString(o.data) == expected
 
 p = Path()
 push!(p, IntPoint(0,0))

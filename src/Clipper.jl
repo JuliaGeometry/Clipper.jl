@@ -45,20 +45,24 @@ typealias __ClipperIntPoint Union(pcpp"ClipperLib::IntPoint",
                                   rcpp"ClipperLib::IntPoint")
 
 # TODO: Remove this when https://github.com/Keno/Cxx.jl/issues/72 is closed
-typealias __ClipperPath Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-                              Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)})
+typealias __ClipperPath Union(
+    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+)
 
 
-typealias __ClipperPaths Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+typealias __ClipperPaths Union(
+    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
+    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)})
+)
 
 typealias __ClipperClipperBase Union(pcpp"ClipperLib::ClipperBase",
                                   cpcpp"ClipperLib::ClipperBase",
@@ -306,8 +310,11 @@ function Path(ct::Integer=0)
     @cxx ClipperLib::Path(ct)
 end
 
-function Path(pts::Vector{(Int, Int)}, ct::Integer=0)
-    p = Path(ct)
+@doc """
+This function builds a Path structure from a Vector of Tuples.
+""" ->
+function Path(pts::Vector{(Int, Int)})
+    p = Path()
     for point in pts
         push!(p, IntPoint(point...))
     end
@@ -971,6 +978,10 @@ end
     icxx"$p[$i-1];"
 end
 
+@inline function Base.getindex(p::__ClipperPolyTree, i::Integer)
+    icxx"$p[$i-1];"
+end
+
 @inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
     icxx"$path[$i-1] = $pt;"
 end
@@ -1015,22 +1026,28 @@ function Base.show(io::IO, p::__ClipperPath)
     if isempty(p)
         return
     end
-    print("Path([")
+    print(io, "Path([")
     for i = 1:length(p)-1
         print(io, string("(", x(p[i]), ",", y(p[i]), "), "))
     end
     print(io, string("(", x(p[end]), ",", y(p[end]), ")"))
-    print("])")
+    print(io, "])")
 end
 
 function Base.show(io::IO, p::__ClipperPaths)
     len = length(p)
+    if len == 0
+        print(io, "Paths()")
+        return
+    end
+    print(io, "Paths([\n    ")
     for i = 1:len
-        show(io, p[i])
+        print(io, p[i])
         if i < len
-            print(io, "; ")
+            print(io, ",\n    ")
         end
     end
+    print(io, "\n)")
 end
 
 # Clipper basic interface
