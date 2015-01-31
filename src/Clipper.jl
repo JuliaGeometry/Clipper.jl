@@ -1001,7 +1001,7 @@ function Base.show(io::IO, p::__ClipperPath)
         print(io, string("(", x(p[i]), ",", y(p[i]), "), "))
     end
     print(io, string("(", x(p[end]), ",", y(p[end]), ")"))
-    print(")]")
+    print("])")
 end
 
 function Base.show(io::IO, p::__ClipperPaths)
