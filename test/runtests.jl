@@ -5,10 +5,27 @@ using Base.Test
 a = Path()
 b = IntPoint(1,0)
 push!(a, b)
-println(a)
 push!(a, b)
 push!(a, b)
-println(a)
+o = IOBuffer()
+show(o, b)
+@test ASCIIString(o.data) == "(1,0)"
+o = IOBuffer()
+show(o, a)
+@test ASCIIString(o.data) == "Path([(1,0), (1,0), (1,0)])"
+
+#test path constructor
+p1 = Path()
+push!(p1, IntPoint(0, 0))
+push!(p1, IntPoint(0, 10))
+push!(p1, IntPoint(10, 10))
+p2 = Path([(0,0), (0,10), (10,10)])
+@test p1 == p2
+
+#test push shortcut
+p = Path()
+push!(p, (0, 0))
+@test p == Path([(0,0)])
 
 # test setindex
 p = Path(2)
@@ -176,7 +193,6 @@ bottom!(ir,4)
 @test right(ir) == 2
 @test top(ir) == 3
 @test bottom(ir) == 4
-println(ir)
 
 # test Clip
 println("Testing Clip...")
@@ -241,12 +257,73 @@ execute!(c, ctIntersection, sol)
 @test length(sol) == 1
 f = first(sol)
 @test length(Path(f)) == 4
-@show children(f)
 @test !is_hole(f)
 @test !is_open(f)
 @test child_count(f) == 0
-@show next(f)
-@show parent(f)
+@test child_count(sol) == 1
+
+# path equality
+println("Testing path equality")
+p1 = Path()
+push!(p1, IntPoint(0,0))
+push!(p1, IntPoint(10,0))
+push!(p1, IntPoint(10,10))
+p2 = Path()
+push!(p2, IntPoint(0,0))
+push!(p2, IntPoint(10,0))
+push!(p2, IntPoint(10,10))
+@test p1 == p2
+
+# offsetting a polygon with holes.
+println("Testing offset of a polygon with holes...")
+perimeter = Path()
+push!(perimeter, IntPoint(-10,-10))
+push!(perimeter, IntPoint(60,-10))
+push!(perimeter, IntPoint(60,60))
+push!(perimeter, IntPoint(-10,60))
+
+hole = Path()
+push!(hole, IntPoint(4,4))
+push!(hole, IntPoint(4,8))
+push!(hole, IntPoint(8,8))
+push!(hole, IntPoint(8,4))
+
+hole2 = Path()
+push!(hole2, IntPoint(12,4))
+push!(hole2, IntPoint(12,8))
+push!(hole2, IntPoint(16,8))
+push!(hole2, IntPoint(16,4))
+
+o = Offset()
+paths = Paths()
+push!(paths, perimeter)
+push!(paths, hole)
+push!(paths, hole2)
+add!(o, paths, jtMiter, etClosedPolygon)
+
+outpaths = Paths()
+execute!(o, outpaths, -2)
+@test length(outpaths) == 2
+@test outpaths[1] == Path([(58,58), (-8,58), (-8,-8), (58,-8)])
+@test outpaths[2] == Path([(18,2), (2,2), (2,10), (18,10)])
+
+# test Paths() construction from a Vector of Path objects
+paths = Paths([
+    Path([(0,0)]),
+    Path([(10,10)]),
+])
+@test length(paths) == 2
+@test paths[1] == Path([(0,0)])
+@test paths[2] == Path([(10,10)])
+
+# test Paths() printing
+o = IOBuffer()
+show(o, outpaths)
+expected = """Paths([
+    Path([(58,58), (-8,58), (-8,-8), (58,-8)]),
+    Path([(18,2), (2,2), (2,10), (18,10)])
+)"""
+@test ASCIIString(o.data) == expected
 
 p = Path()
 push!(p, IntPoint(0,0))
@@ -256,4 +333,3 @@ push!(p, IntPoint(0,10))
 ps = Paths()
 push!(ps, p)
 pt = Clipper.Basic.offset(ps, 2)
-@show pt
