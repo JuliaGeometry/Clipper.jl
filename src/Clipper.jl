@@ -82,8 +82,7 @@ typealias __ClipperPolyTree Union(pcpp"ClipperLib::PolyTree",
 typealias __ClipperPolyNode Union(pcpp"ClipperLib::PolyNode",
                                   cpcpp"ClipperLib::PolyNode",
                                   vcpp"ClipperLib::PolyNode",
-                                  rcpp"ClipperLib::PolyNode",
-                                  Cxx.CppRef{cpcpp"ClipperLib::PolyNode", (false,false,false)})
+                                  rcpp"ClipperLib::PolyNode")
 
 typealias __ClipperPolyNodeArray Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
     Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
