@@ -113,23 +113,32 @@ push!(p, IntPoint(2,0))
 println("Testing Offset...")
 p = Path()
 push!(p, IntPoint(0,0))
-push!(p, IntPoint(10,0))
-push!(p, IntPoint(10,10))
-push!(p, IntPoint(0,10))
+push!(p, IntPoint(100,0))
+push!(p, IntPoint(100,100))
+push!(p, IntPoint(0,100))
+p2 = Path()
+push!(p2, IntPoint(30,30))
+push!(p2, IntPoint(30,70))
+push!(p2, IntPoint(70,70))
+push!(p2, IntPoint(70,30))
 o = Offset()
+paths = Paths()
+push!(paths, p)
+push!(paths, p2)
 r1 = Paths()
 r2 = PolyTree()
-add!(o, p, jtMiter, etClosedPolygon)
+add!(o, paths, jtMiter, etClosedPolygon)
 execute!(o, r1, 1)
 execute!(o, r2, 1)
 clear!(o)
 p1 = Paths(r2)
 # TODO: Failing Polytree tests
 f = first(r2)
+@test child_count(f) ==1
 @test length(Path(f)) == 4
 
 # paths
-@test length(p1) == length(r1) == 1
+@test length(p1) == length(r1) == 2
 p1 = p1[1]
 r1 = r1[1]
 # now just path
