@@ -1058,6 +1058,26 @@ function Base.show(io::IO, p::__ClipperPaths)
     print(io, "\n)")
 end
 
+function Base.show(io::IO, p::__ClipperPolyTree)
+    node = first(p) # grab first PolyNode
+    while node != C_NULL
+        show(io, node)
+        node = next(node)
+    end
+end
+
+function Base.show(io::IO, p::__ClipperPolyNode, depth=0)
+    indent = " "^(depth*2)
+    ct = child_count(p)
+    println(io, "$(indent)Path : $(Path(p))")
+    println(io, "$(indent)is_hole : $(is_hole(p))")
+    println(io, "$(indent)child_count : $(ct)")
+    for i = 1:ct
+        println(io, "Childs[$i] : ")
+        show(io, children(p)[i], depth+1)
+    end
+end
+
 # Clipper basic interface
 include("Basic.jl")
 
