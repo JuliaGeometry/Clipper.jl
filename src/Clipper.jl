@@ -321,7 +321,6 @@ function Path(pts::Vector{(Int, Int)})
     p
 end
 
-
 @doc """
 This structure is fundamental to the Clipper Library. It's a list or array of
 one or more Path structures. (The Path structure contains an ordered list of
@@ -337,6 +336,17 @@ contours or 'hole' contours. Which they are depends on orientation.
 """ ->
 function Paths(ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
+end
+
+@doc """
+This function builds a Paths structure from a Vector of Path objects.
+""" ->
+function Paths{T<:__ClipperPath}(paths::Vector{T})
+    pths = Paths()
+    for path in paths
+        push!(pths, path)
+    end
+    pths
 end
 
 @doc """

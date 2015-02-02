@@ -298,6 +298,15 @@ execute!(o, outpaths, -2)
 @test outpaths[1] == Path([(58,58), (-8,58), (-8,-8), (58,-8)])
 @test outpaths[2] == Path([(18,2), (2,2), (2,10), (18,10)])
 
+# test Paths() construction from a Vector of Path objects
+paths = Paths([
+    Path([(0,0)]),
+    Path([(10,10)]),
+])
+@test length(paths) == 2
+@test paths[1] == Path([(0,0)])
+@test paths[2] == Path([(10,10)])
+
 # test Paths() printing
 o = IOBuffer()
 show(o, outpaths)
