@@ -10,11 +10,7 @@ using Clipper
 function offset(paths::Clipper.__ClipperPaths, dist::Int)
     o = Offset()
     pt = PolyTree()
-
-    for i = 1:length(paths)
-        path = paths[i]
-        add!(o, path, jtMiter, etClosedPolygon)
-    end
+    add!(o, paths, jtMiter, etClosedPolygon)
     execute!(o, pt, dist)
     clear!(o)
 
