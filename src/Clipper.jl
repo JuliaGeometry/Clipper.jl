@@ -584,7 +584,7 @@ function child_count(c::__ClipperPolyTree)
     @cxx c->ChildCount()
 end
 
-## PolyNone  ##################################################################
+## PolyNode  ##################################################################
 
 @doc """
 The returned Polynode will be the first child if any, otherwise the next
