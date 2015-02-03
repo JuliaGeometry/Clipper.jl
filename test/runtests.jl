@@ -335,6 +335,9 @@ push!(ps, p)
 pt = Clipper.Basic.offset(ps, 2)
 
 path = Path([(0,0),(0,0),(0,0)])
+i = 1
 for point in path
-    @test point == IntPoint(0,0)
+    @test point === path[i]
+    i += 1
 end
+@test i == 4
