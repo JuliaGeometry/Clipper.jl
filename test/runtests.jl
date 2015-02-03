@@ -333,3 +333,8 @@ push!(p, IntPoint(0,10))
 ps = Paths()
 push!(ps, p)
 pt = Clipper.Basic.offset(ps, 2)
+
+path = Path([(0,0),(0,0),(0,0)])
+for point in path
+    @test point == IntPoint(0,0)
+end
