@@ -1015,7 +1015,10 @@ end
 end
 
 @inline function Base.getindex(p::__ClipperPolyNodeArray, i::Integer)
-    icxx"$p[$i-1];"
+    # we dereference here because:
+    # typedef std::vector< PolyNode* > PolyNodes;
+    # gives us pointers to Polynodes
+    icxx"*$p[$i-1];"
 end
 
 @inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
