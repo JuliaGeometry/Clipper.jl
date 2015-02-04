@@ -1,5 +1,7 @@
 module Clipper
 
+import Base: start, next, done
+
 using Cxx
 
 # Export Clipper types
@@ -26,18 +28,15 @@ export pftEvenOdd, pftNonZero, pftPositive, pftNegative
 
 export jtSquare, jtRound, jtMiter
 
-#
 # The CPP source for clipper. It is put inside a cxx block so that we dont have
 # any external dependencies. Likewise, the extra compilation time is negligable
 # part of the total load time.
-#
-
 include("clipper_cpp.jl")
 
-#
-# C++ type aliases. Cxx.jl automatically handles the conversion between these
-# three, so we can refer to these as the same thing through the type union.
-#
+###############################################################################
+## C++ type aliases. Cxx.jl automatically handles the conversion between these
+## three, so we can refer to these as the same thing through the type union.
+###############################################################################
 
 typealias __ClipperIntPoint Union(pcpp"ClipperLib::IntPoint",
                                   cpcpp"ClipperLib::IntPoint",
@@ -101,9 +100,9 @@ typealias __ClipperIntRect Union(pcpp"ClipperLib::IntRect",
                                   vcpp"ClipperLib::IntRect",
                                   rcpp"ClipperLib::IntRect")
 
-#
-# Clipper Enums
-#
+###############################################################################
+## Clipper Enums
+###############################################################################
 
 const ioReverseSolution = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(1)
 const ioStrictlySimple = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(2)
@@ -266,9 +265,11 @@ const jtSquare = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(0)
 const jtRound = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(1)
 const jtMiter = Cxx.CppEnum{symbol("ClipperLib::JoinType")}(2)
 
-#
-# Clipper Types
-#
+###############################################################################
+## Clipper Types
+###############################################################################
+
+## IntPoint  ##################################################################
 
 @doc """
 The IntPoint structure is used to represent all vertices in the Clipper Library.
@@ -293,6 +294,16 @@ See also the notes on [rounding](http://www.angusj.com/delphi/clipper/documentat
 function IntPoint(x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
 end
+
+@inline function x(ip::__ClipperIntPoint)
+    @cxx ip->X
+end
+
+@inline function y(ip::__ClipperIntPoint)
+    @cxx ip->Y
+end
+
+## Path  ######################################################################
 
 @doc """
 This structure contains a sequence of IntPoint vertices defining a single
@@ -322,6 +333,8 @@ function Path(pts::Vector{(Int, Int)})
     end
     p
 end
+
+## Paths  #####################################################################
 
 @doc """
 This structure is fundamental to the Clipper Library. It's a list or array of
@@ -360,9 +373,11 @@ function Paths(pt::__ClipperPolyTree)
     return paths
 end
 
-#
-# Clipper Classes
-#
+###############################################################################
+## Clipper Classes
+###############################################################################
+
+## Clip  ######################################################################
 
 function Clip(enum::Cxx.CppEnum{symbol("ClipperLib::InitOptions")} = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(0))
     @cxx ClipperLib::Clipper(enum)
@@ -484,6 +499,8 @@ end
 #  PolyFillType subjFillType = pftEvenOdd,
 #  PolyFillType clipFillType = pftEvenOdd);
 
+## IntRect  ###################################################################
+
 @doc """
 This method returns the axis-aligned bounding rectangle of all polygons that
 have been added to the Clipper object.
@@ -523,6 +540,8 @@ end
 function bottom!(r::__ClipperIntRect, v::Integer)
     icxx"$r.bottom = $v;"
 end
+
+## PolyTree  ##################################################################
 
 function PolyTree()
     @cxx ClipperLib::PolyTree()
@@ -564,6 +583,8 @@ end
 function child_count(c::__ClipperPolyTree)
     @cxx c->ChildCount()
 end
+
+## PolyNode  ##################################################################
 
 @doc """
 The returned Polynode will be the first child if any, otherwise the next
@@ -628,6 +649,8 @@ return a null pointer.
 function Base.parent(c::__ClipperPolyNode)
     @cxx c->Parent
 end
+
+## Offset  ####################################################################
 
 @doc """
 The ClipperOffset constructor takes 2 optional parameters: MiterLimit and
@@ -743,9 +766,9 @@ function execute!(c::__ClipperClipperOffset, sol::__ClipperPolyTree, delta)
 end
 
 
-#
-# Clipper Functions
-#
+###############################################################################
+## Clipper Functions
+###############################################################################
 
 @doc """
 This function returns the area of the supplied polygon. (It's assumed that the
@@ -934,23 +957,28 @@ function minkowski_sum(p1::__ClipperPath, p2::__ClipperPaths, pft::Cxx.CppEnum{s
     return paths
 end
 
+###############################################################################
+## Some "julian" encapsulation of Clipper types.
+###############################################################################
 
-#
-# Some "julian" encapsulation of Clipper types.
-#
+## Comparison  ################################################################
 
-@inline function x(ip::__ClipperIntPoint)
-    @cxx ip->X
+@inline function ==(a::__ClipperPath, b::__ClipperPath)
+    length(a) != length(b) && return false
+    for i = 1:length(a)
+        a[i] != b[i] && return false
+    end
+    return true
 end
-@inline function y(ip::__ClipperIntPoint)
-    @cxx ip->Y
-end
+
 @inline function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     x(i1) == x(i2) && y(i1) == y(i2)
 end
 @inline function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
     isequal(x(i1),x(i2)) && isequal(y(i1),y(i2))
 end
+
+## Array-like Interface  ######################################################
 
 @inline function Base.push!(a::__ClipperPath,
                b::__ClipperIntPoint)
@@ -1014,13 +1042,13 @@ end
     length(p)
 end
 
-function ==(a::__ClipperPath, b::__ClipperPath)
-    length(a) != length(b) && return false
-    for i = 1:length(a)
-        a[i] != b[i] && return false
-    end
-    return true
-end
+## Iteration Support  #########################################################
+
+@inline Base.start(path::__ClipperPath) = 1
+@inline Base.next(path::__ClipperPath, state) = path[state], state+1
+@inline Base.done(path::__ClipperPath, state) = length(path) < state
+
+## Show Function  #############################################################
 
 function Base.show(io::IO, v::__ClipperIntPoint)
     print(io, string("(", x(v),",", y(v),")"))
