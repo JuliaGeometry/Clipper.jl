@@ -113,10 +113,6 @@ typedef std::vector< Path > Paths;
 inline Path& operator <<(Path& poly, const IntPoint& p) {poly.push_back(p); return poly;}
 inline Paths& operator <<(Paths& polys, const Path& p) {polys.push_back(p); return polys;}
 
-std::ostream& operator <<(std::ostream &s, const IntPoint &p);
-std::ostream& operator <<(std::ostream &s, const Path &p);
-std::ostream& operator <<(std::ostream &s, const Paths &p);
-
 struct DoublePoint
 {
   double X;
