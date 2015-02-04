@@ -148,8 +148,12 @@ add!(o, paths, jtMiter, etClosedPolygon)
 execute!(o, r1, 1)
 execute!(o, r2, 1)
 clear!(o)
+# test printing
+out = IOBuffer()
+show(out, r2)
+expected = "Path: Path([(101,101), (-1,101), (-1,-1), (101,-1)])\nis_hole: false\nchild_count: 1\nChildren[1]: \n  Path: Path([(31,31), (31,69), (69,69), (69,31)])\n  is_hole: true\n  child_count: 0\n0\n1\n"
+@test ASCIIString(out.data) == expected
 p1 = Paths(r2)
-# TODO: Failing Polytree tests
 f = first(r2)
 @test child_count(f) ==1
 @test length(Path(f)) == 4
@@ -170,6 +174,20 @@ arc_tolerance!(o, 0.5)
 @test miter_limit(o) == 2.0
 miter_limit!(o, 4.0)
 @test miter_limit(o) == 4.0
+
+# test split event
+p = Path()
+push!(p, IntPoint(0,0))
+push!(p, IntPoint(100,0))
+push!(p, IntPoint(100,100))
+push!(p, IntPoint(0,100))
+push!(p, IntPoint(100,50))
+o = Offset()
+r1 = PolyTree()
+add!(o, p, jtMiter, etClosedPolygon)
+execute!(o, r1, -1)
+clear!(o)
+@test length(r1) == 2
 
 # test IntRect
 println("Testing IntRect...")
