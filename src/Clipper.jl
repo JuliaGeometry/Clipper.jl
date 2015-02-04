@@ -1107,11 +1107,10 @@ function Base.show(io::IO, p::__ClipperPolyNode, depth=0)
     println(io, "$(indent)is_hole: $(is_hole(p))")
     println(io, "$(indent)child_count: $(ct)")
     for i = 1:ct
-        println(io, "Children[$i]: ")
+        println(io, "$(indent)Children[$i]: ")
         child = children(p)[i]
         show(io, child, depth+1)
     end
-    println(io, ct)
 end
 
 # Clipper basic interface

@@ -151,7 +151,7 @@ clear!(o)
 # test printing
 out = IOBuffer()
 show(out, r2)
-expected = "Path: Path([(101,101), (-1,101), (-1,-1), (101,-1)])\nis_hole: false\nchild_count: 1\nChildren[1]: \n  Path: Path([(31,31), (31,69), (69,69), (69,31)])\n  is_hole: true\n  child_count: 0\n0\n1\n"
+expected = "Path: Path([(101,101), (-1,101), (-1,-1), (101,-1)])\nis_hole: false\nchild_count: 1\nChildren[1]: \n  Path: Path([(31,31), (31,69), (69,69), (69,31)])\n  is_hole: true\n  child_count: 0\n"
 @test ASCIIString(out.data) == expected
 p1 = Paths(r2)
 f = first(r2)
@@ -188,6 +188,31 @@ add!(o, p, jtMiter, etClosedPolygon)
 execute!(o, r1, -1)
 clear!(o)
 @test length(r1) == 2
+
+# Split event in hole case
+p1 = Path()
+push!(p1, IntPoint(0,0))
+push!(p1, IntPoint(100,0))
+push!(p1, IntPoint(100,100))
+push!(p1, IntPoint(0,100))
+p2 = Path()
+push!(p2, IntPoint(30,30))
+push!(p2, IntPoint(30,70))
+push!(p2, IntPoint(70,70))
+push!(p2, IntPoint(70,30))
+push!(p2, IntPoint(50,30))
+push!(p2, IntPoint(60,40))
+push!(p2, IntPoint(40,40))
+push!(p2, IntPoint(50,30))
+o = Offset()
+paths = Paths()
+push!(paths, p1)
+push!(paths, p2)
+add!(o, paths, jtMiter, etClosedPolygon)
+r1 = PolyTree()
+execute!(o, r1, -1)
+clear!(o)
+@show r1
 
 # test IntRect
 println("Testing IntRect...")
