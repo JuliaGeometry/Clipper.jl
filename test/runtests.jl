@@ -212,7 +212,6 @@ add!(o, paths, jtMiter, etClosedPolygon)
 r1 = PolyTree()
 execute!(o, r1, -1)
 clear!(o)
-@show r1
 
 # test IntRect
 println("Testing IntRect...")

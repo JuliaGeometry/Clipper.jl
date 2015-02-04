@@ -1092,10 +1092,8 @@ end
 function Base.show(io::IO, p::__ClipperPolyTree)
     node = first(p) # grab first PolyNode
     while node != C_NULL
-        show(io, node)
-        for i = 1:child_count(node)
-            node = next(node)
-        end
+        # only show top-level polys
+        length(Path(parent(node))) == 0 && show(io, node)
         node = next(node)
     end
 end
