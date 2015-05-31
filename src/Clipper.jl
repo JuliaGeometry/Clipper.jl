@@ -319,7 +319,7 @@ end
 @doc """
 This function builds a Path structure from a Vector of Tuples.
 """ ->
-function Path(pts::Vector{(Int, Int)})
+function Path(pts::Vector{Tuple{Int, Int}})
     p = Path()
     for point in pts
         push!(p, IntPoint(point...))
@@ -978,7 +978,7 @@ end
     @cxx a->push_back(b)
 end
 
-@inline function Base.push!(a::__ClipperPath, b::(Int, Int))
+@inline function Base.push!(a::__ClipperPath, b::Tuple{Int, Int})
     push!(a, IntPoint(b...))
 end
 
