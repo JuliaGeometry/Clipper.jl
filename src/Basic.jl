@@ -7,7 +7,7 @@ module Basic
 using Clipper
 
 
-function offset(paths::Clipper.__ClipperPaths, dist::Int)
+function offset(paths::Clipper.Paths, dist::Int)
     o = Offset()
     pt = PolyTree()
     add!(o, paths, jtMiter, etClosedPolygon)

@@ -38,67 +38,62 @@ include("clipper_cpp.jl")
 ## three, so we can refer to these as the same thing through the type union.
 ###############################################################################
 
-typealias __ClipperIntPoint Union(pcpp"ClipperLib::IntPoint",
-                                  cpcpp"ClipperLib::IntPoint",
-                                  vcpp"ClipperLib::IntPoint",
-                                  rcpp"ClipperLib::IntPoint")
+typealias IntPoint Union(pcpp"ClipperLib::IntPoint",
+                              cpcpp"ClipperLib::IntPoint",
+                              vcpp"ClipperLib::IntPoint",
+                              rcpp"ClipperLib::IntPoint")
 
 # TODO: Remove this when https://github.com/Keno/Cxx.jl/issues/72 is closed
-typealias __ClipperPath Union(
-    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-)
+typealias Path Union(
+    cxxt"ClipperLib::Path",
+    cxxt"ClipperLib::Path&",
+    cxxt"ClipperLib::Path*"
+    )
+
+typealias Paths Union(
+    cxxt"ClipperLib::Paths",
+    cxxt"ClipperLib::Paths&",
+    cxxt"ClipperLib::Paths*"
+    )
+
+typealias ClipperBase Union(pcpp"ClipperLib::ClipperBase",
+                            cpcpp"ClipperLib::ClipperBase",
+                            vcpp"ClipperLib::ClipperBase",
+                            rcpp"ClipperLib::ClipperBase")
+
+typealias ClipNonConst Union(pcpp"ClipperLib::Clipper",
+                           vcpp"ClipperLib::Clipper",
+                           rcpp"ClipperLib::Clipper")
+
+typealias Clip Union(ClipNonConst,
+                     cpcpp"ClipperLib::Clipper")
+
+typealias PolyTree Union(pcpp"ClipperLib::PolyTree",
+                         cpcpp"ClipperLib::PolyTree",
+                         vcpp"ClipperLib::PolyTree",
+                         rcpp"ClipperLib::PolyTree")
+
+typealias PolyNode Union(pcpp"ClipperLib::PolyNode",
+                         cpcpp"ClipperLib::PolyNode",
+                         vcpp"ClipperLib::PolyNode",
+                         rcpp"ClipperLib::PolyNode")
+
+typealias PolyNodes Union(
+    cxxt"ClipperLib::PolyNodes",
+    cxxt"ClipperLib::PolyNodes&",
+    cxxt"ClipperLib::PolyNodes*"
+    )
 
 
-typealias __ClipperPaths Union(
-    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::IntPoint")},(false,false,false)},)},(false,false,false)})},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-)
+typealias ClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
+                              cpcpp"ClipperLib::ClipperOffset",
+                              vcpp"ClipperLib::ClipperOffset",
+                              rcpp"ClipperLib::ClipperOffset")
 
-typealias __ClipperClipperBase Union(pcpp"ClipperLib::ClipperBase",
-                                  cpcpp"ClipperLib::ClipperBase",
-                                  vcpp"ClipperLib::ClipperBase",
-                                  rcpp"ClipperLib::ClipperBase")
-
-typealias __ClipperClipper Union(pcpp"ClipperLib::Clipper",
-                                  cpcpp"ClipperLib::Clipper",
-                                  vcpp"ClipperLib::Clipper",
-                                  rcpp"ClipperLib::Clipper")
-
-typealias __ClipperPolyTree Union(pcpp"ClipperLib::PolyTree",
-                                  cpcpp"ClipperLib::PolyTree",
-                                  vcpp"ClipperLib::PolyTree",
-                                  rcpp"ClipperLib::PolyTree")
-
-typealias __ClipperPolyNode Union(pcpp"ClipperLib::PolyNode",
-                                  cpcpp"ClipperLib::PolyNode",
-                                  vcpp"ClipperLib::PolyNode",
-                                  rcpp"ClipperLib::PolyNode")
-
-typealias __ClipperPolyNodeArray Union(Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppPtr{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)},
-    Cxx.CppRef{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::vector")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},Cxx.CppValue{Cxx.CppTemplate{Cxx.CppBaseType{symbol("std::__1::allocator")},(Cxx.CppPtr{Cxx.CppValue{Cxx.CppBaseType{symbol("ClipperLib::PolyNode")},(false,false,false)},(false,false,false)},)},(false,false,false)})},(false,false,false)})
-
-typealias __ClipperClipperOffset Union(pcpp"ClipperLib::ClipperOffset",
-                                  cpcpp"ClipperLib::ClipperOffset",
-                                  vcpp"ClipperLib::ClipperOffset",
-                                  rcpp"ClipperLib::ClipperOffset")
-
-typealias __ClipperIntRect Union(pcpp"ClipperLib::IntRect",
-                                  cpcpp"ClipperLib::IntRect",
-                                  vcpp"ClipperLib::IntRect",
-                                  rcpp"ClipperLib::IntRect")
+typealias IntRect Union(pcpp"ClipperLib::IntRect",
+                        cpcpp"ClipperLib::IntRect",
+                        vcpp"ClipperLib::IntRect",
+                        rcpp"ClipperLib::IntRect")
 
 ###############################################################################
 ## Clipper Enums
@@ -291,15 +286,15 @@ See also the notes on [rounding](http://www.angusj.com/delphi/clipper/documentat
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/IntPoint.htm)
 """ ->
-function IntPoint(x::Int64, y::Int64)
+function call(::Type{IntPoint}, x::Int64, y::Int64)
     @cxx ClipperLib::IntPoint(x, y)
 end
 
-@inline function x(ip::__ClipperIntPoint)
+@inline function x(ip::IntPoint)
     @cxx ip->X
 end
 
-@inline function y(ip::__ClipperIntPoint)
+@inline function y(ip::IntPoint)
     @cxx ip->Y
 end
 
@@ -319,14 +314,14 @@ Multiple paths can be grouped into a Paths structure.
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Path.htm)
 
 """ ->
-function Path(ct::Integer=0)
+function call(::Type{Path}, ct::Integer=0)
     @cxx ClipperLib::Path(ct)
 end
 
 @doc """
 This function builds a Path structure from a Vector of Tuples.
 """ ->
-function Path(pts::Vector{(Int, Int)})
+function call(::Type{Path}, pts::Vector{Tuple{Int, Int}})
     p = Path()
     for point in pts
         push!(p, IntPoint(point...))
@@ -349,14 +344,14 @@ contours or 'hole' contours. Which they are depends on orientation.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Types/Paths.htm)
 """ ->
-function Paths(ct::Integer=0)
+function call(::Type{Paths}, ct::Integer=0)
     @cxx ClipperLib::Paths(ct)
 end
 
 @doc """
 This function builds a Paths structure from a Vector of Path objects.
 """ ->
-function Paths{T<:__ClipperPath}(paths::Vector{T})
+function call{T<:Path}(::Type{Paths}, paths::Vector{T})
     pths = Paths()
     for path in paths
         push!(pths, path)
@@ -367,7 +362,7 @@ end
 @doc """
 This function converts a PolyTree structure into a Paths structure.
 """ ->
-function Paths(pt::__ClipperPolyTree)
+function call(::Type{Paths}, pt::PolyTree)
     paths = Paths()
     @cxx ClipperLib::PolyTreeToPaths(pt, paths)
     return paths
@@ -379,7 +374,7 @@ end
 
 ## Clip  ######################################################################
 
-function Clip(enum::Cxx.CppEnum{symbol("ClipperLib::InitOptions")} = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(0))
+function call(::Type{Clip}, enum::Cxx.CppEnum{symbol("ClipperLib::InitOptions")} = Cxx.CppEnum{symbol("ClipperLib::InitOptions")}(0))
     @cxx ClipperLib::Clipper(enum)
 end
 
@@ -389,7 +384,7 @@ or clip), the Clipper object removes the 'inner' vertices before clipping. When
 enabled the PreserveCollinear property prevents this default behavior to allow
 these inner vertices to appear in the solution.
 """ ->
-function preserve_collinear!(clip::__ClipperClipper, val::Bool)
+function preserve_collinear!(clip::Clip, val::Bool)
     @cxx clip->PreserveCollinear(val)
 end
 
@@ -398,7 +393,7 @@ When this property is set to true, polygons returned in the solution parameter
 of the Execute() method will have orientations opposite to their normal
 orientations.
 """ ->
-function reverse_solution!(clip::__ClipperClipper, val::Bool)
+function reverse_solution!(clip::Clip, val::Bool)
     @cxx clip->ReverseSolution(val)
 end
 
@@ -428,7 +423,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 See also the article on Simple Polygons on Wikipedia.
 """ ->
-function strictly_simple!(clip::__ClipperClipper, val::Bool)
+function strictly_simple!(clip::Clip, val::Bool)
     @cxx clip->StrictlySimple(val)
 end
 
@@ -436,7 +431,7 @@ end
 The Clear method removes any existing subject and clip polygons allowing the
 Clipper object to be reused for clipping operations on different polygon sets.
 """ ->
-function clear!(clip::__ClipperClipper)
+function clear!(clip::Clip)
     @cxx clip->Clear()
 end
 
@@ -470,19 +465,19 @@ invalid for clipping when:
 - it has 2 vertices but is not an open path
 0 the vertices are all co-linear and it is not an open path
 """ ->
-function add!(clip::__ClipperClipper, ppg::__ClipperPaths, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add!(clip::ClipNonConst, ppg::Paths, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPaths(ppg, pt, closed)
 end
 
-function add!(clip::__ClipperClipper, pg::__ClipperPath, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
+function add!(clip::ClipNonConst, pg::Path, pt::Cxx.CppEnum{symbol("ClipperLib::PolyType")}, closed::Bool)
     @cxx clip->AddPath(pg, pt, closed)
 end
 
-function execute!(c::__ClipperClipper, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::__ClipperPaths, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
+function execute!(c::Clip, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::Paths, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
     @cxx c->Execute(ty, sol, sft, cft)
 end
 
-function execute!(c::__ClipperClipper, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::__ClipperPolyTree, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
+function execute!(c::Clip, ty::Cxx.CppEnum{symbol("ClipperLib::ClipType")}, sol::PolyTree, sft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd, cft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}=pftEvenOdd)
     @cxx c->Execute(ty, sol, sft, cft)
 end
 
@@ -505,45 +500,45 @@ end
 This method returns the axis-aligned bounding rectangle of all polygons that
 have been added to the Clipper object.
 """ ->
-function IntRect(clip::__ClipperClipper)
+function call(::Type{IntRect}, clip::Clip)
     @cxx clip->GetBounds()
 end
 
-function left(r::__ClipperIntRect)
+function left(r::IntRect)
     @cxx r->left
 end
 
-function top(r::__ClipperIntRect)
+function top(r::IntRect)
     @cxx r->top
 end
 
-function right(r::__ClipperIntRect)
+function right(r::IntRect)
     @cxx r->right
 end
 
-function bottom(r::__ClipperIntRect)
+function bottom(r::IntRect)
     @cxx r->bottom
 end
 
-function left!(r::__ClipperIntRect, v::Integer)
+function left!(r::IntRect, v::Integer)
     icxx"$r.left = $v;"
 end
 
-function top!(r::__ClipperIntRect, v::Integer)
+function top!(r::IntRect, v::Integer)
     icxx"$r.top = $v;"
 end
 
-function right!(r::__ClipperIntRect, v::Integer)
+function right!(r::IntRect, v::Integer)
     icxx"$r.right = $v;"
 end
 
-function bottom!(r::__ClipperIntRect, v::Integer)
+function bottom!(r::IntRect, v::Integer)
     icxx"$r.bottom = $v;"
 end
 
 ## PolyTree  ##################################################################
 
-function PolyTree()
+function call(::Type{PolyTree})
     @cxx ClipperLib::PolyTree()
 end
 
@@ -555,7 +550,7 @@ accepts a PolyTree parameter will automatically clear the PolyTree object before
 propagating it with new PolyNodes. Likewise, PolyTree's destructor will also
 automatically clear any contained PolyNodes.
 """ ->
-function clear!(c::__ClipperPolyTree)
+function clear!(c::PolyTree)
     @cxx c->Clear()
 end
 
@@ -567,7 +562,7 @@ This function is almost equivalent to calling Childs[0] except that when a
 PolyTree object is empty (has no children), calling Childs[0] would raise an out
 of range exception.
 """ ->
-function Base.first(c::__ClipperPolyTree)
+function Base.first(c::PolyTree)
     @cxx c->GetFirst()
 end
 
@@ -576,11 +571,11 @@ Returns the total number of PolyNodes (polygons) contained within the PolyTree.
 This value is not to be confused with ChildCount which returns the number of
 immediate children only (Childs) contained by PolyTree.
 """ ->
-function Base.length(c::__ClipperPolyTree)
+function Base.length(c::PolyTree)
     @cxx c->Total()
 end
 
-function child_count(c::__ClipperPolyTree)
+function child_count(c::PolyTree)
     @cxx c->ChildCount()
 end
 
@@ -593,21 +588,21 @@ sibling, otherwise the next sibling of the Parent etc.
 A PolyTree can be traversed very easily by calling GetFirst() followed by
 GetNext() in a loop until the returned object is a null pointer ...
 """ ->
-function Base.next(c::__ClipperPolyNode)
+function Base.next(c::PolyNode)
     @cxx c->GetNext()
 end
 
 @doc """
 Returns a path list which contains any number of vertices.
 """ ->
-function Path(c::__ClipperPolyNode)
+function call(::Type{Path}, c::PolyNode)
     @cxx c->Contour
 end
 
 @doc """
 Returns the number of PolyNode Childs directly owned by the PolyNode object.
 """ ->
-function child_count(c::__ClipperPolyNode)
+function child_count(c::PolyNode)
     @cxx c->ChildCount()
 end
 
@@ -616,7 +611,7 @@ A read-only list of PolyNode.
 Outer PolyNode childs contain hole PolyNodes, and hole PolyNode childs contain
 nested outer PolyNodes.
 """ ->
-function children(c::__ClipperPolyNode)
+function children(c::PolyNode)
     @cxx c->Childs
 end
 
@@ -628,7 +623,7 @@ Children of outer polygons are always holes, and children of holes are always
 The IsHole property of a PolyTree object is undefined but its children are
 always top-level outer polygons.
 """ ->
-function is_hole(c::__ClipperPolyNode)
+function is_hole(c::PolyNode)
     @cxx c->IsHole()
 end
 
@@ -636,7 +631,7 @@ end
 Returns true when the PolyNode's Contour results from a clipping operation on an
 open contour (path). Only top-level PolyNodes can contain open contours.
 """ ->
-function is_open(c::__ClipperPolyNode)
+function is_open(c::PolyNode)
     @cxx c->IsOpen()
 end
 
@@ -646,7 +641,7 @@ Returns the parent PolyNode.
 The PolyTree object (which is also a PolyNode) does not have a parent and will
 return a null pointer.
 """ ->
-function Base.parent(c::__ClipperPolyNode)
+function Base.parent(c::PolyNode)
     @cxx c->Parent
 end
 
@@ -709,19 +704,19 @@ example the number of vertices (steps) defining each arc would be a fraction of
 The formula for the number of steps in a full circular arc is ...
 Pi / acos(1 - arc_tolerance / abs(delta)) 
 """ ->
-function arc_tolerance(o::__ClipperClipperOffset)
+function arc_tolerance(o::ClipperOffset)
     @cxx o->ArcTolerance
 end
 
-function arc_tolerance!(o::__ClipperClipperOffset, v::Float64)
+function arc_tolerance!(o::ClipperOffset, v::Float64)
     icxx"$o.ArcTolerance = $v;"
 end
 
-function miter_limit(o::__ClipperClipperOffset)
+function miter_limit(o::ClipperOffset)
     @cxx o->MiterLimit
 end
 
-function miter_limit!(o::__ClipperClipperOffset, v::Float64)
+function miter_limit!(o::ClipperOffset, v::Float64)
     icxx"$o.MiterLimit = $v;"
 end
 
@@ -729,7 +724,7 @@ end
 This method clears all paths from the ClipperOffset object, allowing new paths
 to be assigned.
 """ ->
-function clear!(c::__ClipperClipperOffset)
+function clear!(c::ClipperOffset)
     @cxx c->Clear()
 end
 
@@ -739,11 +734,11 @@ Adds a Path to a ClipperOffset object in preparation for offsetting.
 
 Any number of paths can be added, and each has its own JoinType and EndType. All 'outer' Paths must have the same orientation, and any 'hole' paths must have reverse orientation. Closed paths must have at least 3 vertices. Open paths may have as few as one vertex. Open paths can only be offset with positive deltas.
 """ ->
-function add!(c::__ClipperClipperOffset, path::__ClipperPath, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
+function add!(c::ClipperOffset, path::Path, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPath(path, jt, et)
 end
 
-function add!(c::__ClipperClipperOffset, paths::__ClipperPaths, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
+function add!(c::ClipperOffset, paths::Paths, jt::Cxx.CppEnum{symbol("ClipperLib::JoinType")}, et::Cxx.CppEnum{symbol("ClipperLib::EndType")})
     @cxx c->AddPaths(paths, jt, et)
 end
 
@@ -757,11 +752,11 @@ delta values to shrink polygons and positive delta to expand them.
 This method can be called multiple times, offsetting the same paths by different
 amounts (ie using different deltas).
 """ ->
-function execute!(c::__ClipperClipperOffset, sol::__ClipperPaths, delta)
+function execute!(c::ClipperOffset, sol::Paths, delta)
     @cxx c->Execute(sol, delta)
 end
 
-function execute!(c::__ClipperClipperOffset, sol::__ClipperPolyTree, delta)
+function execute!(c::ClipperOffset, sol::PolyTree, delta)
     @cxx c->Execute(sol, delta)
 end
 
@@ -780,7 +775,7 @@ conversely, if Orientation is false, then the area will be negative.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Area.htm)
 """ ->
-function area(p::__ClipperPath)
+function area(p::Path)
     @cxx ClipperLib::Area(p)
 end
 
@@ -796,7 +791,7 @@ p
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/ReversePath.htm)
 """ ->
-function Base.reverse!(p::__ClipperPath)
+function Base.reverse!(p::Path)
     @cxx ClipperLib::ReversePath(p)
 end
 
@@ -804,7 +799,7 @@ end
 @doc """
 Reverses the vertex order (and hence orientation) in the specified paths.
 """ ->
-function Base.reverse!(p::__ClipperPaths)
+function Base.reverse!(p::Paths)
     @cxx ClipperLib::ReversePaths(p)
 end
 
@@ -831,11 +826,11 @@ semi-adjacent the out-lying vertex will be removed too.)
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/CleanPolygon.htm)
 """ ->
-function clean!(p::__ClipperPath, distance = 1.415)
+function clean!(p::Path, distance = 1.415)
     @cxx ClipperLib::CleanPolygon(p, distance)
 end
 
-function clean!(p::__ClipperPaths, distance = 1.415)
+function clean!(p::Paths, distance = 1.415)
     @cxx ClipperLib::CleanPolygons(p, distance)
 end
 
@@ -847,7 +842,7 @@ Returns 0 if false, -1 if pt is on poly and +1 if pt is in poly.
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/PointInPolygon.htm)
 """ ->
-function isinside(pt::__ClipperIntPoint, poly::__ClipperPath)
+function isinside(pt::IntPoint, poly::Path)
     @cxx ClipperLib::PointInPolygon(pt, poly)
 end
 
@@ -885,7 +880,7 @@ Notes:
 
 [Original Page](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Functions/Orientation.htm)
 """ ->
-function orientation(p::__ClipperPath)
+function orientation(p::Path)
     @cxx ClipperLib::Orientation(p)
 end
 
@@ -901,7 +896,7 @@ Note: There's currently no guarantee that polygons will be strictly simple since
 
 ![](https://raw.githubusercontent.com/Voxel8/Clipper.jl/master/doc/img/simplifypolygons.png?token=AB_WDGPhKj2xE6uaeVrSDKv3eNQx0hPSks5UrLNSwA%3D%3D)
 """->
-function simplify!(p::__ClipperPaths, t::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")})
+function simplify!(p::Paths, t::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")})
     @cxx ClipperLib::SimplifyPolygons(p, t)
 end
 
@@ -910,7 +905,7 @@ end
 This function filters out open paths from the PolyTree structure and returns
 only closed paths in a Paths structure.
 """ ->
-function closed_paths(pt::__ClipperPolyTree)
+function closed_paths(pt::PolyTree)
     paths = Paths()
     @cxx ClipperLib::ClosedPathsFromPolyTree(pt, paths)
     return paths
@@ -920,7 +915,7 @@ end
 This function filters out closed paths from the PolyTree structure and returns
 only open paths in a Paths structure.
 """ ->
-function open_paths(pt::__ClipperPolyTree)
+function open_paths(pt::PolyTree)
     paths = Paths()
     @cxx ClipperLib::OpenPathsFromPolyTree(pt, paths)
     return paths
@@ -933,7 +928,7 @@ Difference is that when it's applied to two polygons, the resulting polygon will
 contain the coordinate space origin whenever the two polygons touch or overlap.
 (This function is often used to determine when polygons collide.)
 """ ->
-function minkowski_diff(p1::__ClipperPath, p2::__ClipperPath)
+function minkowski_diff(p1::Path, p2::Path)
     paths = Paths()
     @cxx MinkowskiDiff(p1, p2, paths)
     return paths
@@ -945,13 +940,13 @@ the set of points in an open or closed path. The resulting polygon (or polygons)
 defines the region that the 'pattern' would pass over in moving from the
 beginning to the end of the 'path'.
 """ ->
-function minkowski_sum(p1::__ClipperPath, p2::__ClipperPath, closed::Bool)
+function minkowski_sum(p1::Path, p2::Path, closed::Bool)
     paths = Paths()
     @cxx ClipperLib::MinkowskiSum(p1, p2, paths, closed)
     return paths
 end
 
-function minkowski_sum(p1::__ClipperPath, p2::__ClipperPaths, pft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}, closed::Bool)
+function minkowski_sum(p1::Path, p2::Paths, pft::Cxx.CppEnum{symbol("ClipperLib::PolyFillType")}, closed::Bool)
     paths = Paths()
     @cxx ClipperLib::MinkowskiSum(p1, p2, paths, pft, closed)
     return paths
@@ -963,7 +958,7 @@ end
 
 ## Comparison  ################################################################
 
-@inline function ==(a::__ClipperPath, b::__ClipperPath)
+@inline function ==(a::Path, b::Path)
     length(a) != length(b) && return false
     for i = 1:length(a)
         a[i] != b[i] && return false
@@ -971,97 +966,97 @@ end
     return true
 end
 
-@inline function ==(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function ==(i1::IntPoint, i2::IntPoint)
     x(i1) == x(i2) && y(i1) == y(i2)
 end
-@inline function Base.isequal(i1::__ClipperIntPoint, i2::__ClipperIntPoint)
+@inline function Base.isequal(i1::IntPoint, i2::IntPoint)
     isequal(x(i1),x(i2)) && isequal(y(i1),y(i2))
 end
 
 ## Array-like Interface  ######################################################
 
-@inline function Base.push!(a::__ClipperPath,
-               b::__ClipperIntPoint)
+@inline function Base.push!(a::Path,
+               b::IntPoint)
     @cxx a->push_back(b)
 end
 
-@inline function Base.push!(a::__ClipperPath, b::(Int, Int))
+@inline function Base.push!(a::Path, b::Tuple{Int, Int})
     push!(a, IntPoint(b...))
 end
 
-@inline function Base.push!(a::__ClipperPaths,
-               b::__ClipperPath)
+@inline function Base.push!(a::Paths,
+               b::Path)
     @cxx a->push_back(b)
 end
 
-@inline function Base.length(p::__ClipperPath)
+@inline function Base.length(p::Path)
     @cxx p->size()
 end
 
-@inline function Base.length(p::__ClipperPaths)
+@inline function Base.length(p::Paths)
     @cxx p->size()
 end
 
-@inline function Base.length(p::__ClipperPolyNodeArray)
+@inline function Base.length(p::PolyNodes)
     @cxx p->size()
 end
 
-@inline function Base.getindex(p::__ClipperPath, i::Integer)
+@inline function Base.getindex(p::Path, i::Integer)
     icxx"$p[$i-1];"
 end
 
-@inline function Base.getindex(p::__ClipperPaths, i::Integer)
+@inline function Base.getindex(p::Paths, i::Integer)
     icxx"$p[$i-1];"
 end
 
-@inline function Base.getindex(p::__ClipperPolyNodeArray, i::Integer)
+@inline function Base.getindex(p::PolyNodes, i::Integer)
     # we dereference here because:
     # typedef std::vector< PolyNode* > PolyNodes;
     # gives us pointers to Polynodes
     icxx"*$p[$i-1];"
 end
 
-@inline function Base.setindex!(path::__ClipperPath, pt::__ClipperIntPoint, i::Integer)
+@inline function Base.setindex!(path::Path, pt::IntPoint, i::Integer)
     icxx"$path[$i-1] = $pt;"
 end
 
-@inline function Base.setindex!(paths::__ClipperPaths, path::__ClipperPath, i::Integer)
+@inline function Base.setindex!(paths::Paths, path::Path, i::Integer)
     icxx"$paths[$i-1] = $path;"
 end
 
-@inline function Base.isempty(p::__ClipperPath)
+@inline function Base.isempty(p::Path)
     length(p) == 0
 end
 
-@inline function Base.isempty(p::__ClipperPaths)
+@inline function Base.isempty(p::Paths)
     length(p) == 0
 end
 
-@inline function Base.endof(p::__ClipperPath)
+@inline function Base.endof(p::Path)
     length(p)
 end
 
-@inline function Base.endof(p::__ClipperPaths)
+@inline function Base.endof(p::Paths)
     length(p)
 end
 
 ## Iteration Support  #########################################################
 
-@inline Base.start(path::__ClipperPath) = 1
-@inline Base.next(path::__ClipperPath, state) = path[state], state+1
-@inline Base.done(path::__ClipperPath, state) = length(path) < state
+@inline Base.start(path::Path) = 1
+@inline Base.next(path::Path, state) = path[state], state+1
+@inline Base.done(path::Path, state) = length(path) < state
 
 ## Show Function  #############################################################
 
-function Base.show(io::IO, v::__ClipperIntPoint)
+function Base.show(io::IO, v::IntPoint)
     print(io, string("(", x(v),",", y(v),")"))
 end
 
-function Base.show(io::IO, r::__ClipperIntRect)
+function Base.show(io::IO, r::IntRect)
     print(io, "left: $(left(r)) right: $(right(r)) top: $(top(r)) bottom: $(bottom(r))")
 end
 
-function Base.show(io::IO, p::__ClipperPath)
+function Base.show(io::IO, p::Path)
     if isempty(p)
         return
     end
@@ -1073,7 +1068,7 @@ function Base.show(io::IO, p::__ClipperPath)
     print(io, "])")
 end
 
-function Base.show(io::IO, p::__ClipperPaths)
+function Base.show(io::IO, p::Paths)
     len = length(p)
     if len == 0
         print(io, "Paths()")
@@ -1089,7 +1084,7 @@ function Base.show(io::IO, p::__ClipperPaths)
     print(io, "\n)")
 end
 
-function Base.show(io::IO, p::__ClipperPolyTree)
+function Base.show(io::IO, p::PolyTree)
     node = first(p) # grab first PolyNode
     while node != C_NULL
         # only show top-level polys
@@ -1098,7 +1093,7 @@ function Base.show(io::IO, p::__ClipperPolyTree)
     end
 end
 
-function Base.show(io::IO, p::__ClipperPolyNode, depth=0)
+function Base.show(io::IO, p::PolyNode, depth=0)
     indent = " "^(depth*2)
     ct = child_count(p)
     println(io, "$(indent)Path: $(Path(p))")
