@@ -1,6 +1,6 @@
 #! /usr/bin/env julia
 
-pkg_dir = Pkg.dir("Clipper.jl")
+pkg_dir = Pkg.dir("Clipper")
 
 @windows_only begin
     try

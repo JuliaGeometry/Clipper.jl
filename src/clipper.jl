@@ -19,7 +19,7 @@ module Clipper
     @enum EndType EndTypeClosedPolygon=0 EndTypeClosedLine=1 EndTypeOpenSquare=2 EndTypeOpenRound=3 EndTypeOpenButt=4
 
     @windows_only begin
-      const library_path = Pkg.dir("Clipper.jl") * "\\src\\cclipper.dll"
+      const library_path = Pkg.dir("Clipper") * "\\src\\cclipper.dll"
     end
 
     type IntPoint
