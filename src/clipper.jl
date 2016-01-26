@@ -22,6 +22,10 @@ module Clipper
       const library_path = Pkg.dir("Clipper") * "\\src\\cclipper.dll"
     end
 
+    @unix_only begin
+        const library_path = Pkg.dir("Clipper") * "/src/cclipper.so"
+    end
+
     type IntPoint
         X::Int64
         Y::Int64
