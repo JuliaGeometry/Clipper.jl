@@ -1,11 +1,28 @@
 #include "clipper.hpp"
 #include "stdio.h"
 
+#if defined _WIN32 || defined __CYGWIN__
+	#ifdef __GNUC__
+		#define CDECL __attribute__ ((cdecl))
+		#define DLL_PUBLIC __attribute__ ((dllexport))
+	#else
+		#define CDECL __cdecl
+		#define DLL_PUBLIC __declspec(dllexport)
+	#endif
+#else
+	#define CDECL __attribute__ ((cdecl))
+	#if __GNUC__ >= 4
+		#define DLL_PUBLIC __attribute__ ((visibility ("default")))
+	#else
+		#define DLL_PUBLIC
+	#endif
+#endif
+
 extern "C" {
 	//==============================================================
 	// Static functions
 	//==============================================================
-	__declspec(dllexport) bool __cdecl orientation(ClipperLib::IntPoint** path, size_t count) {
+	DLL_PUBLIC bool CDECL orientation(ClipperLib::IntPoint** path, size_t count) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
 			v.emplace(v.end(), path[i]->X, path[i]->Y);
@@ -14,7 +31,7 @@ extern "C" {
 		return ClipperLib::Orientation(v);
 	}
 
-	__declspec(dllexport) double __cdecl area(ClipperLib::IntPoint** path, size_t count) {
+	DLL_PUBLIC double CDECL area(ClipperLib::IntPoint** path, size_t count) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
 			v.emplace(v.end(), path[i]->X, path[i]->Y);
@@ -26,15 +43,15 @@ extern "C" {
 	//==============================================================
 	// Clipper object
 	//==============================================================
-	__declspec(dllexport) ClipperLib::Clipper* __cdecl get_clipper() {
+	DLL_PUBLIC ClipperLib::Clipper* CDECL get_clipper() {
 		return new ClipperLib::Clipper();
 	}
 
-	__declspec(dllexport) void __cdecl delete_clipper(ClipperLib::Clipper *ptr) {
+	DLL_PUBLIC void CDECL delete_clipper(ClipperLib::Clipper *ptr) {
 		delete ptr;
 	}
 
-	__declspec(dllexport) bool __cdecl add_path(ClipperLib::Clipper *ptr, ClipperLib::IntPoint** path, size_t count, ClipperLib::PolyType polyType, bool closed) {
+	DLL_PUBLIC bool CDECL add_path(ClipperLib::Clipper *ptr, ClipperLib::IntPoint** path, size_t count, ClipperLib::PolyType polyType, bool closed) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
 			v.emplace(v.end(), path[i]->X, path[i]->Y);
@@ -51,8 +68,8 @@ extern "C" {
 		return result;
 	}
 
-	__declspec(dllexport) bool __cdecl add_paths(ClipperLib::Clipper *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
-																									size_t count, ClipperLib::PolyType polyType, bool closed) {
+	DLL_PUBLIC bool CDECL add_paths(ClipperLib::Clipper *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
+																	size_t count, ClipperLib::PolyType polyType, bool closed) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
 			auto it = vs.emplace(vs.end());
@@ -73,9 +90,9 @@ extern "C" {
 		return result;
 	}
 
-	__declspec(dllexport) bool __cdecl execute(ClipperLib::Clipper *ptr, ClipperLib::ClipType clipType,
-														ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
-														void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
+	DLL_PUBLIC bool CDECL execute(ClipperLib::Clipper *ptr, ClipperLib::ClipType clipType,
+																ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
+																void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
 		ClipperLib::PolyTree pt = ClipperLib::PolyTree();
 
 		bool result = false;
@@ -101,27 +118,27 @@ extern "C" {
 		return true;
 	}
 
-	__declspec(dllexport) void __cdecl clear(ClipperLib::Clipper *ptr) {
+	DLL_PUBLIC void CDECL clear(ClipperLib::Clipper *ptr) {
 		ptr->Clear();
 	}
 
-	__declspec(dllexport) ClipperLib::IntRect __cdecl get_bounds(ClipperLib::Clipper *ptr) {
+	DLL_PUBLIC ClipperLib::IntRect CDECL get_bounds(ClipperLib::Clipper *ptr) {
 		return ptr->GetBounds();
 	}
 
 	//==============================================================
 	// ClipperOffset object
 	//==============================================================
-	__declspec(dllexport) ClipperLib::ClipperOffset* __cdecl get_clipper_offset(double miterLimit, double roundPrecision) {
+	DLL_PUBLIC ClipperLib::ClipperOffset* CDECL get_clipper_offset(double miterLimit, double roundPrecision) {
 		return new ClipperLib::ClipperOffset(miterLimit, roundPrecision);
 	}
 
-	__declspec(dllexport) void __cdecl delete_clipper_offset(ClipperLib::ClipperOffset *ptr) {
+	DLL_PUBLIC void CDECL delete_clipper_offset(ClipperLib::ClipperOffset *ptr) {
 		delete ptr;
 	}
 
-	__declspec(dllexport) void __cdecl add_offset_path(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint** path, size_t count,
-																						ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
+	DLL_PUBLIC void CDECL add_offset_path(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint** path, size_t count,
+																				ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
 			v.emplace(v.end(), path[i]->X, path[i]->Y);
@@ -134,8 +151,8 @@ extern "C" {
 		}
 	}
 
-	__declspec(dllexport) void __cdecl add_offset_paths(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
-																									size_t count, ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
+	DLL_PUBLIC void CDECL add_offset_paths(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
+																				size_t count, ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
 			auto it = vs.emplace(vs.end());
@@ -152,13 +169,13 @@ extern "C" {
 		}
 	}
 
-	__declspec(dllexport) void __cdecl clear_offset(ClipperLib::ClipperOffset *ptr) {
+	DLL_PUBLIC void CDECL clear_offset(ClipperLib::ClipperOffset *ptr) {
 		ptr->Clear();
 	}
 
 
-	__declspec(dllexport) void __cdecl execute_offset(ClipperLib::ClipperOffset *ptr, double delta,
-														void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
+	DLL_PUBLIC void CDECL execute_offset(ClipperLib::ClipperOffset *ptr, double delta,
+																			void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
 		ClipperLib::PolyTree pt = ClipperLib::PolyTree();
 
 		try {
