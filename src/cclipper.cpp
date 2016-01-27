@@ -55,7 +55,7 @@ extern "C" {
 																									size_t count, ClipperLib::PolyType polyType, bool closed) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
-		  auto it = vs.emplace(vs.end());
+			auto it = vs.emplace(vs.end());
 
 			for(size_t j = 0; j < path_counts[i]; j++) {
 				it->emplace(it->end(), paths[i][j]->X, paths[i][j]->Y);
@@ -138,7 +138,7 @@ extern "C" {
 																									size_t count, ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
-		  auto it = vs.emplace(vs.end());
+			auto it = vs.emplace(vs.end());
 
 			for(size_t j = 0; j < path_counts[i]; j++) {
 				it->emplace(it->end(), paths[i][j]->X, paths[i][j]->Y);
