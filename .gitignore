@@ -9,3 +9,5 @@ test/config
 *.dll
 *.lib
 *.exp
+*.o
+*.so
