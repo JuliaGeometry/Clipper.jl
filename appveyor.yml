@@ -1,8 +1,6 @@
 environment:
   matrix:
-  - JULIAVERSION: "julialang/bin/winnt/x86/0.4/julia-0.4-latest-win32.exe"
   - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4-latest-win64.exe"
-  - JULIAVERSION: "julianightlies/bin/winnt/x86/julia-latest-win32.exe"
   - JULIAVERSION: "julianightlies/bin/winnt/x64/julia-latest-win64.exe"
 
 branches:
@@ -16,7 +14,12 @@ notifications:
     on_build_failure: false
     on_build_status_changed: false
 
+os: Visual Studio 2015
+platform: 
+  - x64
+  
 install:
+  - call "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
 # Download most recent Julia Windows binary
   - ps: (new-object net.webclient).DownloadFile(
         $("http://s3.amazonaws.com/"+$env:JULIAVERSION),
