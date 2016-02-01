@@ -3,12 +3,27 @@ language: julia
 os:
   - linux
   - osx
+env:
+  - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
+sudo: required
+install:
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
+      g++ --version
+    fi
 julia:
   - release
   - nightly
 notifications:
   email: false
-# uncomment the following lines to override the default test script 
+# uncomment the following lines to override the default test script
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("Clipper"); Pkg.test("Clipper"; coverage=true)'
