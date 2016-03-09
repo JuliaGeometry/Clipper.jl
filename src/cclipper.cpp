@@ -93,21 +93,18 @@ extern "C" {
 	DLL_PUBLIC bool CDECL execute(ClipperLib::Clipper *ptr, ClipperLib::ClipType clipType,
 																ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
 																void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
-		ClipperLib::PolyTree pt = ClipperLib::PolyTree();
+		ClipperLib::Paths paths = ClipperLib::Paths();
 
 		bool result = false;
 
 		try {
-			result = ptr->Execute(clipType, pt, subjFillType, clipFillType);
+			result = ptr->Execute(clipType, paths, subjFillType, clipFillType);
 		} catch(ClipperLib::clipperException e) {
 			printf(e.what());
 		}
 
 		if (!result)
 			return false;
-
-		ClipperLib::Paths paths = ClipperLib::Paths();
-		ClipperLib::PolyTreeToPaths(pt, paths);
 
 		for (size_t i = 0; i < paths.size(); i++) {
 			for (auto &point: paths[i]) {
@@ -176,16 +173,13 @@ extern "C" {
 
 	DLL_PUBLIC void CDECL execute_offset(ClipperLib::ClipperOffset *ptr, double delta,
 																			void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
-		ClipperLib::PolyTree pt = ClipperLib::PolyTree();
+		ClipperLib::Paths paths = ClipperLib::Paths();
 
 		try {
-			ptr->Execute(pt, delta);
+			ptr->Execute(paths, delta);
 		} catch(ClipperLib::clipperException e) {
 			printf(e.what());
 		}
-
-		ClipperLib::Paths paths = ClipperLib::Paths();
-		ClipperLib::PolyTreeToPaths(pt, paths);
 
 		for (size_t i = 0; i < paths.size(); i++) {
 			for (auto &point: paths[i]) {
