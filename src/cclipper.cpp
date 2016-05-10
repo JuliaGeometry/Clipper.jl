@@ -22,19 +22,19 @@ extern "C" {
 	//==============================================================
 	// Static functions
 	//==============================================================
-	DLL_PUBLIC bool CDECL orientation(ClipperLib::IntPoint** path, size_t count) {
+	DLL_PUBLIC bool CDECL orientation(ClipperLib::IntPoint* path, size_t count) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
-			v.emplace(v.end(), path[i]->X, path[i]->Y);
+			v.emplace(v.end(), path[i].X, path[i].Y);
 		}
 
 		return ClipperLib::Orientation(v);
 	}
 
-	DLL_PUBLIC double CDECL area(ClipperLib::IntPoint** path, size_t count) {
+	DLL_PUBLIC double CDECL area(ClipperLib::IntPoint* path, size_t count) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
-			v.emplace(v.end(), path[i]->X, path[i]->Y);
+			v.emplace(v.end(), path[i].X, path[i].Y);
 		}
 
 		return ClipperLib::Area(v);
@@ -51,10 +51,10 @@ extern "C" {
 		delete ptr;
 	}
 
-	DLL_PUBLIC bool CDECL add_path(ClipperLib::Clipper *ptr, ClipperLib::IntPoint** path, size_t count, ClipperLib::PolyType polyType, bool closed) {
+	DLL_PUBLIC bool CDECL add_path(ClipperLib::Clipper *ptr, ClipperLib::IntPoint* path, size_t count, ClipperLib::PolyType polyType, bool closed) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
-			v.emplace(v.end(), path[i]->X, path[i]->Y);
+			v.emplace(v.end(), path[i].X, path[i].Y);
 		}
 
 		bool result = false;
@@ -68,14 +68,14 @@ extern "C" {
 		return result;
 	}
 
-	DLL_PUBLIC bool CDECL add_paths(ClipperLib::Clipper *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
+	DLL_PUBLIC bool CDECL add_paths(ClipperLib::Clipper *ptr, ClipperLib::IntPoint** paths, size_t* path_counts,
 																	size_t count, ClipperLib::PolyType polyType, bool closed) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
 			auto it = vs.emplace(vs.end());
 
 			for(size_t j = 0; j < path_counts[i]; j++) {
-				it->emplace(it->end(), paths[i][j]->X, paths[i][j]->Y);
+				it->emplace(it->end(), paths[i][j].X, paths[i][j].Y);
 			}
 		}
 
@@ -134,11 +134,11 @@ extern "C" {
 		delete ptr;
 	}
 
-	DLL_PUBLIC void CDECL add_offset_path(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint** path, size_t count,
+	DLL_PUBLIC void CDECL add_offset_path(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint* path, size_t count,
 																				ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
 		ClipperLib::Path v = ClipperLib::Path();
 		for(size_t i = 0; i < count; i++) {
-			v.emplace(v.end(), path[i]->X, path[i]->Y);
+			v.emplace(v.end(), path[i].X, path[i].Y);
 		}
 
 		try {
@@ -148,14 +148,14 @@ extern "C" {
 		}
 	}
 
-	DLL_PUBLIC void CDECL add_offset_paths(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint*** paths, size_t* path_counts,
+	DLL_PUBLIC void CDECL add_offset_paths(ClipperLib::ClipperOffset *ptr, ClipperLib::IntPoint** paths, size_t* path_counts,
 																				size_t count, ClipperLib::JoinType joinType, ClipperLib::EndType endType) {
 		ClipperLib::Paths vs = ClipperLib::Paths();
 		for(size_t i = 0; i < count; i++) {
 			auto it = vs.emplace(vs.end());
 
 			for(size_t j = 0; j < path_counts[i]; j++) {
-				it->emplace(it->end(), paths[i][j]->X, paths[i][j]->Y);
+				it->emplace(it->end(), paths[i][j].X, paths[i][j].Y);
 			}
 		}
 
