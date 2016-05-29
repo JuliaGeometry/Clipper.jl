@@ -1,3 +1,4 @@
+__precompile__()
 module Clipper
     export PolyType, PolyTypeSubject, PolyTypeClip,
            ClipType, ClipTypeIntersection, ClipTypeUnion, ClipTypeDifference, ClipTypeXor,
@@ -5,8 +6,8 @@ module Clipper
            JoinType, JoinTypeSquare, JoinTypeRound, JoinTypeMiter,
            EndType, EndTypeClosedPolygon, EndTypeClosedLine, EndTypeOpenSquare, EndTypeOpenRound, EndTypeOpenButt,
            Clip, add_path!, add_paths!, execute, clear!, get_bounds,
-           IntPoint, IntRect, orientation, area,
-           ClipperOffset
+           IntPoint, IntRect, orientation, area, pointinpolygon, ClipperOffset,
+           PolyNode, execute_pt, contour, ishole, contour, children
 
     @enum PolyType PolyTypeSubject=0 PolyTypeClip=1
 
@@ -19,7 +20,7 @@ module Clipper
     @enum EndType EndTypeClosedPolygon=0 EndTypeClosedLine=1 EndTypeOpenSquare=2 EndTypeOpenRound=3 EndTypeOpenButt=4
 
     @static if is_windows()
-      const library_path = joinpath(dirname(@__FILE__), "cclipper.dll")
+        const library_path = joinpath(dirname(@__FILE__), "cclipper.dll")
     end
 
     @static if is_unix()
@@ -29,6 +30,60 @@ module Clipper
     immutable IntPoint
         X::Int64
         Y::Int64
+    end
+
+    type PolyNode{T}
+        contour::Vector{T}
+        hole::Bool
+        open::Bool
+        children::Vector{PolyNode{T}}
+        parent::PolyNode{T}
+        PolyNode(a,b,c) = new(a,b,c)
+        function PolyNode(a,b,c,d)
+            p = new(a,b,c,d)
+            p.parent = p
+            return p
+        end
+        PolyNode(a,b,c,d,e) = new(a,b,c,d,e)
+    end
+
+    Base.convert{T}(::Type{PolyNode{T}}, x::PolyNode{T}) = x
+    function Base.convert{S,T}(::Type{PolyNode{S}}, x::PolyNode{T})
+        parent(x) !== x && error("must convert a top-level PolyNode (i.e. a PolyTree).")
+
+        pn = PolyNode{S}(convert(Vector{S}, contour(x)), ishole(x), isopen(x))
+        pn.children = [PolyNode(y,pn) for y in children(x)]
+        pn.parent = pn
+    end
+    function PolyNode{S}(x::PolyNode, parent::PolyNode{S})
+        pn = PolyNode{S}(contour(x), ishole(x), isopen(x))
+        pn.children = [PolyNode(y,pn) for y in children(x)]
+        pn.parent = parent
+        pn
+    end
+
+    @inline ishole(x::PolyNode) = x.hole
+    @inline Base.isopen(x::PolyNode) = x.open
+    @inline contour(x::PolyNode) = x.contour
+    @inline children(x::PolyNode) = x.children
+    @inline Base.parent(x::PolyNode) = x.parent
+
+    function Base.show(io::IO, node::PolyNode)
+        if parent(node) === node
+            print(io, "Top-level PolyNode with $(length(children(node))) immediate children.")
+        else
+            if isopen(node)
+                print(io, "Open ")
+            else
+                print(io, "Closed ")
+            end
+            print(io, "PolyNode ")
+            ishole(node) && print(io, "(hole) ")
+            println(io, "with contour:")
+            show(io, contour(node))
+            println(io, "")
+            print(io, "...and $(length(children(node))) immediate children.")
+        end
     end
 
     function Base.show(io::IO, point::IntPoint)
@@ -45,21 +100,41 @@ module Clipper
         push!(ourArray[polyIndex + 1], point)
     end
 
+    # private
+    function appendpn!(jl_node::Ptr{Void}, point::IntPoint)
+        node = unsafe_pointer_to_objref(jl_node)::PolyNode{IntPoint}
+        push!(contour(node), point)
+    end
+
+    # private
+    function newnode(outputTree::Ptr{Void}, ishole::Bool, isopen::Bool)
+        tree = unsafe_pointer_to_objref(outputTree)::PolyNode{IntPoint}
+        node = PolyNode{IntPoint}(IntPoint[], ishole, isopen, PolyNode{IntPoint}[], tree)
+        push!(children(tree), node)
+        pointer_from_objref(node)
+    end
+
     #==============================================================#
   	# Static functions
   	#==============================================================#
     function orientation(path::Vector{IntPoint})
         ccall((:orientation, library_path), Cuchar, (Ptr{IntPoint}, Csize_t),
-              path,
-              length(path)) == 1 ? true : false
+            path,
+            length(path)) == 1 ? true : false
     end
 
     function area(path::Vector{IntPoint})
-      ccall((:area, library_path), Float64, (Ptr{IntPoint}, Csize_t),
+        ccall((:area, library_path), Float64, (Ptr{IntPoint}, Csize_t),
             path,
             length(path))
     end
 
+    function pointinpolygon(pt::IntPoint, path::Vector{IntPoint})
+        ccall((:pointinpolygon, library_path), Cint, (IntPoint, Ptr{IntPoint}, Csize_t),
+            pt,
+            path,
+            length(path))
+    end
 
     #==============================================================#
   	# Clipper object
@@ -113,15 +188,31 @@ module Clipper
         return result == 1 ? true : false, polys
     end
 
+    function execute_pt(c::Clip, clipType::ClipType, subjFillType::PolyFillType, clipFillType::PolyFillType)
+        pt = PolyNode{IntPoint}(IntPoint[], false, false, PolyNode{IntPoint}[])
+
+        result = ccall((:execute_pt, library_path), Cuchar,
+            (Ptr{Void}, Cint, Cint, Cint, Any, Ptr{Void}, Ptr{Void}),
+            c.clipper_ptr,
+            Int(clipType),
+            Int(subjFillType),
+            Int(clipFillType),
+            pt,
+            cfunction(newnode, Ptr{Void}, (Ptr{Void}, Bool, Bool)),
+            cfunction(appendpn!, Any, (Ptr{Void}, IntPoint)))
+
+        return result == 1 ? true : false, pt
+    end
+
     function clear!(c::Clip)
         ccall((:clear, library_path), Void, (Ptr{Void},), c.clipper_ptr)
     end
 
     type IntRect
-      left::Int64
-      top::Int64
-      right::Int64
-      bottom::Int64
+        left::Int64
+        top::Int64
+        right::Int64
+        bottom::Int64
     end
 
     function get_bounds(c::Clip)

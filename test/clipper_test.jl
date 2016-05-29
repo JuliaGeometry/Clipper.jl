@@ -161,3 +161,133 @@ test("Area") do
 
   @test area(path1) == -0.5
 end
+
+test("Point in polygon") do
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(4, 0))
+    push!(path1, IntPoint(0, 4))
+
+    # Returns -1 if on boundary (check all the boundary points)
+    @test pointinpolygon(IntPoint(0,0), path1) == -1
+    @test pointinpolygon(IntPoint(1,0), path1) == -1
+    @test pointinpolygon(IntPoint(2,0), path1) == -1
+    @test pointinpolygon(IntPoint(3,0), path1) == -1
+    @test pointinpolygon(IntPoint(4,0), path1) == -1
+    @test pointinpolygon(IntPoint(3,1), path1) == -1
+    @test pointinpolygon(IntPoint(2,2), path1) == -1
+    @test pointinpolygon(IntPoint(1,3), path1) == -1
+    @test pointinpolygon(IntPoint(0,4), path1) == -1
+    @test pointinpolygon(IntPoint(0,3), path1) == -1
+    @test pointinpolygon(IntPoint(0,2), path1) == -1
+    @test pointinpolygon(IntPoint(0,1), path1) == -1
+
+    # Returns 1 if inside (check all the interior points)
+    @test pointinpolygon(IntPoint(1,1), path1) == 1
+    @test pointinpolygon(IntPoint(2,1), path1) == 1
+    @test pointinpolygon(IntPoint(1,2), path1) == 1
+
+    # Returns 0 if outside (check a few places outside)
+    @test pointinpolygon(IntPoint(10,10), path1) == 0
+    @test pointinpolygon(IntPoint(-1,-1), path1) == 0
+end
+
+immutable IntPoint2
+    X::Int64
+    Y::Int64
+end
+Base.convert(::Type{IntPoint2}, x::IntPoint) = IntPoint2(x.X, x.Y)
+Base.convert(::Type{IntPoint}, x::IntPoint2) = IntPoint(x.X, x.Y)
+
+test("PolyTrees / PolyNodes") do
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(8, 8))
+    push!(path1, IntPoint(0, 8))
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(8, 0))
+
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(1, 1))
+    push!(path2, IntPoint(1, 7))
+    push!(path2, IntPoint(7, 7))
+    push!(path2, IntPoint(7, 1))
+
+    path3 = Vector{IntPoint}()
+    push!(path3, IntPoint(6, 6))
+    push!(path3, IntPoint(2, 6))
+    push!(path3, IntPoint(2, 2))
+    push!(path3, IntPoint(6, 2))
+
+    paths = Vector{IntPoint}[path1, path2, path3]
+
+    c = Clip()
+    add_paths!(c, paths, PolyTypeSubject, true)
+
+    result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+
+    # test expected PolyTree structure
+    @test result == true
+    @test isa(pt, PolyNode{IntPoint})
+    @test parent(pt) === pt     # in the wrapper we set the parent of top level to itself
+    @test length(children(pt)) === 1
+    @test contour(pt) == IntPoint[]     # top level has no contour
+    @test string(pt) == "Top-level PolyNode with 1 immediate children."
+
+    pn1 = children(pt)[1]
+    @test !ishole(pn1)
+    @test !isopen(pn1)
+    @test contour(pn1) == path1
+    @test length(children(pn1)) === 1
+    @test parent(pn1) === pt
+    @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8],[0,8],[0,0],[8,0]]\n...and 1 immediate children."
+
+    pn2 = children(pn1)[1]
+    @test ishole(pn2)
+    @test !isopen(pn2)
+    @test contour(pn2) == path2
+    @test length(children(pn2)) === 1
+    @test parent(pn2) === pn1
+    @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1],[1,7],[7,7],[7,1]]\n...and 1 immediate children."
+
+    pn3 = children(pn2)[1]
+    @test !ishole(pn3)
+    @test !isopen(pn3)
+    @test contour(pn3) == path3
+    @test isempty(children(pn3))
+    @test parent(pn3) === pn2
+    @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6],[2,6],[2,2],[6,2]]\n...and 0 immediate children."
+
+    # Test that we can preserve the tree structure when converting between types.
+    pt2 = convert(PolyNode{IntPoint2}, pt)
+    pt3 = convert(PolyNode{IntPoint}, pt2)
+
+    @test result == true
+    @test isa(pt3, PolyNode{IntPoint})
+    @test parent(pt3) === pt3     # in the wrapper we set the parent of top level to itself
+    @test length(children(pt3)) === 1
+    @test contour(pt3) == IntPoint[]     # top level has no contour
+
+    pn1 = children(pt3)[1]
+    @test !ishole(pn1)
+    @test !isopen(pn1)
+    @test contour(pn1) == path1
+    @test length(children(pn1)) === 1
+    @test parent(pn1) === pt3
+
+    pn2 = children(pn1)[1]
+    @test ishole(pn2)
+    @test !isopen(pn2)
+    @test contour(pn2) == path2
+    @test length(children(pn2)) === 1
+    @test parent(pn2) === pn1
+
+    pn3 = children(pn2)[1]
+    @test !ishole(pn3)
+    @test !isopen(pn3)
+    @test contour(pn3) == path3
+    @test isempty(children(pn3))
+    @test parent(pn3) === pn2
+
+    # Only convert top-level PolyNodes (i.e. PolyTrees)
+    @test_throws ErrorException convert(PolyNode{IntPoint2}, pn3)
+end
