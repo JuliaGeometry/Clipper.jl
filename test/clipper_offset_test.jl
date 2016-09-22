@@ -38,7 +38,7 @@ test("Clear") do
 
     add_path!(c, path, JoinTypeRound, EndTypeClosedPolygon)
 
-    clear!(c)
+    Clipper.clear!(c)
 end
 
 test("Offset") do
@@ -53,5 +53,5 @@ test("Offset") do
 
   poly = execute(c, 1.0)
 
-  @test string(poly) == "[[[1,2],[-1,2],[-1,-1],[1,-1]]]"
+  @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2],[-1,2],[-1,-1],[1,-1]]]"
 end

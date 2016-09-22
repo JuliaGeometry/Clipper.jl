@@ -18,11 +18,11 @@ module Clipper
 
     @enum EndType EndTypeClosedPolygon=0 EndTypeClosedLine=1 EndTypeOpenSquare=2 EndTypeOpenRound=3 EndTypeOpenButt=4
 
-    @windows_only begin
+    @static if is_windows()
       const library_path = joinpath(dirname(@__FILE__), "cclipper.dll")
     end
 
-    @unix_only begin
+    @static if is_unix()
         const library_path = joinpath(dirname(@__FILE__), "cclipper.so")
     end
 
