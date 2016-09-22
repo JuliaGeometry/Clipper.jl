@@ -33,7 +33,7 @@ test("Union") do
   result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
   @test result == true
-  @test string(polys) == "[[[0,0],[2,0],[2,1],[0,1]]]"
+  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
 end
 
 test("Difference") do
@@ -56,7 +56,7 @@ test("Difference") do
   result, polys = execute(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
   @test result == true
-  @test string(polys) == "[[[10,10],[6,10],[6,0],[10,0]],[[0,10],[0,0],[4,0],[4,10]]]"
+  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10],[6,10],[6,0],[10,0]],Clipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]]"
 end
 
 test("GetBounds") do
@@ -101,7 +101,7 @@ test("Clear") do
   add_path!(c, path1, PolyTypeSubject, true)
   add_path!(c, path2, PolyTypeSubject, true)
 
-  clear!(c)
+  Clipper.clear!(c)
 
   rect = get_bounds(c)
 
@@ -132,7 +132,7 @@ test("AddPaths") do
   result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
   @test result == true
-  @test string(polys) == "[[[0,0],[2,0],[2,1],[0,1]]]"
+  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
 end
 
 test("Orientation") do

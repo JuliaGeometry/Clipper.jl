@@ -19,7 +19,7 @@ install:
       g++ --version
     fi
 julia:
-  - release
+  - 0.5
   - nightly
 notifications:
   email: false
