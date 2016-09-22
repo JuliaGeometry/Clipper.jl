@@ -26,7 +26,7 @@ module Clipper
         const library_path = joinpath(dirname(@__FILE__), "cclipper.so")
     end
 
-    type IntPoint
+    immutable IntPoint
         X::Int64
         Y::Int64
     end
