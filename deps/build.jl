@@ -12,6 +12,7 @@ if is_windows()
         WinRPM.install("gcc-c++"; yes = true)
         WinRPM.install("gcc"; yes = true)
         WinRPM.install("headers"; yes = true)
+        WinRPM.install("winpthreads-devel"; yes = true)
 
         gpp = Pkg.dir("WinRPM","deps","usr","x86_64-w64-mingw32","sys-root","mingw","bin","g++")
         RPMbindir = Pkg.dir("WinRPM","deps","usr","x86_64-w64-mingw32","sys-root","mingw","bin")
@@ -37,4 +38,3 @@ if is_unix()
         run(`g++ -shared -o cclipper.so clipper.o cclipper.o`)
     end
 end
-
