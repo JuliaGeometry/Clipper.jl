@@ -34,6 +34,14 @@ test("Union") do
 
   @test result == true
   @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
+
+  result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+  @test result == true
+  @test string(pt) == "Top-level PolyNode with 1 immediate children."
+  @test length(children(pt)) === 1
+
+  pn = children(pt)[1]
+  @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]\n...and 0 immediate children."
 end
 
 test("Difference") do
@@ -57,6 +65,15 @@ test("Difference") do
 
   @test result == true
   @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10],[6,10],[6,0],[10,0]],Clipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]]"
+
+  result, pt = execute_pt(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+  @test result == true
+  @test string(pt) == "Top-level PolyNode with 2 immediate children."
+  @test length(children(pt)) === 2
+
+  pn1,pn2 = (children(pt)...)
+  @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10],[6,10],[6,0],[10,0]]\n...and 0 immediate children."
+  @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]\n...and 0 immediate children."
 end
 
 test("GetBounds") do
