@@ -3,10 +3,10 @@
 path = joinpath(dirname(@__FILE__), "..", "src")
 
 if is_windows()
-    if success(`where cl.exe`)
-        info("Compiling with cl.exe")
-        run(`cl.exe /D_USRDLL /D_WINDLL /EHsc /Fo$(path) $(path)cclipper.cpp $(path)clipper.cpp /MT /link /DLL /OUT:$(path)cclipper.dll`)
-    else
+    # if success(`where cl.exe`)
+    #     info("Compiling with cl.exe")
+    #     run(`cl.exe /D_USRDLL /D_WINDLL /EHsc /Fo$(path) $(path)cclipper.cpp $(path)clipper.cpp /MT /link /DLL /OUT:$(path)cclipper.dll`)
+    # else
         import WinRPM
         info("Compiling with WinRPM gcc-c++")
         WinRPM.install("gcc-c++"; yes = true)
@@ -28,7 +28,7 @@ if is_windows()
         else
             error("no windows c++ compiler (cl.exe) found, and WinRPM with g++ is failing as well.")
         end
-    end
+    # end
 end
 
 if is_unix()
