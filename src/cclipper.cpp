@@ -40,6 +40,17 @@ extern "C" {
 		return ClipperLib::Area(v);
 	}
 
+    DLL_PUBLIC int CDECL pointinpolygon(ClipperLib::IntPoint pt,
+        ClipperLib::IntPoint *path, size_t count) {
+
+        ClipperLib::Path v = ClipperLib::Path();
+        for(size_t i = 0; i < count; i++) {
+            v.emplace(v.end(), path[i].X, path[i].Y);
+        }
+
+        return ClipperLib::PointInPolygon(pt, v);
+    }
+
 	//==============================================================
 	// Clipper object
 	//==============================================================
@@ -91,8 +102,8 @@ extern "C" {
 	}
 
 	DLL_PUBLIC bool CDECL execute(ClipperLib::Clipper *ptr, ClipperLib::ClipType clipType,
-																ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
-																void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
+			ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
+			void* outputArray, void(*append)(void* outputArray, size_t polyIndex, ClipperLib::IntPoint point)) {
 		ClipperLib::Paths paths = ClipperLib::Paths();
 
 		bool result = false;
@@ -114,6 +125,46 @@ extern "C" {
 
 		return true;
 	}
+
+    void CDECL populatenode(ClipperLib::PolyNode node, void* jl_node,
+            void *(*newnode)(void* output_tree, bool ishole, bool isopen),
+            void(*append)(void* output_node, ClipperLib::IntPoint point)) {
+
+        for (auto &point: node.Contour) {
+            append(jl_node, point);
+        }
+
+        for (size_t i = 0; i < node.ChildCount(); i++) {
+            void *jl_node2 = newnode(jl_node, node.Childs[i]->IsHole(), node.Childs[i]->IsOpen());
+            populatenode(*(node.Childs[i]), jl_node2, newnode, append);
+        }
+    }
+
+    DLL_PUBLIC bool CDECL execute_pt(ClipperLib::Clipper *ptr, ClipperLib::ClipType clipType,
+            ClipperLib::PolyFillType subjFillType, ClipperLib::PolyFillType clipFillType,
+            void* jl_polytree,
+            void *(*newnode)(void* output_tree, bool ishole, bool isopen),
+            void(*append)(void* output_tree, ClipperLib::IntPoint point)) {
+        ClipperLib::PolyTree pt = ClipperLib::PolyTree();
+
+        bool result = false;
+
+        try {
+            result = ptr->Execute(clipType, pt, subjFillType, clipFillType);
+        } catch(ClipperLib::clipperException e) {
+            printf(e.what());
+        }
+
+        if (!result)
+            return false;
+
+        for (size_t i = 0; i < pt.ChildCount(); i++) {
+            void *jl_node = newnode(jl_polytree, pt.Childs[i]->IsHole(), pt.Childs[i]->IsOpen());
+            populatenode(*(pt.Childs[i]), jl_node, newnode, append);
+        }
+
+        return true;
+    }
 
 	DLL_PUBLIC void CDECL clear(ClipperLib::Clipper *ptr) {
 		ptr->Clear();
