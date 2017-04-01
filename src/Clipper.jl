@@ -38,13 +38,13 @@ module Clipper
         open::Bool
         children::Vector{PolyNode{T}}
         parent::PolyNode{T}
-        PolyNode(a,b,c) = new(a,b,c)
-        function PolyNode(a,b,c,d)
-            p = new(a,b,c,d)
+        (::Type{PolyNode{T}}){T}(a,b,c) = new{T}(a,b,c)
+        function (::Type{PolyNode{T}}){T}(a,b,c,d)
+            p = new{T}(a,b,c,d)
             p.parent = p
             return p
         end
-        PolyNode(a,b,c,d,e) = new(a,b,c,d,e)
+        (::Type{PolyNode{T}}){T}(a,b,c,d,e) = new{T}(a,b,c,d,e)
     end
 
     Base.convert{T}(::Type{PolyNode{T}}, x::PolyNode{T}) = x
