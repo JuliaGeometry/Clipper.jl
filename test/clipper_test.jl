@@ -14,169 +14,188 @@ test("Add path to clipper") do
 end
 
 test("Union") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(1, 1))
-  push!(path1, IntPoint(1, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(1, 1))
+    push!(path1, IntPoint(1, 0))
 
-  path2 = Vector{IntPoint}()
-  push!(path2, IntPoint(1, 0))
-  push!(path2, IntPoint(1, 1))
-  push!(path2, IntPoint(2, 1))
-  push!(path2, IntPoint(2, 0))
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(1, 0))
+    push!(path2, IntPoint(1, 1))
+    push!(path2, IntPoint(2, 1))
+    push!(path2, IntPoint(2, 0))
 
-  c = Clip()
-  add_path!(c, path1, PolyTypeSubject, true)
-  add_path!(c, path2, PolyTypeSubject, true)
+    c = Clip()
+    add_path!(c, path1, PolyTypeSubject, true)
+    add_path!(c, path2, PolyTypeSubject, true)
 
-  result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+    result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
-  @test result == true
-  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
+    @test result == true
+    if VERSION >= v"0.6.0-pre"
+        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]]"
+    else
+        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
+    end
+    result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+    @test result == true
+    @test string(pt) == "Top-level PolyNode with 1 immediate children."
+    @test length(children(pt)) === 1
 
-  result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
-  @test result == true
-  @test string(pt) == "Top-level PolyNode with 1 immediate children."
-  @test length(children(pt)) === 1
-
-  pn = children(pt)[1]
-  @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]\n...and 0 immediate children."
+    pn = children(pt)[1]
+    if VERSION >= v"0.6.0-pre"
+        @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]\n...and 0 immediate children."
+    else
+        @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]\n...and 0 immediate children."
+    end
 end
 
 test("Difference") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 10))
-  push!(path1, IntPoint(10, 10))
-  push!(path1, IntPoint(10, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 10))
+    push!(path1, IntPoint(10, 10))
+    push!(path1, IntPoint(10, 0))
 
-  path2 = Vector{IntPoint}()
-  push!(path2, IntPoint(4, 0))
-  push!(path2, IntPoint(4, 10))
-  push!(path2, IntPoint(6, 10))
-  push!(path2, IntPoint(6, 0))
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(4, 0))
+    push!(path2, IntPoint(4, 10))
+    push!(path2, IntPoint(6, 10))
+    push!(path2, IntPoint(6, 0))
 
-  c = Clip()
-  add_path!(c, path1, PolyTypeSubject, true)
-  add_path!(c, path2, PolyTypeClip, true)
+    c = Clip()
+    add_path!(c, path1, PolyTypeSubject, true)
+    add_path!(c, path2, PolyTypeClip, true)
 
-  result, polys = execute(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+    result, polys = execute(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
-  @test result == true
-  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10],[6,10],[6,0],[10,0]],Clipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]]"
+    @test result == true
+    if VERSION >= v"0.6.0-pre"
+        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10], [6,10], [6,0], [10,0]], Clipper.IntPoint[[0,10], [0,0], [4,0], [4,10]]]"
+    else
+        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10],[6,10],[6,0],[10,0]],Clipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]]"
+    end
+    result, pt = execute_pt(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+    @test result == true
+    @test string(pt) == "Top-level PolyNode with 2 immediate children."
+    @test length(children(pt)) === 2
 
-  result, pt = execute_pt(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
-  @test result == true
-  @test string(pt) == "Top-level PolyNode with 2 immediate children."
-  @test length(children(pt)) === 2
-
-  pn1,pn2 = (children(pt)...)
-  @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10],[6,10],[6,0],[10,0]]\n...and 0 immediate children."
-  @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]\n...and 0 immediate children."
+    pn1,pn2 = (children(pt)...)
+    if VERSION >= v"0.6.0-pre"
+        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10], [6,10], [6,0], [10,0]]\n...and 0 immediate children."
+        @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10], [0,0], [4,0], [4,10]]\n...and 0 immediate children."
+    else
+        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10],[6,10],[6,0],[10,0]]\n...and 0 immediate children."
+        @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]\n...and 0 immediate children."
+    end
 end
 
 test("GetBounds") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(1, 1))
-  push!(path1, IntPoint(1, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(1, 1))
+    push!(path1, IntPoint(1, 0))
 
-  path2 = Vector{IntPoint}()
-  push!(path2, IntPoint(1, 0))
-  push!(path2, IntPoint(1, 1))
-  push!(path2, IntPoint(2, 1))
-  push!(path2, IntPoint(2, 0))
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(1, 0))
+    push!(path2, IntPoint(1, 1))
+    push!(path2, IntPoint(2, 1))
+    push!(path2, IntPoint(2, 0))
 
-  c = Clip()
-  add_path!(c, path1, PolyTypeSubject, true)
-  add_path!(c, path2, PolyTypeSubject, true)
+    c = Clip()
+    add_path!(c, path1, PolyTypeSubject, true)
+    add_path!(c, path2, PolyTypeSubject, true)
 
-  rect = get_bounds(c)
+    rect = get_bounds(c)
 
-  @test rect.left == 0
-  @test rect.top == 0
-  @test rect.right == 2
-  @test rect.bottom == 1
+    @test rect.left == 0
+    @test rect.top == 0
+    @test rect.right == 2
+    @test rect.bottom == 1
 end
 
 test("Clear") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 10))
-  push!(path1, IntPoint(10, 10))
-  push!(path1, IntPoint(10, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 10))
+    push!(path1, IntPoint(10, 10))
+    push!(path1, IntPoint(10, 0))
 
-  path2 = Vector{IntPoint}()
-  push!(path2, IntPoint(4, 0))
-  push!(path2, IntPoint(4, 10))
-  push!(path2, IntPoint(6, 10))
-  push!(path2, IntPoint(6, 0))
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(4, 0))
+    push!(path2, IntPoint(4, 10))
+    push!(path2, IntPoint(6, 10))
+    push!(path2, IntPoint(6, 0))
 
-  c = Clip()
-  add_path!(c, path1, PolyTypeSubject, true)
-  add_path!(c, path2, PolyTypeSubject, true)
+    c = Clip()
+    add_path!(c, path1, PolyTypeSubject, true)
+    add_path!(c, path2, PolyTypeSubject, true)
 
-  Clipper.clear!(c)
+    Clipper.clear!(c)
 
-  rect = get_bounds(c)
+    rect = get_bounds(c)
 
-  @test rect.left == 0
-  @test rect.top == 0
-  @test rect.right == 0
-  @test rect.bottom == 0
+    @test rect.left == 0
+    @test rect.top == 0
+    @test rect.right == 0
+    @test rect.bottom == 0
 end
 
 test("AddPaths") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(1, 1))
-  push!(path1, IntPoint(1, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(1, 1))
+    push!(path1, IntPoint(1, 0))
 
-  path2 = Vector{IntPoint}()
-  push!(path2, IntPoint(1, 0))
-  push!(path2, IntPoint(1, 1))
-  push!(path2, IntPoint(2, 1))
-  push!(path2, IntPoint(2, 0))
+    path2 = Vector{IntPoint}()
+    push!(path2, IntPoint(1, 0))
+    push!(path2, IntPoint(1, 1))
+    push!(path2, IntPoint(2, 1))
+    push!(path2, IntPoint(2, 0))
 
-  paths = Vector{IntPoint}[path1, path2]
+    paths = Vector{IntPoint}[path1, path2]
 
-  c = Clip()
-  add_paths!(c, paths, PolyTypeSubject, true)
+    c = Clip()
+    add_paths!(c, paths, PolyTypeSubject, true)
 
-  result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
+    result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
-  @test result == true
-  @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
+    @test result == true
+    if VERSION >= v"0.6.0-pre"
+    @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]]"
+    else
+    @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
+    end
 end
 
 test("Orientation") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(1, 1))
-  push!(path1, IntPoint(1, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(1, 1))
+    push!(path1, IntPoint(1, 0))
 
-  @test orientation(path1) == false
+    @test orientation(path1) == false
 
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(1, 0))
-  push!(path1, IntPoint(1, 1))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(0, 0))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(1, 0))
+    push!(path1, IntPoint(1, 1))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(0, 0))
 
-  @test orientation(path1) == true
+    @test orientation(path1) == true
 end
 
 test("Area") do
-  path1 = Vector{IntPoint}()
-  push!(path1, IntPoint(0, 0))
-  push!(path1, IntPoint(0, 1))
-  push!(path1, IntPoint(1, 1))
+    path1 = Vector{IntPoint}()
+    push!(path1, IntPoint(0, 0))
+    push!(path1, IntPoint(0, 1))
+    push!(path1, IntPoint(1, 1))
 
-  @test area(path1) == -0.5
+    @test area(path1) == -0.5
 end
 
 test("Point in polygon") do
@@ -256,7 +275,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn1) == path1
     @test length(children(pn1)) === 1
     @test parent(pn1) === pt
-    @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8],[0,8],[0,0],[8,0]]\n...and 1 immediate children."
+    if VERSION >= v"0.6.0-pre"
+        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8], [0,8], [0,0], [8,0]]\n...and 1 immediate children."
+    else
+        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8],[0,8],[0,0],[8,0]]\n...and 1 immediate children."
+    end
 
     pn2 = children(pn1)[1]
     @test ishole(pn2)
@@ -264,7 +287,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn2) == path2
     @test length(children(pn2)) === 1
     @test parent(pn2) === pn1
-    @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1],[1,7],[7,7],[7,1]]\n...and 1 immediate children."
+    if VERSION >= v"0.6.0-pre"
+        @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1], [1,7], [7,7], [7,1]]\n...and 1 immediate children."
+    else
+        @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1],[1,7],[7,7],[7,1]]\n...and 1 immediate children."
+    end
 
     pn3 = children(pn2)[1]
     @test !ishole(pn3)
@@ -272,7 +299,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn3) == path3
     @test isempty(children(pn3))
     @test parent(pn3) === pn2
-    @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6],[2,6],[2,2],[6,2]]\n...and 0 immediate children."
+    if VERSION >= v"0.6.0-pre"
+        @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6], [2,6], [2,2], [6,2]]\n...and 0 immediate children."
+    else
+        @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6],[2,6],[2,2],[6,2]]\n...and 0 immediate children."
+    end
 
     # Test that we can preserve the tree structure when converting between types.
     pt2 = convert(PolyNode{IntPoint2}, pt)

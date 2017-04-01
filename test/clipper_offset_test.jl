@@ -42,16 +42,20 @@ test("Clear") do
 end
 
 test("Offset") do
-  path = Vector{IntPoint}()
+    path = Vector{IntPoint}()
 
-  push!(path, IntPoint(0, 0))
-  push!(path, IntPoint(0, 1))
+    push!(path, IntPoint(0, 0))
+    push!(path, IntPoint(0, 1))
 
-  c = ClipperOffset()
+    c = ClipperOffset()
 
-  add_path!(c, path, JoinTypeRound, EndTypeOpenRound)
+    add_path!(c, path, JoinTypeRound, EndTypeOpenRound)
 
-  poly = execute(c, 1.0)
+    poly = execute(c, 1.0)
 
-  @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2],[-1,2],[-1,-1],[1,-1]]]"
+    if VERSION >= v"0.6.0-pre"
+      @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2], [-1,2], [-1,-1], [1,-1]]]"
+    else
+      @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2],[-1,2],[-1,-1],[1,-1]]]"
+    end
 end
