@@ -267,7 +267,6 @@ test("PolyTrees / PolyNodes") do
     @test parent(pt) === pt     # in the wrapper we set the parent of top level to itself
     @test length(children(pt)) === 1
     @test contour(pt) == IntPoint[]     # top level has no contour
-    @test string(pt) == "Top-level PolyNode with 1 immediate children."
 
     pn1 = children(pt)[1]
     @test !ishole(pn1)
@@ -275,11 +274,6 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn1) == path1
     @test length(children(pn1)) === 1
     @test parent(pn1) === pt
-    if VERSION >= v"0.6.0-pre"
-        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8], [0,8], [0,0], [8,0]]\n...and 1 immediate children."
-    else
-        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[8,8],[0,8],[0,0],[8,0]]\n...and 1 immediate children."
-    end
 
     pn2 = children(pn1)[1]
     @test ishole(pn2)
@@ -287,11 +281,6 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn2) == path2
     @test length(children(pn2)) === 1
     @test parent(pn2) === pn1
-    if VERSION >= v"0.6.0-pre"
-        @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1], [1,7], [7,7], [7,1]]\n...and 1 immediate children."
-    else
-        @test string(pn2) == "Closed PolyNode (hole) with contour:\nClipper.IntPoint[[1,1],[1,7],[7,7],[7,1]]\n...and 1 immediate children."
-    end
 
     pn3 = children(pn2)[1]
     @test !ishole(pn3)
@@ -299,11 +288,6 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn3) == path3
     @test isempty(children(pn3))
     @test parent(pn3) === pn2
-    if VERSION >= v"0.6.0-pre"
-        @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6], [2,6], [2,2], [6,2]]\n...and 0 immediate children."
-    else
-        @test string(pn3) == "Closed PolyNode with contour:\nClipper.IntPoint[[6,6],[2,6],[2,2],[6,2]]\n...and 0 immediate children."
-    end
 
     # Test that we can preserve the tree structure when converting between types.
     pt2 = convert(PolyNode{IntPoint2}, pt)
