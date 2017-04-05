@@ -33,22 +33,23 @@ test("Union") do
     result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
     @test result == true
-    if VERSION >= v"0.6.0-pre"
-        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]]"
-    else
-        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
-    end
+    @test polys[1][1] == Clipper.IntPoint(0, 0)
+    @test polys[1][2] == Clipper.IntPoint(2, 0)
+    @test polys[1][3] == Clipper.IntPoint(2, 1)
+    @test polys[1][4] == Clipper.IntPoint(0, 1)
+    
     result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
     @test result == true
     @test string(pt) == "Top-level PolyNode with 1 immediate children."
     @test length(children(pt)) === 1
 
     pn = children(pt)[1]
-    if VERSION >= v"0.6.0-pre"
-        @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]\n...and 0 immediate children."
-    else
-        @test string(pn) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]\n...and 0 immediate children."
-    end
+
+    @test length(children(pn)) == 0
+    @test contour(pn)[1] == Clipper.IntPoint(0, 0)
+    @test contour(pn)[2] == Clipper.IntPoint(2, 0)
+    @test contour(pn)[3] == Clipper.IntPoint(2, 1)
+    @test contour(pn)[4] == Clipper.IntPoint(0, 1)
 end
 
 test("Difference") do
@@ -71,24 +72,34 @@ test("Difference") do
     result, polys = execute(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
     @test result == true
-    if VERSION >= v"0.6.0-pre"
-        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10], [6,10], [6,0], [10,0]], Clipper.IntPoint[[0,10], [0,0], [4,0], [4,10]]]"
-    else
-        @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[10,10],[6,10],[6,0],[10,0]],Clipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]]"
-    end
+    @test polys[1][1] == Clipper.IntPoint(10, 10)
+    @test polys[1][2] == Clipper.IntPoint(6, 10)
+    @test polys[1][3] == Clipper.IntPoint(6, 0)
+    @test polys[1][4] == Clipper.IntPoint(10, 0)
+
+    @test polys[2][1] == Clipper.IntPoint(0, 10)
+    @test polys[2][2] == Clipper.IntPoint(0, 0)
+    @test polys[2][3] == Clipper.IntPoint(4, 0)
+    @test polys[2][4] == Clipper.IntPoint(4, 10)
+    
     result, pt = execute_pt(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
     @test result == true
     @test string(pt) == "Top-level PolyNode with 2 immediate children."
     @test length(children(pt)) === 2
 
     pn1,pn2 = (children(pt)...)
-    if VERSION >= v"0.6.0-pre"
-        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10], [6,10], [6,0], [10,0]]\n...and 0 immediate children."
-        @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10], [0,0], [4,0], [4,10]]\n...and 0 immediate children."
-    else
-        @test string(pn1) == "Closed PolyNode with contour:\nClipper.IntPoint[[10,10],[6,10],[6,0],[10,0]]\n...and 0 immediate children."
-        @test string(pn2) == "Closed PolyNode with contour:\nClipper.IntPoint[[0,10],[0,0],[4,0],[4,10]]\n...and 0 immediate children."
-    end
+    @test length(children(pn1)) == 0
+    @test length(children(pn2)) == 0
+
+    @test contour(pn1)[1] == Clipper.IntPoint(10, 10)
+    @test contour(pn1)[2] == Clipper.IntPoint(6, 10)
+    @test contour(pn1)[3] == Clipper.IntPoint(6, 0)
+    @test contour(pn1)[4] == Clipper.IntPoint(10, 0)
+
+    @test contour(pn2)[1] == Clipper.IntPoint(0, 10)
+    @test contour(pn2)[2] == Clipper.IntPoint(0, 0)
+    @test contour(pn2)[3] == Clipper.IntPoint(4, 0)
+    @test contour(pn2)[4] == Clipper.IntPoint(4, 10)
 end
 
 test("GetBounds") do
@@ -164,11 +175,10 @@ test("AddPaths") do
     result, polys = execute(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
 
     @test result == true
-    if VERSION >= v"0.6.0-pre"
-    @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0], [2,0], [2,1], [0,1]]]"
-    else
-    @test string(polys) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[0,0],[2,0],[2,1],[0,1]]]"
-    end
+    @test polys[1][1] == Clipper.IntPoint(0, 0)
+    @test polys[1][2] == Clipper.IntPoint(2, 0)
+    @test polys[1][3] == Clipper.IntPoint(2, 1)
+    @test polys[1][4] == Clipper.IntPoint(0, 1)
 end
 
 test("Orientation") do
@@ -267,6 +277,7 @@ test("PolyTrees / PolyNodes") do
     @test parent(pt) === pt     # in the wrapper we set the parent of top level to itself
     @test length(children(pt)) === 1
     @test contour(pt) == IntPoint[]     # top level has no contour
+    @test length(children(pt)) == 1
 
     pn1 = children(pt)[1]
     @test !ishole(pn1)
@@ -274,6 +285,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn1) == path1
     @test length(children(pn1)) === 1
     @test parent(pn1) === pt
+    @test length(children(pn1)) == 1
+    @test contour(pn1)[1] == Clipper.IntPoint(8, 8)
+    @test contour(pn1)[2] == Clipper.IntPoint(0, 8)
+    @test contour(pn1)[3] == Clipper.IntPoint(0, 0)
+    @test contour(pn1)[4] == Clipper.IntPoint(8, 0)
 
     pn2 = children(pn1)[1]
     @test ishole(pn2)
@@ -281,6 +297,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn2) == path2
     @test length(children(pn2)) === 1
     @test parent(pn2) === pn1
+    @test length(children(pn2)) == 1
+    @test contour(pn2)[1] == Clipper.IntPoint(1, 1)
+    @test contour(pn2)[2] == Clipper.IntPoint(1, 7)
+    @test contour(pn2)[3] == Clipper.IntPoint(7, 7)
+    @test contour(pn2)[4] == Clipper.IntPoint(7, 1)
 
     pn3 = children(pn2)[1]
     @test !ishole(pn3)
@@ -288,6 +309,11 @@ test("PolyTrees / PolyNodes") do
     @test contour(pn3) == path3
     @test isempty(children(pn3))
     @test parent(pn3) === pn2
+    @test length(children(pn3)) == 0
+    @test contour(pn3)[1] == Clipper.IntPoint(6, 6)
+    @test contour(pn3)[2] == Clipper.IntPoint(2, 6)
+    @test contour(pn3)[3] == Clipper.IntPoint(2, 2)
+    @test contour(pn3)[4] == Clipper.IntPoint(6, 2)
 
     # Test that we can preserve the tree structure when converting between types.
     pt2 = convert(PolyNode{IntPoint2}, pt)
