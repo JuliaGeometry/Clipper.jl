@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/Voxel8/Clipper.jl.svg?branch=master)](https://travis-ci.org/Voxel8/Clipper.jl)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/nx7x286a57o4ya6y?svg=true)](https://ci.appveyor.com/project/maxvoxel8/clipper-jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/khjapo84tbrm8lfd?svg=true)](https://ci.appveyor.com/project/Voxel8/clipper-jl)
 
 # Clipper
 
