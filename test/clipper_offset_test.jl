@@ -53,5 +53,5 @@ test("Offset") do
 
     poly = execute(c, 1.0)
 
-    @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2], [-1,2], [-1,-1], [1,-1]]]"
+    @test poly == [[IntPoint(1,2), IntPoint(-1,2), IntPoint(-1,-1), IntPoint(1,-1)]]
 end
