@@ -238,7 +238,7 @@ test("Point in polygon") do
     @test pointinpolygon(IntPoint(-1,-1), path1) == 0
 end
 
-immutable IntPoint2
+struct IntPoint2
     X::Int64
     Y::Int64
 end
