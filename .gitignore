@@ -11,3 +11,5 @@ test/config
 *.exp
 *.o
 *.so
+deps/usr/
+deps/deps.jl
