@@ -34,36 +34,35 @@ module Clipper
     @enum EndType EndTypeClosedPolygon=0 EndTypeClosedLine=1 EndTypeOpenSquare=2 EndTypeOpenRound=3 EndTypeOpenButt=4
 
 
-
     immutable IntPoint
         X::Int64
         Y::Int64
     end
 
-    type PolyNode{T}
+    mutable struct PolyNode{T}
         contour::Vector{T}
         hole::Bool
         open::Bool
         children::Vector{PolyNode{T}}
         parent::PolyNode{T}
-        (::Type{PolyNode{T}}){T}(a,b,c) = new{T}(a,b,c)
-        function (::Type{PolyNode{T}}){T}(a,b,c,d)
+        PolyNode{T}(a,b,c) where {T} = new{T}(a,b,c)
+        function PolyNode{T}(a,b,c,d) where T
             p = new{T}(a,b,c,d)
             p.parent = p
             return p
         end
-        (::Type{PolyNode{T}}){T}(a,b,c,d,e) = new{T}(a,b,c,d,e)
+        PolyNode{T}(a,b,c,d,e) where {T} = new{T}(a,b,c,d,e)
     end
 
-    Base.convert{T}(::Type{PolyNode{T}}, x::PolyNode{T}) = x
-    function Base.convert{S,T}(::Type{PolyNode{S}}, x::PolyNode{T})
+    Base.convert(::Type{PolyNode{T}}, x::PolyNode{T}) where {T} = x
+    function Base.convert(::Type{PolyNode{S}}, x::PolyNode{T}) where {S,T}
         parent(x) !== x && error("must convert a top-level PolyNode (i.e. a PolyTree).")
 
         pn = PolyNode{S}(convert(Vector{S}, contour(x)), ishole(x), isopen(x))
         pn.children = [PolyNode(y,pn) for y in children(x)]
         pn.parent = pn
     end
-    function PolyNode{S}(x::PolyNode, parent::PolyNode{S})
+    function PolyNode(x::PolyNode, parent::PolyNode{S}) where S
         pn = PolyNode{S}(contour(x), ishole(x), isopen(x))
         pn.children = [PolyNode(y,pn) for y in children(x)]
         pn.parent = parent
@@ -147,13 +146,12 @@ module Clipper
     #==============================================================#
   	# Clipper object
   	#==============================================================#
-    type Clip
+    mutable struct Clip
         clipper_ptr::Ptr{Void}
 
         function Clip()
             clipper = new(ccall((:get_clipper, cclipper), Ptr{Void}, ()))
             finalizer(clipper, c -> ccall((:delete_clipper, cclipper), Void, (Ptr{Void},), c.clipper_ptr))
-
             clipper
         end
     end
@@ -216,7 +214,7 @@ module Clipper
         ccall((:clear, cclipper), Void, (Ptr{Void},), c.clipper_ptr)
     end
 
-    type IntRect
+    mutable struct IntRect
         left::Int64
         top::Int64
         right::Int64
@@ -230,7 +228,7 @@ module Clipper
     #==============================================================#
   	# ClipperOffset object
   	#==============================================================#
-    type ClipperOffset
+    mutable struct ClipperOffset
         clipper_ptr::Ptr{Void}
 
         function ClipperOffset(miterLimit::Float64 = 2.0, roundPrecision::Float64 = 0.25)
@@ -271,7 +269,6 @@ module Clipper
 
     function execute(c::ClipperOffset, delta::Float64)
         polys = Vector{Vector{IntPoint}}()
-
         result = ccall((:execute_offset, cclipper), Void, (Ptr{Void}, Cdouble, Any, Ptr{Void}),
                         c.clipper_ptr,
                         delta,
