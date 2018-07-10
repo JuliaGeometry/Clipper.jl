@@ -53,9 +53,5 @@ test("Offset") do
 
     poly = execute(c, 1.0)
 
-    if VERSION >= v"0.6.0-dev.2505" # julia PR #20288
-      @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2], [-1,2], [-1,-1], [1,-1]]]"
-    else
-      @test string(poly) == "Array{Clipper.IntPoint,1}[Clipper.IntPoint[[1,2],[-1,2],[-1,-1],[1,-1]]]"
-    end
+    @test poly == [[IntPoint(1,2), IntPoint(-1,2), IntPoint(-1,-1), IntPoint(1,-1)]]
 end
