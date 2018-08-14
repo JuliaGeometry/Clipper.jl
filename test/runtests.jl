@@ -4,7 +4,7 @@ using Base.Test
 function test(run::Function, name::AbstractString; verbose=true)
     test_name = "Test $(name)"
     if verbose
-        println(STDERR, test_name)
+        println(stderr, test_name)
     end
     try
         run()

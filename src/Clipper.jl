@@ -13,7 +13,6 @@ module Clipper
         check_deps()
     end
 
-
     export PolyType, PolyTypeSubject, PolyTypeClip,
            ClipType, ClipTypeIntersection, ClipTypeUnion, ClipTypeDifference, ClipTypeXor,
            PolyFillType, PolyFillTypeEvenOdd, PolyFillTypeNonZero, PolyFillTypePositive, PolyFillTypeNegative,
@@ -33,8 +32,7 @@ module Clipper
 
     @enum EndType EndTypeClosedPolygon=0 EndTypeClosedLine=1 EndTypeOpenSquare=2 EndTypeOpenRound=3 EndTypeOpenButt=4
 
-
-    immutable IntPoint
+    struct IntPoint
         X::Int64
         Y::Int64
     end
@@ -97,7 +95,7 @@ module Clipper
       print(io, "[$(point.X),$(point.Y)]")
     end
 
-    function append!(outputArray::Ptr{Void}, polyIndex::Csize_t, point::IntPoint)
+    function append!(outputArray::Ptr{Cvoid}, polyIndex::Csize_t, point::IntPoint)
         ourArray = unsafe_pointer_to_objref(outputArray)::Vector{Vector{IntPoint}}
 
         while (polyIndex + 1) > length(ourArray)
@@ -108,13 +106,13 @@ module Clipper
     end
 
     # private
-    function appendpn!(jl_node::Ptr{Void}, point::IntPoint)
+    function appendpn!(jl_node::Ptr{Cvoid}, point::IntPoint)
         node = unsafe_pointer_to_objref(jl_node)::PolyNode{IntPoint}
         push!(contour(node), point)
     end
 
     # private
-    function newnode(outputTree::Ptr{Void}, ishole::Bool, isopen::Bool)
+    function newnode(outputTree::Ptr{Cvoid}, ishole::Bool, isopen::Bool)
         tree = unsafe_pointer_to_objref(outputTree)::PolyNode{IntPoint}
         node = PolyNode{IntPoint}(IntPoint[], ishole, isopen, PolyNode{IntPoint}[], tree)
         push!(children(tree), node)
@@ -147,17 +145,17 @@ module Clipper
   	# Clipper object
   	#==============================================================#
     mutable struct Clip
-        clipper_ptr::Ptr{Void}
+        clipper_ptr::Ptr{Cvoid}
 
         function Clip()
-            clipper = new(ccall((:get_clipper, cclipper), Ptr{Void}, ()))
-            finalizer(clipper, c -> ccall((:delete_clipper, cclipper), Void, (Ptr{Void},), c.clipper_ptr))
+            clipper = new(ccall((:get_clipper, cclipper), Ptr{Cvoid}, ()))
+            finalizer(c -> ccall((:delete_clipper, cclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr), clipper)
             clipper
         end
     end
 
     function add_path!(c::Clip, path::Vector{IntPoint}, polyType::PolyType, closed::Bool)
-        ccall((:add_path, cclipper), Cuchar, (Ptr{Void}, Ptr{IntPoint}, Csize_t, Cint, Cuchar),
+        ccall((:add_path, cclipper), Cuchar, (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cuchar),
               c.clipper_ptr,
               path,
               length(path),
@@ -171,7 +169,7 @@ module Clipper
             push!(lengths, length(path))
         end
 
-        ccall((:add_paths, cclipper), Cuchar, (Ptr{Void}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cuchar),
+        ccall((:add_paths, cclipper), Cuchar, (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cuchar),
               c.clipper_ptr,
               paths,
               lengths,
@@ -183,13 +181,13 @@ module Clipper
     function execute(c::Clip, clipType::ClipType, subjFillType::PolyFillType, clipFillType::PolyFillType)
         polys = Vector{Vector{IntPoint}}()
 
-        result = ccall((:execute, cclipper), Cuchar, (Ptr{Void}, Cint, Cint, Cint, Any, Ptr{Void}),
+        result = ccall((:execute, cclipper), Cuchar, (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}),
                         c.clipper_ptr,
                         Int(clipType),
                         Int(subjFillType),
                         Int(clipFillType),
                         polys,
-                        cfunction(append!, Any, (Ptr{Void}, Csize_t, IntPoint)))
+                        @cfunction(append!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
 
         return result == 1 ? true : false, polys
     end
@@ -198,20 +196,20 @@ module Clipper
         pt = PolyNode{IntPoint}(IntPoint[], false, false, PolyNode{IntPoint}[])
 
         result = ccall((:execute_pt, cclipper), Cuchar,
-            (Ptr{Void}, Cint, Cint, Cint, Any, Ptr{Void}, Ptr{Void}),
+            (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}),
             c.clipper_ptr,
             Int(clipType),
             Int(subjFillType),
             Int(clipFillType),
             pt,
-            cfunction(newnode, Ptr{Void}, (Ptr{Void}, Bool, Bool)),
-            cfunction(appendpn!, Any, (Ptr{Void}, IntPoint)))
+            @cfunction(newnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool, Bool)),
+            @cfunction(appendpn!, Any, (Ptr{Cvoid}, IntPoint)))
 
         return result == 1 ? true : false, pt
     end
 
     function clear!(c::Clip)
-        ccall((:clear, cclipper), Void, (Ptr{Void},), c.clipper_ptr)
+        ccall((:clear, cclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
     end
 
     mutable struct IntRect
@@ -222,25 +220,25 @@ module Clipper
     end
 
     function get_bounds(c::Clip)
-        ccall((:get_bounds, cclipper), IntRect, (Ptr{Void}, ), c.clipper_ptr)
+        ccall((:get_bounds, cclipper), IntRect, (Ptr{Cvoid}, ), c.clipper_ptr)
     end
 
     #==============================================================#
   	# ClipperOffset object
   	#==============================================================#
     mutable struct ClipperOffset
-        clipper_ptr::Ptr{Void}
+        clipper_ptr::Ptr{Cvoid}
 
         function ClipperOffset(miterLimit::Float64 = 2.0, roundPrecision::Float64 = 0.25)
-            clipper = new(ccall((:get_clipper_offset, cclipper), Ptr{Void}, (Cdouble, Cdouble), miterLimit, roundPrecision))
-            finalizer(clipper, c -> ccall((:delete_clipper_offset, cclipper), Void, (Ptr{Void},), c.clipper_ptr))
+            clipper = new(ccall((:get_clipper_offset, cclipper), Ptr{Cvoid}, (Cdouble, Cdouble), miterLimit, roundPrecision))
+            finalizer(c -> ccall((:delete_clipper_offset, cclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr), clipper)
 
             clipper
         end
     end
 
     function add_path!(c::ClipperOffset, path::Vector{IntPoint}, joinType::JoinType, endType::EndType)
-        ccall((:add_offset_path, cclipper), Void, (Ptr{Void}, Ptr{IntPoint}, Csize_t, Cint, Cint),
+        ccall((:add_offset_path, cclipper), Cvoid, (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cint),
               c.clipper_ptr,
               path,
               length(path),
@@ -254,7 +252,7 @@ module Clipper
             push!(lengths, length(path))
         end
 
-        ccall((:add_offset_paths, cclipper), Void, (Ptr{Void}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cint),
+        ccall((:add_offset_paths, cclipper), Cvoid, (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cint),
               c.clipper_ptr,
               paths,
               lengths,
@@ -264,16 +262,16 @@ module Clipper
     end
 
     function clear!(c::ClipperOffset)
-        ccall((:clear_offset, cclipper), Void, (Ptr{Void},), c.clipper_ptr)
+        ccall((:clear_offset, cclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
     end
 
     function execute(c::ClipperOffset, delta::Float64)
         polys = Vector{Vector{IntPoint}}()
-        result = ccall((:execute_offset, cclipper), Void, (Ptr{Void}, Cdouble, Any, Ptr{Void}),
+        result = ccall((:execute_offset, cclipper), Cvoid, (Ptr{Cvoid}, Cdouble, Any, Ptr{Cvoid}),
                         c.clipper_ptr,
                         delta,
                         polys,
-                        cfunction(append!, Any, (Ptr{Void}, Csize_t, IntPoint)))
+                        @cfunction(append!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
 
         return polys
     end
