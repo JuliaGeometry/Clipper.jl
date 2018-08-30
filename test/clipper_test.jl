@@ -37,7 +37,7 @@ test("Union") do
     @test polys[1][2] == Clipper.IntPoint(2, 0)
     @test polys[1][3] == Clipper.IntPoint(2, 1)
     @test polys[1][4] == Clipper.IntPoint(0, 1)
-    
+
     result, pt = execute_pt(c, ClipTypeUnion, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
     @test result == true
     @test string(pt) == "Top-level PolyNode with 1 immediate children."
@@ -81,13 +81,13 @@ test("Difference") do
     @test polys[2][2] == Clipper.IntPoint(0, 0)
     @test polys[2][3] == Clipper.IntPoint(4, 0)
     @test polys[2][4] == Clipper.IntPoint(4, 10)
-    
+
     result, pt = execute_pt(c, ClipTypeDifference, PolyFillTypeEvenOdd, PolyFillTypeEvenOdd)
     @test result == true
     @test string(pt) == "Top-level PolyNode with 2 immediate children."
     @test length(children(pt)) === 2
 
-    pn1,pn2 = (children(pt)...)
+    pn1,pn2 = (children(pt)...,)
     @test length(children(pn1)) == 0
     @test length(children(pn2)) == 0
 
