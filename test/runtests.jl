@@ -1,5 +1,5 @@
 using Clipper
-using Base.Test
+using Test
 
 function test(run::Function, name::AbstractString; verbose=true)
     test_name = "Test $(name)"
