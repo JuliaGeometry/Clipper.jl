@@ -13,3 +13,4 @@ Clipper.jl is a Julia wrapper for [Angus Johnson's Clipper library (ver. 6.2.1).
 ## License
 Available under the [Boost Software License - Version 1.0](http://www.boost.org/LICENSE_1_0.txt).
 See: [LICENSE.md](./LICENSE.md).
+
