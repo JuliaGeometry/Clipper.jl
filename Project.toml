@@ -1,5 +1,6 @@
 name = "Clipper"
 uuid = "c8f6d549-b3ab-5508-a0d1-48fe138e8cc1"
+version = "0.5.1"
 
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
