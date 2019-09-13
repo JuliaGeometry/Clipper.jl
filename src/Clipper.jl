@@ -20,7 +20,7 @@ module Clipper
            EndType, EndTypeClosedPolygon, EndTypeClosedLine, EndTypeOpenSquare, EndTypeOpenRound, EndTypeOpenButt,
            Clip, add_path!, add_paths!, execute, clear!, get_bounds,
            IntPoint, IntRect, orientation, area, pointinpolygon, ClipperOffset,
-           PolyNode, execute_pt, contour, ishole, contour, children
+           PolyNode, execute_pt, contour, ishole, contour, children, tofloat
 
     @enum PolyType PolyTypeSubject=0 PolyTypeClip=1
 
@@ -35,6 +35,43 @@ module Clipper
     struct IntPoint
         X::Int64
         Y::Int64
+    end
+
+    """
+        IntPoint(x, y)
+
+    Create an IntPoint from integer values.
+
+        IntPoint(x, y, magnitude, precision)
+
+    Create an IntPoint from floating point values with the given number of digits of precision.
+    magnitude = number of digits above zero (90 => 2, 9 => 1, 0.9 => 0, 0.09 => -1)
+    sigdigits = number of digits to preserve (94.3856 with 4 => 94.39)
+
+    ```julia
+    a = IntPoint(5.483, 55.8739, 2, 4) # [548, 5587]
+    b,c = tofloat(a, 2, 4)             # 5.48, 55.87
+    ```
+    """
+    function IntPoint(x::Union{Float16, Float32, Float64}, y::Union{Float16, Float32, Float64}, magnitude::Int64, sigdigits::Int64)
+        factor = exp10(sigdigits - magnitude)
+        xInt = x * factor |> round |> Int
+        yInt = y * factor |> round |> Int
+        IntPoint(xInt, yInt)
+    end
+
+    """
+        tofloat(intpoint, magnitude, precision)
+
+    Restore an IntPoint to floating point values using the specified magnitude and precision.
+    magnitude = number of digits to be above zero (90 => 2, 9 => 1, 0.9 => 0, 0.09 => -1)
+    sigdigits = number of digits that were preserved (94.3856 with 4 => 94.39)
+    """
+    function tofloat(intpoint::IntPoint, magnitude::Int64, sigdigits::Int64)
+        factor = exp10(sigdigits - magnitude)
+        xFloat = intpoint.X / factor
+        yFloat = intpoint.Y / factor
+        xFloat, yFloat
     end
 
     mutable struct PolyNode{T}

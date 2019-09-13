@@ -349,3 +349,38 @@ test("PolyTrees / PolyNodes") do
     # Only convert top-level PolyNodes (i.e. PolyTrees)
     @test_throws ErrorException convert(PolyNode{IntPoint2}, pn3)
 end
+
+test("IntPoint from floating point") do
+    value1 = 58.4309
+    value2 = 9.39547
+    value3 = 10.393
+    value4 = 132.45
+    value5 = 0.0045
+
+    test1 = IntPoint(value1, value2, 2, 4)
+    @test IntPoint(5843, 940) == test1
+
+    test2 = IntPoint(value3, value4, 3, 5)
+    @test IntPoint(1039, 13245) == test2
+
+    test3 = IntPoint(value1, value4, 6, 2)
+    @test IntPoint(0, 0) == test3
+
+    test4 = IntPoint(value2, value3, 1, 4)
+    @test IntPoint(9395, 10393) == test4
+
+    test5 = IntPoint(value4, value5, -2, 5)
+    @test IntPoint(1324500000, 45000) == test5
+
+    test6 = IntPoint(value4, value5, 3, 5)
+    @test IntPoint(13245, 0) == test6
+end
+
+test("IntPoint to floating point") do
+    point = IntPoint(13245, 340)
+
+    @test tofloat(point, 3, 5) == (132.45, 3.4)
+    @test tofloat(point, -4, 5) == (0.000013245, 0.00000034)
+    @test tofloat(point, 3, 4) == (1324.5, 34)
+    @test tofloat(point, -4, 4) == (0.00013245, 0.0000034)
+end
