@@ -3,7 +3,9 @@
 .ropeproject
 test/config
 *.jl.cov
+*.jl.*.cov
 *.jl.mem
+*.jl.*.mem
 *.gcode.new
 *.obj
 *.dll
@@ -13,3 +15,4 @@ test/config
 *.so
 deps/usr
 deps/deps.jl
+Manifest.toml
