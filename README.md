@@ -4,7 +4,7 @@
 
 # Clipper
 
-Clipper.jl is a Julia wrapper for [Angus Johnson's Clipper library (ver. 6.2.1).](http://www.angusj.com/delphi/clipper.php). 
+Clipper.jl is a Julia wrapper for [Angus Johnson's Clipper library (ver. 6.4.2).](http://www.angusj.com/delphi/clipper.php). 
 
 > Clipper - an open source freeware library for clipping and offsetting lines and polygons.
 
