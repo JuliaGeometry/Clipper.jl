@@ -87,7 +87,7 @@ test("Difference") do
     @test string(pt) == "Top-level PolyNode with 2 immediate children."
     @test length(children(pt)) === 2
 
-    pn1,pn2 = (children(pt)...,)
+    pn1, pn2 = (children(pt)...,)
     @test length(children(pn1)) == 0
     @test length(children(pn2)) == 0
 
@@ -215,27 +215,27 @@ test("Point in polygon") do
     push!(path1, IntPoint(0, 4))
 
     # Returns -1 if on boundary (check all the boundary points)
-    @test pointinpolygon(IntPoint(0,0), path1) == -1
-    @test pointinpolygon(IntPoint(1,0), path1) == -1
-    @test pointinpolygon(IntPoint(2,0), path1) == -1
-    @test pointinpolygon(IntPoint(3,0), path1) == -1
-    @test pointinpolygon(IntPoint(4,0), path1) == -1
-    @test pointinpolygon(IntPoint(3,1), path1) == -1
-    @test pointinpolygon(IntPoint(2,2), path1) == -1
-    @test pointinpolygon(IntPoint(1,3), path1) == -1
-    @test pointinpolygon(IntPoint(0,4), path1) == -1
-    @test pointinpolygon(IntPoint(0,3), path1) == -1
-    @test pointinpolygon(IntPoint(0,2), path1) == -1
-    @test pointinpolygon(IntPoint(0,1), path1) == -1
+    @test pointinpolygon(IntPoint(0, 0), path1) == -1
+    @test pointinpolygon(IntPoint(1, 0), path1) == -1
+    @test pointinpolygon(IntPoint(2, 0), path1) == -1
+    @test pointinpolygon(IntPoint(3, 0), path1) == -1
+    @test pointinpolygon(IntPoint(4, 0), path1) == -1
+    @test pointinpolygon(IntPoint(3, 1), path1) == -1
+    @test pointinpolygon(IntPoint(2, 2), path1) == -1
+    @test pointinpolygon(IntPoint(1, 3), path1) == -1
+    @test pointinpolygon(IntPoint(0, 4), path1) == -1
+    @test pointinpolygon(IntPoint(0, 3), path1) == -1
+    @test pointinpolygon(IntPoint(0, 2), path1) == -1
+    @test pointinpolygon(IntPoint(0, 1), path1) == -1
 
     # Returns 1 if inside (check all the interior points)
-    @test pointinpolygon(IntPoint(1,1), path1) == 1
-    @test pointinpolygon(IntPoint(2,1), path1) == 1
-    @test pointinpolygon(IntPoint(1,2), path1) == 1
+    @test pointinpolygon(IntPoint(1, 1), path1) == 1
+    @test pointinpolygon(IntPoint(2, 1), path1) == 1
+    @test pointinpolygon(IntPoint(1, 2), path1) == 1
 
     # Returns 0 if outside (check a few places outside)
-    @test pointinpolygon(IntPoint(10,10), path1) == 0
-    @test pointinpolygon(IntPoint(-1,-1), path1) == 0
+    @test pointinpolygon(IntPoint(10, 10), path1) == 0
+    @test pointinpolygon(IntPoint(-1, -1), path1) == 0
 end
 
 struct IntPoint2
