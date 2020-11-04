@@ -6,7 +6,7 @@ test("Add path to offset") do
 
     c = ClipperOffset()
 
-    add_path!(c, path, JoinTypeRound, EndTypeClosedPolygon)
+    return add_path!(c, path, JoinTypeRound, EndTypeClosedPolygon)
 end
 
 test("Add paths to offset") do
@@ -24,9 +24,8 @@ test("Add paths to offset") do
 
     c = ClipperOffset()
 
-    add_paths!(c, paths, JoinTypeRound, EndTypeClosedPolygon)
+    return add_paths!(c, paths, JoinTypeRound, EndTypeClosedPolygon)
 end
-
 
 test("Clear") do
     path = Vector{IntPoint}()
@@ -38,7 +37,7 @@ test("Clear") do
 
     add_path!(c, path, JoinTypeRound, EndTypeClosedPolygon)
 
-    Clipper.clear!(c)
+    return Clipper.clear!(c)
 end
 
 test("Offset") do
@@ -53,5 +52,5 @@ test("Offset") do
 
     poly = execute(c, 1.0)
 
-    @test poly == [[IntPoint(1,2), IntPoint(-1,2), IntPoint(-1,-1), IntPoint(1,-1)]]
+    @test poly == [[IntPoint(1, 2), IntPoint(-1, 2), IntPoint(-1, -1), IntPoint(1, -1)]]
 end
