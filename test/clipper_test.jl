@@ -384,3 +384,9 @@ test("IntPoint to floating point") do
     @test tofloat(point, 3, 4) == (1324.5, 34)
     @test tofloat(point, -4, 4) == (0.00013245, 0.0000034)
 end
+
+test("Minkowski sum") do
+	tri = [IntPoint(0,0), IntPoint(10,0), IntPoint(0,20)]
+	@test minkowski_sum(tri,tri) ==
+		[[IntPoint(0,0), IntPoint(20,0), IntPoint(0,40)]]
+end
