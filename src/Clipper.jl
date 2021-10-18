@@ -309,7 +309,7 @@ function minkowski_sum(poly1::Vector{IntPoint}, poly2::Vector{IntPoint},
 end
 function minkowski_difference(poly1::Vector{IntPoint}, poly2::Vector{IntPoint})
     polys = Vector{Vector{IntPoint}}()
-    @ccall libcclipper.minkoswki_difference(
+    @ccall libcclipper.minkowski_difference(
         poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
         poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
         polys::Any,
