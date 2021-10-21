@@ -9,7 +9,7 @@ export PolyType, PolyTypeSubject, PolyTypeClip, ClipType, ClipTypeIntersection,
        EndTypeClosedLine, EndTypeOpenSquare, EndTypeOpenRound, EndTypeOpenButt, Clip,
        add_path!, add_paths!, execute, clear!, get_bounds, IntPoint, IntRect, orientation,
        area, pointinpolygon, ClipperOffset, PolyNode, execute_pt, contour, ishole, contour,
-       children, tofloat
+       children, tofloat, minkowski_sum, minkowski_difference
 
 @enum PolyType PolyTypeSubject = 0 PolyTypeClip = 1
 
@@ -295,5 +295,27 @@ function simplify_polygons(polys::Vector{Vector{IntPoint}},
                    @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
     return simplified
 end
+
+function minkowski_sum(poly1::Vector{IntPoint}, poly2::Vector{IntPoint},
+        is_closed::Bool = true)
+    polys = Vector{Vector{IntPoint}}()
+    @ccall libcclipper.minkowski_sum(
+        poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
+        poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
+        polys::Any,
+        @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint))::Ptr{Cvoid},
+        is_closed::Cuchar)::Cvoid
+    return polys
+end
+function minkowski_difference(poly1::Vector{IntPoint}, poly2::Vector{IntPoint})
+    polys = Vector{Vector{IntPoint}}()
+    @ccall libcclipper.minkowski_difference(
+        poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
+        poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
+        polys::Any,
+        @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint))::Ptr{Cvoid})::Cvoid
+    return polys
+end
+
 
 end
