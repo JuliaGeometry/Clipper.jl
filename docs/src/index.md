@@ -39,7 +39,9 @@ tofloat.(ips, 1, 3)
 
 ## Offsetting a polygon
 
-A polygon can be offsetted (inflated/deflated) in the following way using Clipper.jl. More information about general offsetting in the [Clipper documentation](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Classes/ClipperOffset/_Body.htm).
+[Original Clipper documentation](http://www.angusj.com/delphi/clipper/documentation/Docs/Units/ClipperLib/Classes/ClipperOffset/_Body.htm).
+
+A polygon can be offset (inflated/deflated) in the following way using Clipper.jl:
 
 
 ```julia
