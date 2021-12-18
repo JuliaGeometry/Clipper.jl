@@ -107,7 +107,7 @@ miter_offset_polygons = execute(co, 7.0)
 
 `JoinTypeRound` produces rounded corners, `JoinTypeSquare` produces squared corners.
 In the case of `JoinTypeMiter` it depends on the degree of the angle or in different words the maximum offsetted distance if corners.
-would not be squared. If the maximum distance is bigger than `MitterLimit * delta` than it is squared which would be the case in the upper right corner.
+would not be squared. If the maximum distance is bigger than `MiterLimit * delta` than it is squared which would be the case in the upper right corner.
 
 The `MiterLimit` is the first argument of `ClipperOffset` for example `ClipperOffset(3.0)` would set it to `3.0` (default is `2.0`).
 `delta` is simply the distance we want to offset in our case above we set it to `7.0` as the second parameter of the `execute` function.
