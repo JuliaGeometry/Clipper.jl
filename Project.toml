@@ -1,13 +1,13 @@
 name = "Clipper"
 uuid = "c8f6d549-b3ab-5508-a0d1-48fe138e8cc1"
-version = "0.6.3"
+version = "2.0.0"
 
 [deps]
-Clipper_jll = "1721f0f4-5627-55cb-8b31-c466f04189fe"
+Clipper2_jll = "6a795559-3f7e-5382-b5a1-7e858e3d15a4"
 
 [compat]
-Clipper_jll = "6.4.2"
-julia = "1.5"
+Clipper2_jll = "1.2.2"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

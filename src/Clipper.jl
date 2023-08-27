@@ -1,6 +1,6 @@
 module Clipper
 
-using Clipper_jll
+using Clipper2_jll
 
 export PolyType, PolyTypeSubject, PolyTypeClip, ClipType, ClipTypeIntersection,
        ClipTypeUnion, ClipTypeDifference, ClipTypeXor, PolyFillType, PolyFillTypeEvenOdd,
@@ -150,17 +150,17 @@ end
 # Static functions
 #==============================================================#
 function orientation(path::Vector{IntPoint})
-    return ccall((:orientation, libcclipper), Cuchar, (Ptr{IntPoint}, Csize_t), path,
+    return ccall((:orientation, libClipper2), Cuchar, (Ptr{IntPoint}, Csize_t), path,
                  length(path)) == 1
 end
 
 function area(path::Vector{IntPoint})
-    return ccall((:area, libcclipper), Float64, (Ptr{IntPoint}, Csize_t), path,
+    return ccall((:area, libClipper2), Float64, (Ptr{IntPoint}, Csize_t), path,
                  length(path))
 end
 
 function pointinpolygon(pt::IntPoint, path::Vector{IntPoint})
-    return ccall((:pointinpolygon, libcclipper), Cint, (IntPoint, Ptr{IntPoint}, Csize_t),
+    return ccall((:pointinpolygon, libClipper2), Cint, (IntPoint, Ptr{IntPoint}, Csize_t),
                  pt, path, length(path))
 end
 
@@ -171,15 +171,15 @@ mutable struct Clip
     clipper_ptr::Ptr{Cvoid}
 
     function Clip()
-        clipper = new(ccall((:get_clipper, libcclipper), Ptr{Cvoid}, ()))
-        finalizer(c -> ccall((:delete_clipper, libcclipper), Cvoid, (Ptr{Cvoid},),
+        clipper = new(ccall((:get_clipper, libClipper2), Ptr{Cvoid}, ()))
+        finalizer(c -> ccall((:delete_clipper, libClipper2), Cvoid, (Ptr{Cvoid},),
                              c.clipper_ptr), clipper)
         return clipper
     end
 end
 
 function add_path!(c::Clip, path::Vector{IntPoint}, polyType::PolyType, closed::Bool)
-    return ccall((:add_path, libcclipper), Cuchar,
+    return ccall((:add_path, libClipper2), Cuchar,
                  (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cuchar), c.clipper_ptr, path,
                  length(path), Int(polyType), closed) == 1
 end
@@ -191,7 +191,7 @@ function add_paths!(c::Clip, paths::Vector{Vector{IntPoint}}, polyType::PolyType
         push!(lengths, length(path))
     end
 
-    return ccall((:add_paths, libcclipper), Cuchar,
+    return ccall((:add_paths, libClipper2), Cuchar,
                  (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cuchar),
                  c.clipper_ptr, paths, lengths, length(paths), Int(polyType), closed) == 1
 end
@@ -200,7 +200,7 @@ function execute(c::Clip, clipType::ClipType, subjFillType::PolyFillType,
                  clipFillType::PolyFillType)
     polys = Vector{Vector{IntPoint}}()
 
-    result = ccall((:execute, libcclipper), Cuchar,
+    result = ccall((:execute, libClipper2), Cuchar,
                    (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}), c.clipper_ptr,
                    Int(clipType), Int(subjFillType), Int(clipFillType), polys,
                    @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
@@ -212,7 +212,7 @@ function execute_pt(c::Clip, clipType::ClipType, subjFillType::PolyFillType,
                     clipFillType::PolyFillType)
     pt = PolyNode{IntPoint}(IntPoint[], false, false, PolyNode{IntPoint}[])
 
-    result = ccall((:execute_pt, libcclipper), Cuchar,
+    result = ccall((:execute_pt, libClipper2), Cuchar,
                    (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}),
                    c.clipper_ptr, Int(clipType), Int(subjFillType), Int(clipFillType), pt,
                    @cfunction(newnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool, Bool)),
@@ -222,7 +222,7 @@ function execute_pt(c::Clip, clipType::ClipType, subjFillType::PolyFillType,
 end
 
 function clear!(c::Clip)
-    return ccall((:clear, libcclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
+    return ccall((:clear, libClipper2), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
 end
 
 mutable struct IntRect
@@ -233,7 +233,7 @@ mutable struct IntRect
 end
 
 function get_bounds(c::Clip)
-    return ccall((:get_bounds, libcclipper), IntRect, (Ptr{Cvoid},), c.clipper_ptr)
+    return ccall((:get_bounds, libClipper2), IntRect, (Ptr{Cvoid},), c.clipper_ptr)
 end
 
 #==============================================================#
@@ -243,9 +243,9 @@ mutable struct ClipperOffset
     clipper_ptr::Ptr{Cvoid}
 
     function ClipperOffset(miterLimit::Float64=2.0, roundPrecision::Float64=0.25)
-        clipper = new(ccall((:get_clipper_offset, libcclipper), Ptr{Cvoid},
+        clipper = new(ccall((:get_clipper_offset, libClipper2), Ptr{Cvoid},
                             (Cdouble, Cdouble), miterLimit, roundPrecision))
-        finalizer(c -> ccall((:delete_clipper_offset, libcclipper), Cvoid, (Ptr{Cvoid},),
+        finalizer(c -> ccall((:delete_clipper_offset, libClipper2), Cvoid, (Ptr{Cvoid},),
                              c.clipper_ptr), clipper)
 
         return clipper
@@ -254,7 +254,7 @@ end
 
 function add_path!(c::ClipperOffset, path::Vector{IntPoint}, joinType::JoinType,
                    endType::EndType)
-    return ccall((:add_offset_path, libcclipper), Cvoid,
+    return ccall((:add_offset_path, libClipper2), Cvoid,
                  (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cint), c.clipper_ptr, path,
                  length(path), Int(joinType), Int(endType))
 end
@@ -266,18 +266,18 @@ function add_paths!(c::ClipperOffset, paths::Vector{Vector{IntPoint}}, joinType:
         push!(lengths, length(path))
     end
 
-    return ccall((:add_offset_paths, libcclipper), Cvoid,
+    return ccall((:add_offset_paths, libClipper2), Cvoid,
                  (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cint),
                  c.clipper_ptr, paths, lengths, length(paths), Int(joinType), Int(endType))
 end
 
 function clear!(c::ClipperOffset)
-    return ccall((:clear_offset, libcclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
+    return ccall((:clear_offset, libClipper2), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
 end
 
 function execute(c::ClipperOffset, delta::Float64)
     polys = Vector{Vector{IntPoint}}()
-    result = ccall((:execute_offset, libcclipper), Cvoid,
+    result = ccall((:execute_offset, libClipper2), Cvoid,
                    (Ptr{Cvoid}, Cdouble, Any, Ptr{Cvoid}), c.clipper_ptr, delta, polys,
                    @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
 
@@ -289,7 +289,7 @@ function simplify_polygons(polys::Vector{Vector{IntPoint}},
     simplified = Vector{Vector{IntPoint}}()
     counts = Csize_t.(length.(polys))
     count = Csize_t(length(counts))
-    result = ccall((:simplify_polygons, libcclipper), Cvoid,
+    result = ccall((:simplify_polygons, libClipper2), Cvoid,
                    (Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Any, Ptr{Cvoid}),
                    polys, counts, count, filltype, simplified,
                    @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
@@ -299,7 +299,7 @@ end
 function minkowski_sum(poly1::Vector{IntPoint}, poly2::Vector{IntPoint},
         is_closed::Bool = true)
     polys = Vector{Vector{IntPoint}}()
-    @ccall libcclipper.minkowski_sum(
+    @ccall libClipper2.minkowski_sum(
         poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
         poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
         polys::Any,
@@ -309,7 +309,7 @@ function minkowski_sum(poly1::Vector{IntPoint}, poly2::Vector{IntPoint},
 end
 function minkowski_difference(poly1::Vector{IntPoint}, poly2::Vector{IntPoint})
     polys = Vector{Vector{IntPoint}}()
-    @ccall libcclipper.minkowski_difference(
+    @ccall libClipper2.minkowski_difference(
         poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
         poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
         polys::Any,
