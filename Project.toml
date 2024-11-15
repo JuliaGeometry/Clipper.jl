@@ -1,6 +1,6 @@
 name = "Clipper"
 uuid = "c8f6d549-b3ab-5508-a0d1-48fe138e8cc1"
-version = "2.0.0"
+version = "0.7.0"
 
 [deps]
 Clipper2_jll = "6a795559-3f7e-5382-b5a1-7e858e3d15a4"
