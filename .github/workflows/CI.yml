@@ -1,7 +1,9 @@
 name: CI
 on:
-  - push
-  - pull_request
+  push:
+    branches: [main, master]
+    tags: ["*"]
+  pull_request:
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -18,11 +20,12 @@ jobs:
         arch:
           - x64
         include:
+          # test macOS and Windows with latest Julia only
           - os: macOS-latest
             arch: aarch64
-            version: 1       
-
-     steps:
+            version: 1
+            
+    steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
@@ -65,13 +68,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
-#  finish:
-#    needs: test
-#    if: always()
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Coveralls Finished
-#        uses: coverallsapp/github-action@master
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          parallel-finished: true
