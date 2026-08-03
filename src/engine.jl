@@ -7,7 +7,9 @@
 # Result marshalling — flat Paths64 (Execute → Paths64 solution)
 # ------------------------------------------------------------
 # The C side calls `append(output, path_index, point)` once per point. We accumulate
-# into a Vector of Paths64 keyed by the (0-based) path index.
+# into a Vector of Paths64 keyed by the (0-based) path index. (Index gaps are filled
+# with empty paths; a trailing empty path would be invisible here, but Clipper2
+# never emits empty output paths.)
 mutable struct _PathsSink
     paths::Paths64
 end
@@ -29,13 +31,9 @@ end
 # The C side calls:
 #   newnode(parent_jl_ptr, ishole::Bool) -> child_jl_ptr
 #   append(node_jl_ptr, pt::Point64)
-# We keep node objects alive in a sink-held registry indexed by the object pointer.
-mutable struct _TreeSink
-    root::PolyTree64
-    # Keep every node referenced so the GC can't collect a node whose only live
-    # reference is the raw pointer held transiently on the C stack.
-    registry::Vector{Any}
-end
+# Nodes stay GC-reachable because _tree_newnode links each child into its parent's
+# `children` before returning the raw pointer, so every node is reachable from the
+# root (which ccall roots for the duration of the call).
 
 function _tree_newnode(parent_ptr::Ptr{Cvoid}, ish::Bool)
     # parent_ptr is either the root PolyTree64 or a PolyPath64.
@@ -70,7 +68,7 @@ The underlying C++ engine is freed by a finalizer.
 mutable struct Clipper64
     ptr::Ptr{Cvoid}
     function Clipper64(; preserve_collinear::Bool=true, reverse_solution::Bool=false)
-        p = ccall((:clipper64_create, libcclipper2), Ptr{Cvoid}, (Cuchar, Cuchar),
+        p = ccall((:clipper64_create, libcclipper2), Ptr{Cvoid}, (Bool, Bool),
             preserve_collinear, reverse_solution)
         c = new(p)
         finalizer(c) do x
@@ -82,6 +80,13 @@ mutable struct Clipper64
         return c
     end
 end
+
+# ccall lowers a `Clipper64` argument declared `Ptr{Cvoid}` through cconvert /
+# unsafe_convert and roots the object for the duration of the call, so a GC pass
+# triggered from a result callback (or another thread) cannot finalize the engine
+# while C code is still using it. Never pass the raw `.ptr` field to ccall.
+Base.cconvert(::Type{Ptr{Cvoid}}, c::Clipper64) = c
+Base.unsafe_convert(::Type{Ptr{Cvoid}}, c::Clipper64) = c.ptr
 
 # Each add mode is its own C entry point (clipper64_add_subject / _open_subject /
 # _clip, plus plural batch variants). ccall needs a constant symbol, so the six
@@ -95,22 +100,22 @@ for (mode, single, batch) in (
     batch_fn = Symbol(:_add_, mode, :_paths!)
     @eval begin
         function $single_fn(c::Clipper64, path::Path64)
-            ok = ccall(($(QuoteNode(single)), libcclipper2), Cuchar,
+            return ccall(($(QuoteNode(single)), libcclipper2), Bool,
                 (Ptr{Cvoid}, Ptr{Point64}, Csize_t),
-                c.ptr, path, length(path))
-            return Bool(ok)
+                c, path, length(path))
         end
         function $batch_fn(c::Clipper64, paths::Paths64)
             isempty(paths) && return true
-            # Build the (Ptr, count) arrays the C batch adds expect.
+            # Build the (Ptr, count) arrays the C batch adds expect. `ptrs` and
+            # `counts` are ccall arguments (rooted automatically); `paths` is only
+            # referenced through raw pointers, so it needs an explicit preserve.
             ptrs = [pointer(p) for p in paths]
             counts = Csize_t[length(p) for p in paths]
-            ok = GC.@preserve paths ptrs counts begin
-                ccall(($(QuoteNode(batch)), libcclipper2), Cuchar,
+            return GC.@preserve paths begin
+                ccall(($(QuoteNode(batch)), libcclipper2), Bool,
                     (Ptr{Cvoid}, Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t),
-                    c.ptr, ptrs, counts, length(paths))
+                    c, ptrs, counts, length(paths))
             end
-            return Bool(ok)
         end
     end
 end
@@ -119,27 +124,50 @@ end
     add_subject!(c, path_or_paths; closed=true)
 
 Add closed (or, with `closed=false`, open) subject geometry to the engine.
+Returns `c`; throws [`ClipperError`](@ref) on failure. Single-path adds reject
+degenerate paths (closed paths need ≥ 3 vertices, open ≥ 2); batch adds pass
+everything through and leave degenerate paths to the engine, which ignores them.
 """
-add_subject!(c::Clipper64, path::Path64; closed::Bool=true) =
-    closed ? _add_subject_path!(c, path) : _add_open_subject_path!(c, path)
-add_subject!(c::Clipper64, paths::Paths64; closed::Bool=true) =
-    closed ? _add_subject_paths!(c, paths) : _add_open_subject_paths!(c, paths)
+function add_subject!(c::Clipper64, path::Path64; closed::Bool=true)
+    ok = closed ? _add_subject_path!(c, path) : _add_open_subject_path!(c, path)
+    ok || throw(ClipperError(:add_subject!))
+    return c
+end
+function add_subject!(c::Clipper64, paths::Paths64; closed::Bool=true)
+    ok = closed ? _add_subject_paths!(c, paths) : _add_open_subject_paths!(c, paths)
+    ok || throw(ClipperError(:add_subject!))
+    return c
+end
 
 """
     add_open_subject!(c, path_or_paths)
 
 Add open (polyline) subject geometry. Equivalent to `add_subject!(...; closed=false)`.
+Returns `c`; throws [`ClipperError`](@ref) on failure.
 """
-add_open_subject!(c::Clipper64, path::Path64) = _add_open_subject_path!(c, path)
-add_open_subject!(c::Clipper64, paths::Paths64) = _add_open_subject_paths!(c, paths)
+function add_open_subject!(c::Clipper64, path::Path64)
+    _add_open_subject_path!(c, path) || throw(ClipperError(:add_open_subject!))
+    return c
+end
+function add_open_subject!(c::Clipper64, paths::Paths64)
+    _add_open_subject_paths!(c, paths) || throw(ClipperError(:add_open_subject!))
+    return c
+end
 
 """
     add_clip!(c, path_or_paths)
 
-Add clip geometry (always treated as closed).
+Add clip geometry (always treated as closed). Returns `c`; throws
+[`ClipperError`](@ref) on failure.
 """
-add_clip!(c::Clipper64, path::Path64) = _add_clip_path!(c, path)
-add_clip!(c::Clipper64, paths::Paths64) = _add_clip_paths!(c, paths)
+function add_clip!(c::Clipper64, path::Path64)
+    _add_clip_path!(c, path) || throw(ClipperError(:add_clip!))
+    return c
+end
+function add_clip!(c::Clipper64, paths::Paths64)
+    _add_clip_paths!(c, paths) || throw(ClipperError(:add_clip!))
+    return c
+end
 
 """
     execute(c, cliptype, fillrule) -> (Paths64, Paths64)
@@ -153,12 +181,12 @@ function execute(c::Clipper64, cliptype::ClipType, fillrule::FillRule)
     sink = _PathsSink(Point64[])
     open_sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    ok = GC.@preserve sink open_sink begin
-        ccall((:clipper64_execute, libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Any, Ptr{Cvoid}),
-            c.ptr, Cint(cliptype), Cint(fillrule), sink, cb, open_sink, cb)
-    end
-    Bool(ok) || throw(ClipperError(:execute))
+    # `c`, `sink`, and `open_sink` are all ccall arguments and stay rooted for the
+    # duration of the call, even if a GC pass runs inside the append callbacks.
+    ok = ccall((:clipper64_execute, libcclipper2), Bool,
+        (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Any, Ptr{Cvoid}),
+        c, Cint(cliptype), Cint(fillrule), sink, cb, open_sink, cb)
+    ok || throw(ClipperError(:execute))
     return (sink.paths, open_sink.paths)
 end
 
@@ -171,25 +199,21 @@ hierarchy (outer contours with nested holes) plus the open-path solution as flat
 separately from the tree).
 """
 function execute_polytree(c::Clipper64, cliptype::ClipType, fillrule::FillRule)
-    sink = _TreeSink(PolyTree64(), Any[])
+    root = PolyTree64()
     open_sink = _PathsSink(Point64[])
     newnode_cb = @cfunction(_tree_newnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
     append_cb = @cfunction(_tree_append, Cvoid, (Ptr{Cvoid}, Point64))
     open_cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    # The C walk holds raw pointers to the root and to each freshly-created child
-    # only transiently, but a GC pass mid-callback could still collect a node that
-    # is not yet linked into a parent's `children` from Julia's view. We keep the
-    # root preserved; children are pushed into parent.children inside _tree_newnode
-    # *before* the pointer is returned, so each node is reachable from the root the
-    # instant it exists.
-    ok = GC.@preserve sink open_sink begin
-        ccall((:clipper64_execute_polytree, libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Any, Ptr{Cvoid}),
-            c.ptr, Cint(cliptype), Cint(fillrule),
-            sink.root, newnode_cb, append_cb, open_sink, open_cb)
-    end
-    Bool(ok) || throw(ClipperError(:execute_polytree))
-    return (sink.root, open_sink.paths)
+    # The C walk holds raw node pointers only transiently: ccall roots `root` (and
+    # `c` and `open_sink`), and _tree_newnode links each child into its parent's
+    # `children` *before* the pointer is returned, so each node is reachable from
+    # the root the instant it exists — a GC pass mid-callback cannot collect one.
+    ok = ccall((:clipper64_execute_polytree, libcclipper2), Bool,
+        (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Any, Ptr{Cvoid}),
+        c, Cint(cliptype), Cint(fillrule),
+        root, newnode_cb, append_cb, open_sink, open_cb)
+    ok || throw(ClipperError(:execute_polytree))
+    return (root, open_sink.paths)
 end
 
 """
@@ -198,6 +222,6 @@ end
 Reset the engine, discarding all added geometry. The handle can be reused.
 """
 function clear!(c::Clipper64)
-    ccall((:clipper64_clear, libcclipper2), Cvoid, (Ptr{Cvoid},), c.ptr)
+    ccall((:clipper64_clear, libcclipper2), Cvoid, (Ptr{Cvoid},), c)
     return c
 end

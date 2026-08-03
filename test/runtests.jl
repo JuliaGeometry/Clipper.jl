@@ -11,7 +11,6 @@ struct PtZ
     y::Int64
     z::Int64
 end
-PtZ(x::Integer, y::Integer, z::Integer) = PtZ(Int64(x), Int64(y), Int64(z))
 
 mutable struct ZNode
     pts::Vector{PtZ}
@@ -63,6 +62,7 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         p = Point64(3, 4)
         @test p.x == 3 && p.y == 4
         @test Point64(3, 4) == Point64(Int64(3), Int64(4))
+        @test Point64(Int32(3), Int32(4)) == Point64(3, 4)
         r = Rect64(0, 10, 10, 0)
         @test r.left == 0 && r.right == 10
         @test Path64 == Vector{Point64}
@@ -109,6 +109,17 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         add_clip!(c, b)
         x, _ = execute(c, ClipTypeXor, FillRuleNonZero)
         @test sum(abs(area(p)) for p in x) == 150.0
+    end
+
+    @testset "Degenerate single-path adds throw" begin
+        # Single-path adds validate vertex counts (closed ≥ 3, open ≥ 2) and the
+        # Julia wrappers convert the C `false` into a ClipperError.
+        c = Clipper64()
+        @test_throws ClipperError add_subject!(c, Point64[Point64(0, 0), Point64(1, 1)])
+        @test_throws ClipperError add_clip!(c, Point64[Point64(0, 0), Point64(1, 1)])
+        @test_throws ClipperError add_open_subject!(c, Point64[Point64(0, 0)])
+        # Batch adds defer degenerate paths to the engine, which ignores them.
+        @test add_subject!(c, Paths64([RECT])) === c
     end
 
     @testset "Open paths returned from execute" begin
@@ -305,22 +316,21 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
                 PtZ(5, 15, 104), PtZ(5, 10, 105)]
 
         c = Clipper64()
-        @test Bool(ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c.ptr, subject, length(subject)))
-        @test Bool(ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c.ptr, clip, length(clip)))
+        @test ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject))
+        @test ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip))
 
         root = ZNode(PtZ[], ZNode[])
         newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
         append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
-        ok = GC.@preserve root begin
-            ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Cuchar,
-                (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-                 Ptr{Cvoid}, Ptr{Cvoid}),
-                c.ptr, Cint(ClipTypeIntersection), Cint(FillRuleNonZero),
-                root, newnode_cb, append_cb, C_NULL, C_NULL)
-        end
-        @test Bool(ok)
+        # `c` and `root` are ccall arguments, so both stay rooted during the call.
+        ok = ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
+             Ptr{Cvoid}, Ptr{Cvoid}),
+            c, Cint(ClipTypeIntersection), Cint(FillRuleNonZero),
+            root, newnode_cb, append_cb, C_NULL, C_NULL)
+        @test ok
         @test length(root.children) == 1
         result = root.children[1].pts
         zof = Dict((p.x, p.y) => p.z for p in result)
@@ -351,22 +361,20 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
                 PtZ(39, 33, 5003), PtZ(-9, 35, 5004)]
 
         c = Clipper64()
-        @test Bool(ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c.ptr, subject, length(subject)))
-        @test Bool(ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Cuchar,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c.ptr, clip, length(clip)))
+        @test ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject))
+        @test ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip))
 
         root = ZNode(PtZ[], ZNode[])
         newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
         append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
-        ok = GC.@preserve root begin
-            ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Cuchar,
-                (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-                 Ptr{Cvoid}, Ptr{Cvoid}),
-                c.ptr, Cint(ClipTypeUnion), Cint(FillRuleNegative),
-                root, newnode_cb, append_cb, C_NULL, C_NULL)
-        end
-        @test Bool(ok)
+        ok = ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
+             Ptr{Cvoid}, Ptr{Cvoid}),
+            c, Cint(ClipTypeUnion), Cint(FillRuleNegative),
+            root, newnode_cb, append_cb, C_NULL, C_NULL)
+        @test ok
         @test length(root.children) == 1
         result = root.children[1].pts
         zof = Dict((p.x, p.y) => p.z for p in result)
@@ -388,12 +396,10 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         add_subject!(c, RECT)
         nocb = @cfunction(Clipper._paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
         sink = Clipper._PathsSink(Point64[])
-        ok = GC.@preserve sink begin
-            ccall((:clipper64_execute, Clipper.libcclipper2), Cuchar,
-                (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-                c.ptr, Cint(99), Cint(FillRuleNonZero), sink, nocb, C_NULL, C_NULL)
-        end
-        @test !Bool(ok)
+        ok = ccall((:clipper64_execute, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
+            c, Cint(99), Cint(FillRuleNonZero), sink, nocb, C_NULL, C_NULL)
+        @test !ok
         @test isempty(sink.paths)
     end
 end
