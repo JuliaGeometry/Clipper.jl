@@ -1,10 +1,12 @@
-using Documenter
 using Clipper
+using Documenter
+
+DocMeta.setdocmeta!(Clipper, :DocTestSetup, :(using Clipper); recursive=true)
 
 makedocs(
-    # See https://github.com/JuliaDocs/Documenter.jl/issues/868
+    modules = [Clipper],
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
-    sitename = "Clipper",
+    sitename = "Clipper.jl",
     pages = [
         "Home" => "index.md",
         "Reference" => "reference.md",
