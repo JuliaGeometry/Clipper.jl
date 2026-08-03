@@ -52,6 +52,13 @@ const libcclipper2 = abspath(
     joinpath(@__DIR__, "..", "deps", "libcclipper2.$(Libdl.dlext)"),
 )
 
+function __init__()
+    isfile(libcclipper2) || error(
+        "libcclipper2 not found at $libcclipper2. Build it from " *
+        "deps/cwrapper/cclipper2.cpp — see \"Testing this draft\" in README.md.",
+    )
+end
+
 # ============================================================
 # Enums — the wrapper-owned ABI values defined in cclipper2.cpp (mapped to
 # Clipper2's native enums inside the shim, so upstream renumbering can't
@@ -120,7 +127,6 @@ struct Point64
     x::Int64
     y::Int64
 end
-Point64(x::Integer, y::Integer) = Point64(Int64(x), Int64(y))
 
 """A polygon or polyline represented by a vector of [`Point64`](@ref) values."""
 const Path64 = Vector{Point64}

@@ -27,7 +27,7 @@ True if the polygon has positive orientation (counter-clockwise). Clipper2's
 `IsPositive`.
 """
 is_positive(path::Path64) =
-    Bool(ccall((:cclipper2_is_positive, libcclipper2), Cuchar, (Ptr{Point64}, Csize_t), path, length(path)))
+    ccall((:cclipper2_is_positive, libcclipper2), Bool, (Ptr{Point64}, Csize_t), path, length(path))
 
 """
     point_in_polygon(pt, path) -> Symbol
@@ -59,14 +59,16 @@ function rect_clip(rect::Rect64, paths)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ptrs = [pointer(p) for p in ps]
     counts = Csize_t[length(p) for p in ps]
-    ok = GC.@preserve sink ps ptrs counts begin
-        ccall((:cclipper2_rect_clip, libcclipper2), Cuchar,
+    # `ps` is only referenced through raw pointers, so it needs an explicit
+    # preserve; the other objects are ccall arguments (rooted automatically).
+    ok = GC.@preserve ps begin
+        ccall((:cclipper2_rect_clip, libcclipper2), Bool,
             (Int64, Int64, Int64, Int64,
              Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t, Any, Ptr{Cvoid}),
             rect.left, rect.top, rect.right, rect.bottom,
             ptrs, counts, length(ps), sink, cb)
     end
-    Bool(ok) || throw(ClipperError(:rect_clip))
+    ok || throw(ClipperError(:rect_clip))
     return sink.paths
 end
 
@@ -79,12 +81,10 @@ Compute the Minkowski sum of `pattern` and `path`. `closed` specifies whether
 function minkowski_sum(pattern::Path64, path::Path64, closed::Bool)
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    ok = GC.@preserve sink begin
-        ccall((:cclipper2_minkowski_sum, libcclipper2), Cuchar,
-            (Ptr{Point64}, Csize_t, Ptr{Point64}, Csize_t, Any, Ptr{Cvoid}, Cuchar),
-            pattern, length(pattern), path, length(path), sink, cb, closed)
-    end
-    Bool(ok) || throw(ClipperError(:minkowski_sum))
+    ok = ccall((:cclipper2_minkowski_sum, libcclipper2), Bool,
+        (Ptr{Point64}, Csize_t, Ptr{Point64}, Csize_t, Any, Ptr{Cvoid}, Bool),
+        pattern, length(pattern), path, length(path), sink, cb, closed)
+    ok || throw(ClipperError(:minkowski_sum))
     return sink.paths
 end
 
@@ -97,12 +97,10 @@ whether `path` is closed.
 function minkowski_diff(pattern::Path64, path::Path64, closed::Bool)
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    ok = GC.@preserve sink begin
-        ccall((:cclipper2_minkowski_difference, libcclipper2), Cuchar,
-            (Ptr{Point64}, Csize_t, Ptr{Point64}, Csize_t, Any, Ptr{Cvoid}, Cuchar),
-            pattern, length(pattern), path, length(path), sink, cb, closed)
-    end
-    Bool(ok) || throw(ClipperError(:minkowski_diff))
+    ok = ccall((:cclipper2_minkowski_difference, libcclipper2), Bool,
+        (Ptr{Point64}, Csize_t, Ptr{Point64}, Csize_t, Any, Ptr{Cvoid}, Bool),
+        pattern, length(pattern), path, length(path), sink, cb, closed)
+    ok || throw(ClipperError(:minkowski_diff))
     return sink.paths
 end
 
@@ -112,18 +110,19 @@ end
 Resolve self-intersections and merge overlapping contours within `paths` using
 `fillrule`.
 """
-function union_self(paths::Paths64, fillrule::FillRule)
-    isempty(paths) && return Paths64()
+function union_self(paths, fillrule::FillRule)
+    ps = _as_paths(paths)
+    isempty(ps) && return Paths64()
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    ptrs = [pointer(p) for p in paths]
-    counts = Csize_t[length(p) for p in paths]
-    ok = GC.@preserve sink paths ptrs counts begin
-        ccall((:cclipper2_union_self, libcclipper2), Cuchar,
+    ptrs = [pointer(p) for p in ps]
+    counts = Csize_t[length(p) for p in ps]
+    ok = GC.@preserve ps begin
+        ccall((:cclipper2_union_self, libcclipper2), Bool,
             (Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t, Cint, Any, Ptr{Cvoid}),
-            ptrs, counts, length(paths), Cint(fillrule), sink, cb)
+            ptrs, counts, length(ps), Cint(fillrule), sink, cb)
     end
-    Bool(ok) || throw(ClipperError(:union_self))
+    ok || throw(ClipperError(:union_self))
     return sink.paths
 end
 
@@ -133,18 +132,19 @@ end
 Drop vertices that lie on the straight edge between their neighbours, per path.
 Set `is_open=true` to preserve the endpoints of open paths.
 """
-function trim_collinear(paths::Paths64; is_open::Bool=false)
-    isempty(paths) && return Paths64()
+function trim_collinear(paths; is_open::Bool=false)
+    ps = _as_paths(paths)
+    isempty(ps) && return Paths64()
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-    ptrs = [pointer(p) for p in paths]
-    counts = Csize_t[length(p) for p in paths]
-    ok = GC.@preserve sink paths ptrs counts begin
-        ccall((:cclipper2_trim_collinear, libcclipper2), Cuchar,
-            (Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t, Cuchar, Any, Ptr{Cvoid}),
-            ptrs, counts, length(paths), is_open, sink, cb)
+    ptrs = [pointer(p) for p in ps]
+    counts = Csize_t[length(p) for p in ps]
+    ok = GC.@preserve ps begin
+        ccall((:cclipper2_trim_collinear, libcclipper2), Bool,
+            (Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t, Bool, Any, Ptr{Cvoid}),
+            ptrs, counts, length(ps), is_open, sink, cb)
     end
-    Bool(ok) || throw(ClipperError(:trim_collinear))
+    ok || throw(ClipperError(:trim_collinear))
     return sink.paths
 end
 
