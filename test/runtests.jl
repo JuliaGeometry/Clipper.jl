@@ -213,12 +213,16 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
     @testset "Free functions" begin
         b = Point64[Point64(5, 5), Point64(15, 5), Point64(15, 15), Point64(5, 15)]
 
-        @test sum(abs(area(p)) for p in union_paths(RECT, b)) == 175.0
-        @test sum(abs(area(p)) for p in intersect_paths(RECT, b)) == 25.0
-        @test sum(abs(area(p)) for p in difference_paths(RECT, b)) == 75.0
-        @test sum(abs(area(p)) for p in xor_paths(RECT, b)) == 150.0
+        @test sum(abs(area(p)) for p in
+                  union_paths(RECT, b, FillRuleNonZero)) == 175.0
+        @test sum(abs(area(p)) for p in
+                  intersect_paths(RECT, b, FillRuleNonZero)) == 25.0
+        @test sum(abs(area(p)) for p in
+                  difference_paths(RECT, b, FillRuleNonZero)) == 75.0
+        @test sum(abs(area(p)) for p in
+                  xor_paths(RECT, b, FillRuleNonZero)) == 150.0
 
-        infl = inflate_paths(RECT, 5.0; jointype=JoinTypeMiter, endtype=EndTypePolygon)
+        infl = inflate_paths(RECT, 5.0, JoinTypeMiter, EndTypePolygon)
         @test abs(area(infl[1])) == 400.0
 
         @test point_in_polygon(Point64(5, 5), RECT) == :inside
@@ -226,18 +230,18 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test point_in_polygon(Point64(0, 5), RECT) == :on
 
         # Self-union of a single rect is itself (area unchanged).
-        us = union_self(Paths64([RECT]))
+        us = union_self(Paths64([RECT]), FillRuleNonZero)
         @test sum(abs(area(p)) for p in us) == 100.0
 
         # Minkowski sum of a small square pattern over a path enlarges it.
         pattern = Point64[Point64(-1, -1), Point64(1, -1), Point64(1, 1), Point64(-1, 1)]
-        ms = minkowski_sum(pattern, RECT; closed=true)
+        ms = minkowski_sum(pattern, RECT, true)
         @test !isempty(ms)
 
         # Minkowski difference accepts the same closed kwarg.
-        md = minkowski_diff(pattern, RECT; closed=true)
+        md = minkowski_diff(pattern, RECT, true)
         @test !isempty(md)
-        @test !isempty(minkowski_diff(pattern, RECT; closed=false))
+        @test !isempty(minkowski_diff(pattern, RECT, false))
 
         # trim_collinear drops a vertex that sits on the straight edge between its
         # neighbours; the 4 true corners survive.
@@ -277,7 +281,7 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         touch(sz) = union_paths(Paths64([
             Point64[Point64(0, 0), Point64(sz, 0), Point64(sz, sz), Point64(0, sz)],
             Point64[Point64(sz, 0), Point64(2sz, 0), Point64(2sz, sz), Point64(sz, sz)],
-        ]), Paths64())
+        ]), FillRuleNonZero)
         @test length(touch(1)) == 1
         @test length(touch(2)) == 1
         @test length(touch(1000)) == 1

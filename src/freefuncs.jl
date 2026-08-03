@@ -71,9 +71,12 @@ function rect_clip(rect::Rect64, paths)
 end
 
 """
-    minkowski_sum(pattern, path; closed=true) -> Paths64
+    minkowski_sum(pattern, path, closed) -> Paths64
+
+Compute the Minkowski sum of `pattern` and `path`. `closed` specifies whether
+`path` is closed.
 """
-function minkowski_sum(pattern::Path64, path::Path64; closed::Bool=true)
+function minkowski_sum(pattern::Path64, path::Path64, closed::Bool)
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ok = GC.@preserve sink begin
@@ -86,9 +89,12 @@ function minkowski_sum(pattern::Path64, path::Path64; closed::Bool=true)
 end
 
 """
-    minkowski_diff(pattern, path; closed=true) -> Paths64
+    minkowski_diff(pattern, path, closed) -> Paths64
+
+Compute the Minkowski difference of `pattern` and `path`. `closed` specifies
+whether `path` is closed.
 """
-function minkowski_diff(pattern::Path64, path::Path64; closed::Bool=true)
+function minkowski_diff(pattern::Path64, path::Path64, closed::Bool)
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ok = GC.@preserve sink begin
@@ -101,13 +107,12 @@ function minkowski_diff(pattern::Path64, path::Path64; closed::Bool=true)
 end
 
 """
-    union_self(paths; fillrule=FillRuleNonZero) -> Paths64
+    union_self(paths, fillrule) -> Paths64
 
-Self-union: resolve self-intersections and merge overlapping contours within
-`paths` (NOT to be confused with `simplify_paths`, which would be Clipper2's
-RDP `SimplifyPaths` — a different algorithm).
+Resolve self-intersections and merge overlapping contours within `paths` using
+`fillrule`.
 """
-function union_self(paths::Paths64; fillrule::FillRule=FillRuleNonZero)
+function union_self(paths::Paths64, fillrule::FillRule)
     isempty(paths) && return Paths64()
     sink = _PathsSink(Point64[])
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
@@ -159,40 +164,47 @@ function _boolean(ct::ClipType, subjects, clips, fr::FillRule)
 end
 
 """
-    intersect_paths(subjects, clips; fillrule=FillRuleNonZero) -> Paths64
+    intersect_paths(subjects, clips, fillrule) -> Paths64
+
+Intersect `subjects` and `clips` using `fillrule`.
 """
-intersect_paths(subjects, clips; fillrule::FillRule=FillRuleNonZero) =
+intersect_paths(subjects, clips, fillrule::FillRule) =
     _boolean(ClipTypeIntersection, subjects, clips, fillrule)
 
 """
-    union_paths(subjects, clips=Paths64(); fillrule=FillRuleNonZero) -> Paths64
+    union_paths(subjects, fillrule) -> Paths64
+    union_paths(subjects, clips, fillrule) -> Paths64
 
-Union of `subjects` (and optional `clips`). With no clips, this is a self-union
-under the given fill rule.
+Union `subjects`, optionally with `clips`, using `fillrule`.
 """
-union_paths(subjects, clips=Paths64(); fillrule::FillRule=FillRuleNonZero) =
+union_paths(subjects, fillrule::FillRule) =
+    _boolean(ClipTypeUnion, subjects, Paths64(), fillrule)
+union_paths(subjects, clips, fillrule::FillRule) =
     _boolean(ClipTypeUnion, subjects, clips, fillrule)
 
 """
-    difference_paths(subjects, clips; fillrule=FillRuleNonZero) -> Paths64
+    difference_paths(subjects, clips, fillrule) -> Paths64
+
+Subtract `clips` from `subjects` using `fillrule`.
 """
-difference_paths(subjects, clips; fillrule::FillRule=FillRuleNonZero) =
+difference_paths(subjects, clips, fillrule::FillRule) =
     _boolean(ClipTypeDifference, subjects, clips, fillrule)
 
 """
-    xor_paths(subjects, clips; fillrule=FillRuleNonZero) -> Paths64
+    xor_paths(subjects, clips, fillrule) -> Paths64
+
+Compute the symmetric difference of `subjects` and `clips` using `fillrule`.
 """
-xor_paths(subjects, clips; fillrule::FillRule=FillRuleNonZero) =
+xor_paths(subjects, clips, fillrule::FillRule) =
     _boolean(ClipTypeXor, subjects, clips, fillrule)
 
 """
-    inflate_paths(paths, delta; jointype=JoinTypeMiter, endtype=EndTypePolygon,
+    inflate_paths(paths, delta, jointype, endtype;
                   miter_limit=2.0, arc_tolerance=0.0) -> Paths64
 
-Offset `paths` by `delta` using a one-shot `ClipperOffset`.
+Offset `paths` by `delta` using `jointype` and `endtype`.
 """
-function inflate_paths(paths, delta::Real;
-        jointype::JoinType=JoinTypeMiter, endtype::EndType=EndTypePolygon,
+function inflate_paths(paths, delta::Real, jointype::JoinType, endtype::EndType;
         miter_limit::Real=2.0, arc_tolerance::Real=0.0)
     o = ClipperOffset(; miter_limit=miter_limit, arc_tolerance=arc_tolerance)
     add_path!(o, _as_paths(paths), jointype, endtype)

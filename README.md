@@ -1,22 +1,23 @@
 # Clipper.jl (faithful Clipper2 wrapper)
 
-A Julia wrapper that exposes [Clipper2](https://github.com/AngusJohnson/Clipper2)'s
-API rather than reshaping it to match the historical Clipper1-based `Clipper.jl`.
+A Julia wrapper for [Clipper2](https://github.com/AngusJohnson/Clipper2)'s
+integer-coordinate polygon clipping and offsetting API.
 
-## What "faithful" means here
+## API
 
-- A single `FillRule` per boolean operation (not Clipper1's subject/clip split).
-- `add_subject!` / `add_clip!` / `add_open_subject!` (not
-  `add_path!(clipper, path, polytype, closed)`).
+- A single `FillRule` is used for each boolean operation.
+- Geometry is added with `add_subject!`, `add_clip!`, and `add_open_subject!`.
 - Native enum values: `ClipTypeNone`, `ClipTypeIntersection`, `ClipTypeUnion`,
   `ClipTypeDifference`, `ClipTypeXor`; `FillRuleEvenOdd`, `FillRuleNonZero`,
   `FillRulePositive`, `FillRuleNegative`; `JoinTypeSquare`, `JoinTypeBevel`,
   `JoinTypeRound`, `JoinTypeMiter`; and `EndTypePolygon`, `EndTypeJoined`,
   `EndTypeButt`, `EndTypeSquare`, `EndTypeRound`.
-- `union_self` (Clipper1's `SimplifyPolygons` self-union) is named distinctly
-  from Clipper2's RDP `SimplifyPaths`.
+- `union_self(paths, fillrule)` resolves self-intersections and overlapping
+  contours within a path collection.
 - Open paths are first-class: both `execute` and `execute_polytree` return
   `(closed, open)`.
+- Boolean convenience functions require an explicit `FillRule`; offset
+  convenience functions require explicit `JoinType` and `EndType` values.
 - The C ABI is likewise Clipper2-native: `clipper64_*` / `clipperoffset_*`
   handles, per-mode add entry points, and `Rect64` with `top` = min-y /
   `bottom` = max-y.

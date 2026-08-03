@@ -57,6 +57,11 @@ const libcclipper2 = abspath(
 # Clipper2's native enums inside the shim, so upstream renumbering can't
 # shift them). `::Cint`-backed so they pass cleanly through the `int` C ABI.
 # ============================================================
+"""
+    ClipType
+
+Boolean operation passed to [`execute`](@ref) and [`execute_polytree`](@ref).
+"""
 @enum ClipType::Cint begin
     ClipTypeNone = 0
     ClipTypeIntersection = 1
@@ -65,6 +70,11 @@ const libcclipper2 = abspath(
     ClipTypeXor = 4
 end
 
+"""
+    FillRule
+
+Rule used to determine whether a region is inside the subject and clip paths.
+"""
 @enum FillRule::Cint begin
     FillRuleEvenOdd = 0
     FillRuleNonZero = 1
@@ -72,6 +82,11 @@ end
     FillRuleNegative = 3
 end
 
+"""
+    JoinType
+
+Corner treatment used by [`ClipperOffset`](@ref) and [`inflate_paths`](@ref).
+"""
 @enum JoinType::Cint begin
     JoinTypeSquare = 0
     JoinTypeBevel = 1
@@ -79,6 +94,11 @@ end
     JoinTypeMiter = 3
 end
 
+"""
+    EndType
+
+End treatment used when offsetting closed polygons and open paths.
+"""
 @enum EndType::Cint begin
     EndTypePolygon = 0
     EndTypeJoined = 1
@@ -102,7 +122,10 @@ struct Point64
 end
 Point64(x::Integer, y::Integer) = Point64(Int64(x), Int64(y))
 
+"""A polygon or polyline represented by a vector of [`Point64`](@ref) values."""
 const Path64 = Vector{Point64}
+
+"""A collection of [`Path64`](@ref) values."""
 const Paths64 = Vector{Path64}
 
 """
@@ -142,8 +165,13 @@ mutable struct PolyTree64
 end
 PolyTree64() = PolyTree64(PolyPath64[])
 
+"""Return the contour stored in a [`PolyPath64`](@ref) node."""
 contour(n::PolyPath64) = n.polygon
+
+"""Return whether a [`PolyPath64`](@ref) node represents a hole."""
 ishole(n::PolyPath64) = n.ishole
+
+"""Return the child nodes of a [`PolyPath64`](@ref) or [`PolyTree64`](@ref)."""
 children(n::Union{PolyPath64,PolyTree64}) = n.children
 
 """
