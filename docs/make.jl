@@ -1,7 +1,7 @@
 using Clipper
 using Documenter
 
-DocMeta.setdocmeta!(Clipper, :DocTestSetup, :(using Clipper); recursive=true)
+DocMeta.setdocmeta!(Clipper, :DocTestSetup, :(using Clipper); recursive = true)
 
 makedocs(
     modules = [Clipper],

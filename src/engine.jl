@@ -67,9 +67,11 @@ The underlying C++ engine is freed by a finalizer.
 """
 mutable struct Clipper64
     ptr::Ptr{Cvoid}
-    function Clipper64(; preserve_collinear::Bool=true, reverse_solution::Bool=false)
-        p = ccall((:clipper64_create, libcclipper2), Ptr{Cvoid}, (Bool, Bool),
-            preserve_collinear, reverse_solution)
+    function Clipper64(; preserve_collinear::Bool = true, reverse_solution::Bool = false)
+        p = ccall(
+            (:clipper64_create, libcclipper2), Ptr{Cvoid}, (Bool, Bool),
+            preserve_collinear, reverse_solution
+        )
         c = new(p)
         finalizer(c) do x
             if x.ptr != C_NULL
@@ -92,17 +94,19 @@ Base.unsafe_convert(::Type{Ptr{Cvoid}}, c::Clipper64) = c.ptr
 # _clip, plus plural batch variants). ccall needs a constant symbol, so the six
 # helpers are generated per mode.
 for (mode, single, batch) in (
-    (:subject, :clipper64_add_subject, :clipper64_add_subjects),
-    (:open_subject, :clipper64_add_open_subject, :clipper64_add_open_subjects),
-    (:clip, :clipper64_add_clip, :clipper64_add_clips),
-)
+        (:subject, :clipper64_add_subject, :clipper64_add_subjects),
+        (:open_subject, :clipper64_add_open_subject, :clipper64_add_open_subjects),
+        (:clip, :clipper64_add_clip, :clipper64_add_clips),
+    )
     single_fn = Symbol(:_add_, mode, :_path!)
     batch_fn = Symbol(:_add_, mode, :_paths!)
     @eval begin
         function $single_fn(c::Clipper64, path::Path64)
-            return ccall(($(QuoteNode(single)), libcclipper2), Bool,
+            return ccall(
+                ($(QuoteNode(single)), libcclipper2), Bool,
                 (Ptr{Cvoid}, Ptr{Point64}, Csize_t),
-                c, path, length(path))
+                c, path, length(path)
+            )
         end
         function $batch_fn(c::Clipper64, paths::Paths64)
             isempty(paths) && return true
@@ -112,9 +116,11 @@ for (mode, single, batch) in (
             ptrs = [pointer(p) for p in paths]
             counts = Csize_t[length(p) for p in paths]
             return GC.@preserve paths begin
-                ccall(($(QuoteNode(batch)), libcclipper2), Bool,
+                ccall(
+                    ($(QuoteNode(batch)), libcclipper2), Bool,
                     (Ptr{Cvoid}, Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t),
-                    c, ptrs, counts, length(paths))
+                    c, ptrs, counts, length(paths)
+                )
             end
         end
     end
@@ -128,12 +134,12 @@ Returns `c`; throws [`ClipperError`](@ref) on failure. Single-path adds reject
 degenerate paths (closed paths need ≥ 3 vertices, open ≥ 2); batch adds pass
 everything through and leave degenerate paths to the engine, which ignores them.
 """
-function add_subject!(c::Clipper64, path::Path64; closed::Bool=true)
+function add_subject!(c::Clipper64, path::Path64; closed::Bool = true)
     ok = closed ? _add_subject_path!(c, path) : _add_open_subject_path!(c, path)
     ok || throw(ClipperError(:add_subject!))
     return c
 end
-function add_subject!(c::Clipper64, paths::Paths64; closed::Bool=true)
+function add_subject!(c::Clipper64, paths::Paths64; closed::Bool = true)
     ok = closed ? _add_subject_paths!(c, paths) : _add_open_subject_paths!(c, paths)
     ok || throw(ClipperError(:add_subject!))
     return c
@@ -183,9 +189,11 @@ function execute(c::Clipper64, cliptype::ClipType, fillrule::FillRule)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     # `c`, `sink`, and `open_sink` are all ccall arguments and stay rooted for the
     # duration of the call, even if a GC pass runs inside the append callbacks.
-    ok = ccall((:clipper64_execute, libcclipper2), Bool,
+    ok = ccall(
+        (:clipper64_execute, libcclipper2), Bool,
         (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Any, Ptr{Cvoid}),
-        c, Cint(cliptype), Cint(fillrule), sink, cb, open_sink, cb)
+        c, Cint(cliptype), Cint(fillrule), sink, cb, open_sink, cb
+    )
     ok || throw(ClipperError(:execute))
     return (sink.paths, open_sink.paths)
 end
@@ -208,10 +216,12 @@ function execute_polytree(c::Clipper64, cliptype::ClipType, fillrule::FillRule)
     # `c` and `open_sink`), and _tree_newnode links each child into its parent's
     # `children` *before* the pointer is returned, so each node is reachable from
     # the root the instant it exists — a GC pass mid-callback cannot collect one.
-    ok = ccall((:clipper64_execute_polytree, libcclipper2), Bool,
+    ok = ccall(
+        (:clipper64_execute_polytree, libcclipper2), Bool,
         (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Any, Ptr{Cvoid}),
         c, Cint(cliptype), Cint(fillrule),
-        root, newnode_cb, append_cb, open_sink, open_cb)
+        root, newnode_cb, append_cb, open_sink, open_cb
+    )
     ok || throw(ClipperError(:execute_polytree))
     return (root, open_sink.paths)
 end

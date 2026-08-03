@@ -25,7 +25,7 @@ import Libdl
 
 # Enums
 export ClipType, ClipTypeNone, ClipTypeIntersection, ClipTypeUnion, ClipTypeDifference,
-       ClipTypeXor
+    ClipTypeXor
 export FillRule, FillRuleEvenOdd, FillRuleNonZero, FillRulePositive, FillRuleNegative
 export JoinType, JoinTypeSquare, JoinTypeBevel, JoinTypeRound, JoinTypeMiter
 export EndType, EndTypePolygon, EndTypeJoined, EndTypeButt, EndTypeSquare, EndTypeRound
@@ -33,7 +33,7 @@ export EndType, EndTypePolygon, EndTypeJoined, EndTypeButt, EndTypeSquare, EndTy
 # Engine
 export Clipper64, ClipperError, Path64, Paths64, Point64, PolyPath64, PolyTree64, Rect64
 export add_clip!, add_open_subject!, add_subject!, children, clear!, contour, execute,
-       execute_polytree, ishole
+    execute_polytree, ishole
 
 # Offsetting
 export ClipperOffset
@@ -41,8 +41,8 @@ export add_path!
 
 # Free functions
 export area, difference_paths, inflate_paths, intersect_paths, is_positive, minkowski_diff,
-       minkowski_sum, point_in_polygon, rect_clip, trim_collinear, union_paths, union_self,
-       xor_paths
+    minkowski_sum, point_in_polygon, rect_clip, trim_collinear, union_paths, union_self,
+    xor_paths
 
 # ============================================================
 # Library handle
@@ -53,9 +53,9 @@ const libcclipper2 = abspath(
 )
 
 function __init__()
-    isfile(libcclipper2) || error(
+    return isfile(libcclipper2) || error(
         "libcclipper2 not found at $libcclipper2. Build it from " *
-        "deps/cwrapper/cclipper2.cpp — see \"Testing this draft\" in README.md.",
+            "deps/cwrapper/cclipper2.cpp — see \"Testing this draft\" in README.md.",
     )
 end
 
@@ -178,7 +178,7 @@ contour(n::PolyPath64) = n.polygon
 ishole(n::PolyPath64) = n.ishole
 
 """Return the child nodes of a [`PolyPath64`](@ref) or [`PolyTree64`](@ref)."""
-children(n::Union{PolyPath64,PolyTree64}) = n.children
+children(n::Union{PolyPath64, PolyTree64}) = n.children
 
 """
     ClipperError(fn)

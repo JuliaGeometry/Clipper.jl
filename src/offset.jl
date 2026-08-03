@@ -16,12 +16,16 @@ to `preserve_collinear=true`.
 """
 mutable struct ClipperOffset
     ptr::Ptr{Cvoid}
-    function ClipperOffset(; miter_limit::Real=2.0, arc_tolerance::Real=0.0,
-            preserve_collinear::Bool=false, reverse_solution::Bool=false)
-        p = ccall((:clipperoffset_create, libcclipper2), Ptr{Cvoid},
+    function ClipperOffset(;
+            miter_limit::Real = 2.0, arc_tolerance::Real = 0.0,
+            preserve_collinear::Bool = false, reverse_solution::Bool = false
+        )
+        p = ccall(
+            (:clipperoffset_create, libcclipper2), Ptr{Cvoid},
             (Cdouble, Cdouble, Bool, Bool),
             Float64(miter_limit), Float64(arc_tolerance),
-            preserve_collinear, reverse_solution)
+            preserve_collinear, reverse_solution
+        )
         c = new(p)
         finalizer(c) do x
             if x.ptr != C_NULL
@@ -46,9 +50,11 @@ Base.unsafe_convert(::Type{Ptr{Cvoid}}, o::ClipperOffset) = o.ptr
 Add a path to be offset, with the given join and end behavior.
 """
 function add_path!(o::ClipperOffset, path::Path64, jt::JoinType, et::EndType)
-    ok = ccall((:clipperoffset_add_path, libcclipper2), Bool,
+    ok = ccall(
+        (:clipperoffset_add_path, libcclipper2), Bool,
         (Ptr{Cvoid}, Ptr{Point64}, Csize_t, Cint, Cint),
-        o, path, length(path), Cint(jt), Cint(et))
+        o, path, length(path), Cint(jt), Cint(et)
+    )
     ok || throw(ClipperError(:add_path!))
     return o
 end
@@ -60,9 +66,11 @@ function add_path!(o::ClipperOffset, paths::Paths64, jt::JoinType, et::EndType)
     ptrs = [pointer(p) for p in paths]
     counts = Csize_t[length(p) for p in paths]
     ok = GC.@preserve paths begin
-        ccall((:clipperoffset_add_paths, libcclipper2), Bool,
+        ccall(
+            (:clipperoffset_add_paths, libcclipper2), Bool,
             (Ptr{Cvoid}, Ptr{Ptr{Point64}}, Ptr{Csize_t}, Csize_t, Cint, Cint),
-            o, ptrs, counts, length(paths), Cint(jt), Cint(et))
+            o, ptrs, counts, length(paths), Cint(jt), Cint(et)
+        )
     end
     ok || throw(ClipperError(:add_path!))
     return o
@@ -79,9 +87,11 @@ function execute(o::ClipperOffset, delta::Real)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     # `o` and `sink` are ccall arguments and stay rooted for the duration of the
     # call, even if a GC pass runs inside the append callback.
-    ok = ccall((:clipperoffset_execute, libcclipper2), Bool,
+    ok = ccall(
+        (:clipperoffset_execute, libcclipper2), Bool,
         (Ptr{Cvoid}, Cdouble, Any, Ptr{Cvoid}),
-        o, Float64(delta), sink, cb)
+        o, Float64(delta), sink, cb
+    )
     ok || throw(ClipperError(:execute))
     return sink.paths
 end

@@ -51,7 +51,7 @@ product once it is available.
 - The engine, offset, free-function, and Z-aware APIs are covered by the
   standalone test suite in `test/runtests.jl`.
 - Only integer coordinates (`Path64`) are supported. Double-precision `PathD`
-  support is a planned follow-up.
+  support could be added in the future.
 - The canonical C wrapper source is in `deps/cwrapper/`; the Yggdrasil recipe
   pulls that directory when building `libcclipper2`.
 
