@@ -148,7 +148,7 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test length(u[1]) == 6
 
         # preserve_collinear=false: minimal-vertex output.
-        c2 = Clipper64(; preserve_collinear=false)
+        c2 = Clipper64(; preserve_collinear = false)
         add_subject!(c2, Paths64([left, right]))
         u2, _ = execute(c2, ClipTypeUnion, FillRuleNonZero)
         @test length(u2) == 1
@@ -205,7 +205,7 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test abs(area(defl[1])) == 36.0
 
         # Round join inflate produces more vertices than miter (arc approximation).
-        o3 = ClipperOffset(; arc_tolerance=0.25)
+        o3 = ClipperOffset(; arc_tolerance = 0.25)
         add_path!(o3, RECT, JoinTypeRound, EndTypePolygon)
         rnd = execute(o3, 5.0)
         @test length(rnd) == 1
@@ -224,14 +224,22 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
     @testset "Free functions" begin
         b = Point64[Point64(5, 5), Point64(15, 5), Point64(15, 15), Point64(5, 15)]
 
-        @test sum(abs(area(p)) for p in
-                  union_paths(RECT, b, FillRuleNonZero)) == 175.0
-        @test sum(abs(area(p)) for p in
-                  intersect_paths(RECT, b, FillRuleNonZero)) == 25.0
-        @test sum(abs(area(p)) for p in
-                  difference_paths(RECT, b, FillRuleNonZero)) == 75.0
-        @test sum(abs(area(p)) for p in
-                  xor_paths(RECT, b, FillRuleNonZero)) == 150.0
+        @test sum(
+            abs(area(p)) for p in
+                union_paths(RECT, b, FillRuleNonZero)
+        ) == 175.0
+        @test sum(
+            abs(area(p)) for p in
+                intersect_paths(RECT, b, FillRuleNonZero)
+        ) == 25.0
+        @test sum(
+            abs(area(p)) for p in
+                difference_paths(RECT, b, FillRuleNonZero)
+        ) == 75.0
+        @test sum(
+            abs(area(p)) for p in
+                xor_paths(RECT, b, FillRuleNonZero)
+        ) == 150.0
 
         infl = inflate_paths(RECT, 5.0, JoinTypeMiter, EndTypePolygon)
         @test abs(area(infl[1])) == 400.0
@@ -256,8 +264,10 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
 
         # trim_collinear drops a vertex that sits on the straight edge between its
         # neighbours; the 4 true corners survive.
-        withmid = Point64[Point64(0, 0), Point64(5, 0), Point64(10, 0),
-                          Point64(10, 10), Point64(0, 10)]
+        withmid = Point64[
+            Point64(0, 0), Point64(5, 0), Point64(10, 0),
+            Point64(10, 10), Point64(0, 10),
+        ]
         tc = trim_collinear(Paths64([withmid]))
         @test length(tc) == 1
         @test length(tc[1]) == 4
@@ -270,8 +280,12 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         rc = rect_clip(tile, RECT)
         @test length(rc) == 1
         @test abs(area(rc[1])) == 25.0
-        @test pointset(rc) == Set([Point64(5, 5), Point64(10, 5),
-                                   Point64(10, 10), Point64(5, 10)])
+        @test pointset(rc) == Set(
+            [
+                Point64(5, 5), Point64(10, 5),
+                Point64(10, 10), Point64(5, 10),
+            ]
+        )
 
         # Path entirely inside survives unchanged; entirely outside vanishes.
         @test length(rect_clip(Rect64(-5, -5, 15, 15), RECT)) == 1
@@ -280,8 +294,10 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
 
         # Tiling invariant: cutting into quadrant tiles partitions the area
         # exactly (integer seams), so the tile areas sum to the original.
-        tiles = [Rect64(0, 0, 5, 5), Rect64(5, 0, 10, 5),
-                 Rect64(0, 5, 5, 10), Rect64(5, 5, 10, 10)]
+        tiles = [
+            Rect64(0, 0, 5, 5), Rect64(5, 0, 10, 5),
+            Rect64(0, 5, 5, 10), Rect64(5, 5, 10, 10),
+        ]
         tiled_area = sum(abs(area(p)) for t in tiles for p in rect_clip(t, RECT))
         @test tiled_area == 100.0
     end
@@ -289,10 +305,14 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
     @testset "Edge-touching integer union merges at every edge length" begin
         # Edge-touching polygons must merge even when their shared edge is only
         # one integer unit long.
-        touch(sz) = union_paths(Paths64([
-            Point64[Point64(0, 0), Point64(sz, 0), Point64(sz, sz), Point64(0, sz)],
-            Point64[Point64(sz, 0), Point64(2sz, 0), Point64(2sz, sz), Point64(sz, sz)],
-        ]), FillRuleNonZero)
+        touch(sz) = union_paths(
+            Paths64(
+                [
+                    Point64[Point64(0, 0), Point64(sz, 0), Point64(sz, sz), Point64(0, sz)],
+                    Point64[Point64(sz, 0), Point64(2sz, 0), Point64(2sz, sz), Point64(sz, sz)],
+                ]
+            ), FillRuleNonZero
+        )
         @test length(touch(1)) == 1
         @test length(touch(2)) == 1
         @test length(touch(1000)) == 1
@@ -312,24 +332,34 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         Z_INTERSECTION = typemin(Int64)
 
         subject = [PtZ(0, 0, 1), PtZ(10, 0, 2), PtZ(10, 10, 3), PtZ(0, 10, 4)]
-        clip = [PtZ(5, 5, 101), PtZ(15, 5, 102), PtZ(15, 15, 103),
-                PtZ(5, 15, 104), PtZ(5, 10, 105)]
+        clip = [
+            PtZ(5, 5, 101), PtZ(15, 5, 102), PtZ(15, 15, 103),
+            PtZ(5, 15, 104), PtZ(5, 10, 105),
+        ]
 
         c = Clipper64()
-        @test ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject))
-        @test ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip))
+        @test ccall(
+            (:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject)
+        )
+        @test ccall(
+            (:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip)
+        )
 
         root = ZNode(PtZ[], ZNode[])
         newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
         append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
         # `c` and `root` are ccall arguments, so both stay rooted during the call.
-        ok = ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-             Ptr{Cvoid}, Ptr{Cvoid}),
+        ok = ccall(
+            (:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
+            (
+                Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
+                Ptr{Cvoid}, Ptr{Cvoid},
+            ),
             c, Cint(ClipTypeIntersection), Cint(FillRuleNonZero),
-            root, newnode_cb, append_cb, C_NULL, C_NULL)
+            root, newnode_cb, append_cb, C_NULL, C_NULL
+        )
         @test ok
         @test length(root.children) == 1
         result = root.children[1].pts
@@ -355,25 +385,37 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         # clip rectangle.
         Z_INTERSECTION = typemin(Int64)
 
-        subject = [PtZ(15, 10, 1001), PtZ(26, 38, 1002),
-                   PtZ(17, 10, 1003), PtZ(10, 2, 1004)]
-        clip = [PtZ(-8, 8, 5001), PtZ(37, -1, 5002),
-                PtZ(39, 33, 5003), PtZ(-9, 35, 5004)]
+        subject = [
+            PtZ(15, 10, 1001), PtZ(26, 38, 1002),
+            PtZ(17, 10, 1003), PtZ(10, 2, 1004),
+        ]
+        clip = [
+            PtZ(-8, 8, 5001), PtZ(37, -1, 5002),
+            PtZ(39, 33, 5003), PtZ(-9, 35, 5004),
+        ]
 
         c = Clipper64()
-        @test ccall((:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject))
-        @test ccall((:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip))
+        @test ccall(
+            (:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject)
+        )
+        @test ccall(
+            (:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
+            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip)
+        )
 
         root = ZNode(PtZ[], ZNode[])
         newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
         append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
-        ok = ccall((:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-             Ptr{Cvoid}, Ptr{Cvoid}),
+        ok = ccall(
+            (:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
+            (
+                Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
+                Ptr{Cvoid}, Ptr{Cvoid},
+            ),
             c, Cint(ClipTypeUnion), Cint(FillRuleNegative),
-            root, newnode_cb, append_cb, C_NULL, C_NULL)
+            root, newnode_cb, append_cb, C_NULL, C_NULL
+        )
         @test ok
         @test length(root.children) == 1
         result = root.children[1].pts
@@ -396,9 +438,11 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         add_subject!(c, RECT)
         nocb = @cfunction(Clipper._paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
         sink = Clipper._PathsSink(Point64[])
-        ok = ccall((:clipper64_execute, Clipper.libcclipper2), Bool,
+        ok = ccall(
+            (:clipper64_execute, Clipper.libcclipper2), Bool,
             (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-            c, Cint(99), Cint(FillRuleNonZero), sink, nocb, C_NULL, C_NULL)
+            c, Cint(99), Cint(FillRuleNonZero), sink, nocb, C_NULL, C_NULL
+        )
         @test !ok
         @test isempty(sink.paths)
     end
