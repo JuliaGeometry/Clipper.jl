@@ -5,33 +5,6 @@ using Test
 # collinear-tolerant where noted. For exact-vertex tests we compare Sets of points.
 pointset(paths) = Set(Iterators.flatten(paths))
 
-# --- Z-provenance test scaffolding (raw C ABI; layout matches CPoint64Z) ---
-struct PtZ
-    x::Int64
-    y::Int64
-    z::Int64
-end
-
-mutable struct ZNode
-    pts::Vector{PtZ}
-    children::Vector{ZNode}
-end
-
-function _znewnode(parent_ptr::Ptr{Cvoid}, ::Bool)
-    parent = unsafe_pointer_to_objref(parent_ptr)::ZNode
-    child = ZNode(PtZ[], ZNode[])
-    # Push before returning the pointer so the child is GC-reachable from the
-    # root the instant the C side holds its address.
-    push!(parent.children, child)
-    return pointer_from_objref(child)
-end
-
-function _zappend(node_ptr::Ptr{Cvoid}, pt::PtZ)
-    node = unsafe_pointer_to_objref(node_ptr)::ZNode
-    push!(node.pts, pt)
-    return nothing
-end
-
 const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 10)]
 
 @testset "Clipper.jl (faithful Clipper2 wrapper)" begin
@@ -67,8 +40,24 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test r.left == 0 && r.right == 10
         @test Path64 == Vector{Point64}
         @test Paths64 == Vector{Vector{Point64}}
+
+        pz = Point64Z(3, 4, 5)
+        @test (pz.x, pz.y, pz.z) == (3, 4, 5)
+        @test sizeof(Point64Z) == 3 * sizeof(Int64)
+        @test Path64Z == Vector{Point64Z}
+        @test Paths64Z == Vector{Vector{Point64Z}}
+        @test Z_INTERSECTION == typemin(Int64)
+
         n = PolyPath64()
         @test isempty(contour(n)) && !ishole(n) && isempty(children(n))
+        nz = PolyPath64Z()
+        @test isempty(contour(nz)) && !ishole(nz) && isempty(children(nz))
+    end
+
+    @testset "NULL handles throw" begin
+        @test_throws ClipperError Clipper._checked_handle(C_NULL, :test_create)
+        ptr = Ptr{Cvoid}(1)
+        @test Clipper._checked_handle(ptr, :test_create) == ptr
     end
 
     @testset "Engine boolean operations" begin
@@ -118,6 +107,10 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test_throws ClipperError add_subject!(c, Point64[Point64(0, 0), Point64(1, 1)])
         @test_throws ClipperError add_clip!(c, Point64[Point64(0, 0), Point64(1, 1)])
         @test_throws ClipperError add_open_subject!(c, Point64[Point64(0, 0)])
+        @test_throws ClipperError add_subject!(
+            c, Point64Z[Point64Z(0, 0, 1), Point64Z(1, 1, 2)]
+        )
+        @test_throws ClipperError add_open_subject!(c, Point64Z[Point64Z(0, 0, 1)])
         # Batch adds defer degenerate paths to the engine, which ignores them.
         @test add_subject!(c, Paths64([RECT])) === c
     end
@@ -318,51 +311,29 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test length(touch(1000)) == 1
     end
 
-    @testset "Z provenance through the raw C ABI" begin
-        # The *_z entry points tag input vertices with an application z and read
-        # back output-vertex z. Three classes must be distinguishable:
-        #   1. original vertices → keep their input z,
-        #   2. invented intersection vertices → Z_INTERSECTION (INT64_MIN),
-        #   3. intersections coinciding with an input endpoint → that endpoint's z
-        #      (Clipper2's SetZ pre-seeds these; sentinel_zcb re-derives the same
-        #      answer from the four edge endpoints and must not clobber them).
-        # Geometry: subject square (0..10)², clip square (5..15)² with an extra
-        # vertex at (5,10) exactly where the subject's top edge crosses the clip's
-        # left edge — the class-3 case.
-        Z_INTERSECTION = typemin(Int64)
-
-        subject = [PtZ(0, 0, 1), PtZ(10, 0, 2), PtZ(10, 10, 3), PtZ(0, 10, 4)]
-        clip = [
-            PtZ(5, 5, 101), PtZ(15, 5, 102), PtZ(15, 15, 103),
-            PtZ(5, 15, 104), PtZ(5, 10, 105),
+    @testset "Z provenance through the Julia API" begin
+        # Three classes must be distinguishable: original tagged vertices,
+        # invented intersections, and intersections coinciding with an endpoint.
+        subject = Point64Z[
+            Point64Z(0, 0, 1), Point64Z(10, 0, 2),
+            Point64Z(10, 10, 3), Point64Z(0, 10, 4),
+        ]
+        clip = Point64Z[
+            Point64Z(5, 5, 101), Point64Z(15, 5, 102), Point64Z(15, 15, 103),
+            Point64Z(5, 15, 104), Point64Z(5, 10, 105),
         ]
 
         c = Clipper64()
-        @test ccall(
-            (:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject)
+        @test add_subject!(c, subject) === c
+        @test add_clip!(c, clip) === c
+        root, open_result = execute_polytree_z(
+            c, ClipTypeIntersection, FillRuleNonZero
         )
-        @test ccall(
-            (:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip)
-        )
-
-        root = ZNode(PtZ[], ZNode[])
-        newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
-        append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
-        # `c` and `root` are ccall arguments, so both stay rooted during the call.
-        ok = ccall(
-            (:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
-            (
-                Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-                Ptr{Cvoid}, Ptr{Cvoid},
-            ),
-            c, Cint(ClipTypeIntersection), Cint(FillRuleNonZero),
-            root, newnode_cb, append_cb, C_NULL, C_NULL
-        )
-        @test ok
-        @test length(root.children) == 1
-        result = root.children[1].pts
+        @test root isa PolyTree64Z
+        @test open_result isa Paths64Z
+        @test isempty(open_result)
+        @test length(children(root)) == 1
+        result = contour(children(root)[1])
         zof = Dict((p.x, p.y) => p.z for p in result)
         @test Set(keys(zof)) == Set([(5, 5), (10, 5), (10, 10), (5, 10)])
         @test zof[(5, 5)] == 101              # original clip vertex
@@ -371,62 +342,94 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test zof[(5, 10)] == 105             # endpoint-coincident: z preserved
     end
 
-    @testset "Z provenance through join/split paths" begin
-        # The z contract has exactly two outcomes per output vertex: some input
-        # vertex's z, or Z_INTERSECTION. A third outcome — z = 0 with no input
-        # carrying 0 — means a vertex reached the output from an engine path that
-        # applied no z policy at all. Three such paths exist upstream (Split and
-        # CheckJoinLeft/Right create output points from an intersection whose z
-        # GetLineIntersectPt left at 0, and never call SetZ), so no wrapper
-        # callback can cover them. The engine must apply SetZ on those paths.
-        # This geometry reaches one of them.
-        # The subject is a simple quadrilateral with nonzero input tags. The extra
-        # output vertex at (11, 4) is invented where the subject's spike leaves the
-        # clip rectangle.
-        Z_INTERSECTION = typemin(Int64)
-
-        subject = [
-            PtZ(15, 10, 1001), PtZ(26, 38, 1002),
-            PtZ(17, 10, 1003), PtZ(10, 2, 1004),
+    @testset "Z PolyTree hierarchy" begin
+        outer = Point64Z[
+            Point64Z(0, 0, 1), Point64Z(20, 0, 2),
+            Point64Z(20, 20, 3), Point64Z(0, 20, 4),
         ]
-        clip = [
-            PtZ(-8, 8, 5001), PtZ(37, -1, 5002),
-            PtZ(39, 33, 5003), PtZ(-9, 35, 5004),
+        inner = Point64Z[
+            Point64Z(5, 5, 11), Point64Z(15, 5, 12),
+            Point64Z(15, 15, 13), Point64Z(5, 15, 14),
+        ]
+        c = Clipper64()
+        add_subject!(c, outer)
+        add_clip!(c, inner)
+        root, _ = execute_polytree_z(c, ClipTypeDifference, FillRuleNonZero)
+        @test length(children(root)) == 1
+        outer_node = children(root)[1]
+        @test !ishole(outer_node)
+        @test length(children(outer_node)) == 1
+        @test ishole(children(outer_node)[1])
+        @test Set(p.z for p in contour(children(outer_node)[1])) == Set(11:14)
+    end
+
+    @testset "Mixed narrow and Z-aware inputs" begin
+        subject = Point64Z[
+            Point64Z(0, 0, 1), Point64Z(10, 0, 2),
+            Point64Z(10, 10, 3), Point64Z(0, 10, 4),
+        ]
+        clip = Point64[
+            Point64(5, 5), Point64(15, 5), Point64(15, 15), Point64(5, 15),
+        ]
+        c = Clipper64()
+        add_subject!(c, subject)
+        add_clip!(c, clip)
+        root, _ = execute_polytree_z(c, ClipTypeIntersection, FillRuleNonZero)
+        zof = Dict((p.x, p.y) => p.z for p in contour(children(root)[1]))
+        @test zof[(5, 5)] == 0
+        @test zof[(10, 10)] == 3
+        @test zof[(10, 5)] == Z_INTERSECTION
+    end
+
+    @testset "Z open-path single and batch adds" begin
+        line = Point64Z[Point64Z(-5, 5, 11), Point64Z(25, 5, 12)]
+        clip = Point64Z[
+            Point64Z(0, 0, 101), Point64Z(10, 0, 102),
+            Point64Z(10, 10, 103), Point64Z(0, 10, 104),
+        ]
+
+        for batch in (false, true)
+            c = Clipper64()
+            added_open = batch ?
+                add_open_subject!(c, Paths64Z([line])) : add_open_subject!(c, line)
+            added_clip = batch ? add_clip!(c, clip) : add_clip!(c, Paths64Z([clip]))
+            @test added_open === c
+            @test added_clip === c
+
+            root, open_result = execute_polytree_z(
+                c, ClipTypeIntersection, FillRuleNonZero
+            )
+            @test isempty(children(root))
+            @test length(open_result) == 1
+            @test Set((p.x, p.y) for p in open_result[1]) == Set([(0, 5), (10, 5)])
+            @test all(p -> p.z == Z_INTERSECTION, open_result[1])
+        end
+    end
+
+    @testset "Z provenance through join/split paths" begin
+        # A z of zero here would mean an engine path applied no z policy. This
+        # geometry reaches one of the patched join/split paths.
+        subject = Point64Z[
+            Point64Z(15, 10, 1001), Point64Z(26, 38, 1002),
+            Point64Z(17, 10, 1003), Point64Z(10, 2, 1004),
+        ]
+        clip = Point64Z[
+            Point64Z(-8, 8, 5001), Point64Z(37, -1, 5002),
+            Point64Z(39, 33, 5003), Point64Z(-9, 35, 5004),
         ]
 
         c = Clipper64()
-        @test ccall(
-            (:clipper64_add_subject_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, subject, length(subject)
-        )
-        @test ccall(
-            (:clipper64_add_clip_z, Clipper.libcclipper2), Bool,
-            (Ptr{Cvoid}, Ptr{PtZ}, Csize_t), c, clip, length(clip)
-        )
-
-        root = ZNode(PtZ[], ZNode[])
-        newnode_cb = @cfunction(_znewnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
-        append_cb = @cfunction(_zappend, Cvoid, (Ptr{Cvoid}, PtZ))
-        ok = ccall(
-            (:clipper64_execute_polytree_z, Clipper.libcclipper2), Bool,
-            (
-                Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid},
-                Ptr{Cvoid}, Ptr{Cvoid},
-            ),
-            c, Cint(ClipTypeUnion), Cint(FillRuleNegative),
-            root, newnode_cb, append_cb, C_NULL, C_NULL
-        )
-        @test ok
-        @test length(root.children) == 1
-        result = root.children[1].pts
+        @test add_subject!(c, Paths64Z([subject])) === c
+        @test add_clip!(c, Paths64Z([clip])) === c
+        root, _ = execute_polytree_z(c, ClipTypeUnion, FillRuleNegative)
+        @test length(children(root)) == 1
+        result = contour(children(root)[1])
         zof = Dict((p.x, p.y) => p.z for p in result)
         @test Set(keys(zof)) == Set([(15, 10), (26, 38), (17, 10), (11, 4)])
         @test zof[(15, 10)] == 1001
         @test zof[(26, 38)] == 1002
         @test zof[(17, 10)] == 1003
-        @test zof[(11, 4)] == Z_INTERSECTION  # 0 without the patch
-
-        # No output vertex may carry an untagged z, whatever the mechanism.
+        @test zof[(11, 4)] == Z_INTERSECTION  # 0 without the Clipper2 patch
         @test !any(p -> p.z == 0, result)
     end
 
@@ -437,7 +440,7 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         c = Clipper64()
         add_subject!(c, RECT)
         nocb = @cfunction(Clipper._paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
-        sink = Clipper._PathsSink(Point64[])
+        sink = Clipper._PathsSink(Point64)
         ok = ccall(
             (:clipper64_execute, Clipper.libcclipper2), Bool,
             (Ptr{Cvoid}, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),

@@ -32,9 +32,15 @@ EndType
 Point64
 Path64
 Paths64
+Point64Z
+Path64Z
+Paths64Z
+Z_INTERSECTION
 Rect64
 PolyPath64
 PolyTree64
+PolyPath64Z
+PolyTree64Z
 ClipperError
 children
 contour
@@ -50,6 +56,7 @@ add_open_subject!
 add_clip!
 execute(::Clipper64, ::ClipType, ::FillRule)
 execute_polytree
+execute_polytree_z
 clear!(::Clipper64)
 ```
 
