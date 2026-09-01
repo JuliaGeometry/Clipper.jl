@@ -1,321 +1,246 @@
+"""
+    Clipper
+
+A Julia wrapper for the Clipper2 polygon-clipping and offsetting library.
+
+This module exposes Clipper2's integer-coordinate API:
+
+  - `Clipper64`, the boolean-operation engine
+    - `add_subject!`/`add_clip!`/`add_open_subject!` to add geometry
+    - `ClipType`/`FillRule` enums to specify Boolean operations
+    - `execute`, `execute_polytree`, and `clear!`
+  - `ClipperOffset`, the offsetting engine
+    - `add_path!` to add geometry
+    - `JoinType` and `EndType` enums to specify offsetting behavior
+    - `execute` and `clear!`
+  - Z-aware `Point64Z` input and `execute_polytree_z` results for vertex provenance
+  - Free functions such as `union_paths`, `intersect_paths`, `difference_paths`,
+    `xor_paths`, `inflate_paths`, and `minkowski_sum`
+
+All geometry crosses the FFI boundary through the C shim `libcclipper2` (`cclipper2.cpp`),
+which calls Clipper2's C++ API. Results are returned via Julia callbacks.
+"""
 module Clipper
 
-using Clipper_jll
+import Libdl
 
-export PolyType, PolyTypeSubject, PolyTypeClip, ClipType, ClipTypeIntersection,
-       ClipTypeUnion, ClipTypeDifference, ClipTypeXor, PolyFillType, PolyFillTypeEvenOdd,
-       PolyFillTypeNonZero, PolyFillTypePositive, PolyFillTypeNegative, JoinType,
-       JoinTypeSquare, JoinTypeRound, JoinTypeMiter, EndType, EndTypeClosedPolygon,
-       EndTypeClosedLine, EndTypeOpenSquare, EndTypeOpenRound, EndTypeOpenButt, Clip,
-       add_path!, add_paths!, execute, clear!, get_bounds, IntPoint, IntRect, orientation,
-       area, pointinpolygon, ClipperOffset, PolyNode, execute_pt, contour, ishole, contour,
-       children, tofloat, minkowski_sum, minkowski_difference
+# Enums
+export ClipType, ClipTypeNone, ClipTypeIntersection, ClipTypeUnion, ClipTypeDifference,
+    ClipTypeXor
+export FillRule, FillRuleEvenOdd, FillRuleNonZero, FillRulePositive, FillRuleNegative
+export JoinType, JoinTypeSquare, JoinTypeBevel, JoinTypeRound, JoinTypeMiter
+export EndType, EndTypePolygon, EndTypeJoined, EndTypeButt, EndTypeSquare, EndTypeRound
 
-@enum PolyType PolyTypeSubject = 0 PolyTypeClip = 1
+# Engine
+export Clipper64, ClipperError, Path64, Paths64, Point64, PolyPath64, PolyTree64, Rect64
+export Path64Z, Paths64Z, Point64Z, PolyPath64Z, PolyTree64Z, Z_INTERSECTION
+export add_clip!, add_open_subject!, add_subject!, children, clear!, contour, execute,
+    execute_polytree, execute_polytree_z, ishole
 
-@enum ClipType ClipTypeIntersection = 0 ClipTypeUnion = 1 ClipTypeDifference = 2 ClipTypeXor = 3
+# Offsetting
+export ClipperOffset
+export add_path!
 
-@enum PolyFillType PolyFillTypeEvenOdd = 0 PolyFillTypeNonZero = 1 PolyFillTypePositive = 2 PolyFillTypeNegative = 3
+# Free functions
+export area, difference_paths, inflate_paths, intersect_paths, is_positive, minkowski_diff,
+    minkowski_sum, point_in_polygon, rect_clip, trim_collinear, union_paths, union_self,
+    xor_paths
 
-@enum JoinType JoinTypeSquare = 0 JoinTypeRound = 1 JoinTypeMiter = 2
+# ============================================================
+# Library handle
+# ============================================================
+# Local builds place the platform-specific C shim in deps/.
+const libcclipper2 = abspath(
+    joinpath(@__DIR__, "..", "deps", "libcclipper2.$(Libdl.dlext)"),
+)
 
-@enum EndType EndTypeClosedPolygon = 0 EndTypeClosedLine = 1 EndTypeOpenSquare = 2 EndTypeOpenRound = 3 EndTypeOpenButt = 4
+function __init__()
+    return isfile(libcclipper2) || error(
+        "libcclipper2 not found at $libcclipper2. Build it from " *
+            "deps/cwrapper/cclipper2.cpp — see \"Testing this draft\" in README.md.",
+    )
+end
 
-struct IntPoint
-    X::Int64
-    Y::Int64
+# ============================================================
+# Enums — the wrapper-owned ABI values defined in cclipper2.cpp (mapped to
+# Clipper2's native enums inside the shim, so upstream renumbering can't
+# shift them). `::Cint`-backed so they pass cleanly through the `int` C ABI.
+# ============================================================
+"""
+    ClipType
+
+Boolean operation passed to [`execute`](@ref) and [`execute_polytree`](@ref).
+"""
+@enum ClipType::Cint begin
+    ClipTypeNone = 0
+    ClipTypeIntersection = 1
+    ClipTypeUnion = 2
+    ClipTypeDifference = 3
+    ClipTypeXor = 4
 end
 
 """
-    IntPoint(x, y)
+    FillRule
 
-Create an IntPoint from integer values.
-
-    IntPoint(x, y, magnitude, precision)
-
-Create an IntPoint from floating point values with the given number of digits of precision.
-magnitude = number of digits above zero (90 => 2, 9 => 1, 0.9 => 0, 0.09 => -1)
-sigdigits = number of digits to preserve (94.3856 with 4 => 94.39)
-
-```julia
-a = IntPoint(5.483, 55.8739, 2, 4) # [548, 5587]
-b,c = tofloat(a, 2, 4)             # 5.48, 55.87
-```
+Rule used to determine whether a region is inside the subject and clip paths.
 """
-function IntPoint(x::Union{Float16,Float32,Float64}, y::Union{Float16,Float32,Float64},
-                  magnitude::Int64, sigdigits::Int64)
-    factor = exp10(sigdigits - magnitude)
-    xInt = Int(round(x * factor))
-    yInt = Int(round(y * factor))
-    return IntPoint(xInt, yInt)
+@enum FillRule::Cint begin
+    FillRuleEvenOdd = 0
+    FillRuleNonZero = 1
+    FillRulePositive = 2
+    FillRuleNegative = 3
 end
 
 """
-    tofloat(intpoint, magnitude, precision)
+    JoinType
 
-Restore an IntPoint to floating point values using the specified magnitude and precision.
-magnitude = number of digits to be above zero (90 => 2, 9 => 1, 0.9 => 0, 0.09 => -1)
-sigdigits = number of digits that were preserved (94.3856 with 4 => 94.39)
+Corner treatment used by [`ClipperOffset`](@ref) and [`inflate_paths`](@ref).
 """
-function tofloat(intpoint::IntPoint, magnitude::Int64, sigdigits::Int64)
-    factor = exp10(sigdigits - magnitude)
-    xFloat = intpoint.X / factor
-    yFloat = intpoint.Y / factor
-    return xFloat, yFloat
+@enum JoinType::Cint begin
+    JoinTypeSquare = 0
+    JoinTypeBevel = 1
+    JoinTypeRound = 2
+    JoinTypeMiter = 3
 end
 
-mutable struct PolyNode{T}
-    contour::Vector{T}
-    hole::Bool
-    open::Bool
-    children::Vector{PolyNode{T}}
-    parent::PolyNode{T}
-    PolyNode{T}(a, b, c) where {T} = new{T}(a, b, c)
-    function PolyNode{T}(a, b, c, d) where {T}
-        p = new{T}(a, b, c, d)
-        p.parent = p
-        return p
-    end
-    PolyNode{T}(a, b, c, d, e) where {T} = new{T}(a, b, c, d, e)
+"""
+    EndType
+
+End treatment used when offsetting closed polygons and open paths.
+"""
+@enum EndType::Cint begin
+    EndTypePolygon = 0
+    EndTypeJoined = 1
+    EndTypeButt = 2
+    EndTypeSquare = 3
+    EndTypeRound = 4
 end
 
-Base.convert(::Type{PolyNode{T}}, x::PolyNode{T}) where {T} = x
-function Base.convert(::Type{PolyNode{S}}, x::PolyNode{T}) where {S,T}
-    parent(x) !== x && error("must convert a top-level PolyNode (i.e. a PolyTree).")
+# ============================================================
+# Types — layout-compatible with the C ABI structs (CPoint64/CRect64).
+# ============================================================
+"""
+    Point64(x, y)
 
-    pn = PolyNode{S}(convert(Vector{S}, contour(x)), ishole(x), isopen(x))
-    pn.children = [PolyNode(y, pn) for y in children(x)]
-    return pn.parent = pn
-end
-function PolyNode(x::PolyNode, parent::PolyNode{S}) where {S}
-    pn = PolyNode{S}(contour(x), ishole(x), isopen(x))
-    pn.children = [PolyNode(y, pn) for y in children(x)]
-    pn.parent = parent
-    return pn
-end
-
-@inline ishole(x::PolyNode) = x.hole
-@inline Base.isopen(x::PolyNode) = x.open
-@inline contour(x::PolyNode) = x.contour
-@inline children(x::PolyNode) = x.children
-@inline Base.parent(x::PolyNode) = x.parent
-
-function Base.show(io::IO, node::PolyNode)
-    if parent(node) === node
-        print(io, "Top-level PolyNode with $(length(children(node))) immediate children.")
-    else
-        if isopen(node)
-            print(io, "Open ")
-        else
-            print(io, "Closed ")
-        end
-        print(io, "PolyNode ")
-        ishole(node) && print(io, "(hole) ")
-        println(io, "with contour:")
-        show(io, contour(node))
-        println(io, "")
-        print(io, "...and $(length(children(node))) immediate children.")
-    end
+An integer-coordinate 2D point. Layout-compatible with Clipper2Lib::Point64
+(two `Int64`).
+"""
+struct Point64
+    x::Int64
+    y::Int64
 end
 
-function Base.show(io::IO, point::IntPoint)
-    return print(io, "[$(point.X),$(point.Y)]")
+"""
+    Point64Z(x, y, z)
+
+An integer-coordinate 2D point carrying a signed 64-bit application tag. Z-aware
+operations preserve input tags and mark vertices invented at edge intersections
+with [`Z_INTERSECTION`](@ref).
+"""
+struct Point64Z
+    x::Int64
+    y::Int64
+    z::Int64
 end
 
-function append_poly!(outputArray::Ptr{Cvoid}, polyIndex::Csize_t, point::IntPoint)
-    ourArray = unsafe_pointer_to_objref(outputArray)::Vector{Vector{IntPoint}}
+"""Sentinel tag assigned to vertices invented at edge intersections."""
+const Z_INTERSECTION = typemin(Int64)
 
-    while (polyIndex + 1) > length(ourArray)
-        push!(ourArray, Vector{IntPoint}())
-    end
+"""A polygon or polyline represented by a vector of [`Point64`](@ref) values."""
+const Path64 = Vector{Point64}
 
-    return push!(ourArray[polyIndex + 1], point)
-end
+"""A collection of [`Path64`](@ref) values."""
+const Paths64 = Vector{Path64}
 
-# private
-function appendpn!(jl_node::Ptr{Cvoid}, point::IntPoint)
-    node = unsafe_pointer_to_objref(jl_node)::PolyNode{IntPoint}
-    return push!(contour(node), point)
-end
+"""A tagged polygon or polyline represented by a vector of [`Point64Z`](@ref) values."""
+const Path64Z = Vector{Point64Z}
 
-# private
-function newnode(outputTree::Ptr{Cvoid}, ishole::Bool, isopen::Bool)
-    tree = unsafe_pointer_to_objref(outputTree)::PolyNode{IntPoint}
-    node = PolyNode{IntPoint}(IntPoint[], ishole, isopen, PolyNode{IntPoint}[], tree)
-    push!(children(tree), node)
-    return pointer_from_objref(node)
-end
+"""A collection of [`Path64Z`](@ref) values."""
+const Paths64Z = Vector{Path64Z}
 
-#==============================================================#
-# Static functions
-#==============================================================#
-function orientation(path::Vector{IntPoint})
-    return ccall((:orientation, libcclipper), Cuchar, (Ptr{IntPoint}, Csize_t), path,
-                 length(path)) == 1
-end
+"""
+    Rect64(left, top, right, bottom)
 
-function area(path::Vector{IntPoint})
-    return ccall((:area, libcclipper), Float64, (Ptr{IntPoint}, Csize_t), path,
-                 length(path))
-end
-
-function pointinpolygon(pt::IntPoint, path::Vector{IntPoint})
-    return ccall((:pointinpolygon, libcclipper), Cint, (IntPoint, Ptr{IntPoint}, Csize_t),
-                 pt, path, length(path))
-end
-
-#==============================================================#
-# Clipper object
-#==============================================================#
-mutable struct Clip
-    clipper_ptr::Ptr{Cvoid}
-
-    function Clip()
-        clipper = new(ccall((:get_clipper, libcclipper), Ptr{Cvoid}, ()))
-        finalizer(c -> ccall((:delete_clipper, libcclipper), Cvoid, (Ptr{Cvoid},),
-                             c.clipper_ptr), clipper)
-        return clipper
-    end
-end
-
-function add_path!(c::Clip, path::Vector{IntPoint}, polyType::PolyType, closed::Bool)
-    return ccall((:add_path, libcclipper), Cuchar,
-                 (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cuchar), c.clipper_ptr, path,
-                 length(path), Int(polyType), closed) == 1
-end
-
-function add_paths!(c::Clip, paths::Vector{Vector{IntPoint}}, polyType::PolyType,
-                    closed::Bool)
-    lengths = Vector{UInt64}()
-    for path in paths
-        push!(lengths, length(path))
-    end
-
-    return ccall((:add_paths, libcclipper), Cuchar,
-                 (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cuchar),
-                 c.clipper_ptr, paths, lengths, length(paths), Int(polyType), closed) == 1
-end
-
-function execute(c::Clip, clipType::ClipType, subjFillType::PolyFillType,
-                 clipFillType::PolyFillType)
-    polys = Vector{Vector{IntPoint}}()
-
-    result = ccall((:execute, libcclipper), Cuchar,
-                   (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}), c.clipper_ptr,
-                   Int(clipType), Int(subjFillType), Int(clipFillType), polys,
-                   @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
-
-    return result == 1, polys
-end
-
-function execute_pt(c::Clip, clipType::ClipType, subjFillType::PolyFillType,
-                    clipFillType::PolyFillType)
-    pt = PolyNode{IntPoint}(IntPoint[], false, false, PolyNode{IntPoint}[])
-
-    result = ccall((:execute_pt, libcclipper), Cuchar,
-                   (Ptr{Cvoid}, Cint, Cint, Cint, Any, Ptr{Cvoid}, Ptr{Cvoid}),
-                   c.clipper_ptr, Int(clipType), Int(subjFillType), Int(clipFillType), pt,
-                   @cfunction(newnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool, Bool)),
-                   @cfunction(appendpn!, Any, (Ptr{Cvoid}, IntPoint)))
-
-    return result == 1, pt
-end
-
-function clear!(c::Clip)
-    return ccall((:clear, libcclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
-end
-
-mutable struct IntRect
+An axis-aligned integer bounding box. Layout-compatible with Clipper2Lib::Rect64.
+"""
+struct Rect64
     left::Int64
     top::Int64
     right::Int64
     bottom::Int64
 end
 
-function get_bounds(c::Clip)
-    return ccall((:get_bounds, libcclipper), IntRect, (Ptr{Cvoid},), c.clipper_ptr)
+"""
+    PolyPath64(polygon, ishole, children)
+
+A node in a `PolyTree64`. `polygon` is the node's contour, `ishole` is true for
+holes, `children` are nested `PolyPath64`. Clipper2 PolyTree nodes carry no
+`isopen` flag — open paths are returned separately by `execute_polytree`.
+"""
+mutable struct PolyPath64
+    polygon::Path64
+    ishole::Bool
+    children::Vector{PolyPath64}
+end
+PolyPath64() = PolyPath64(Point64[], false, PolyPath64[])
+
+"""
+    PolyTree64()
+
+The root of a polygon hierarchy returned by `execute_polytree`. The root itself
+holds no contour; its `children` are the outermost contours.
+"""
+mutable struct PolyTree64
+    children::Vector{PolyPath64}
+end
+PolyTree64() = PolyTree64(PolyPath64[])
+
+"""
+    PolyPath64Z(polygon, ishole, children)
+
+A tagged node in a [`PolyTree64Z`](@ref), analogous to [`PolyPath64`](@ref).
+"""
+mutable struct PolyPath64Z
+    polygon::Path64Z
+    ishole::Bool
+    children::Vector{PolyPath64Z}
+end
+PolyPath64Z() = PolyPath64Z(Point64Z[], false, PolyPath64Z[])
+
+"""The root of a tagged polygon hierarchy returned by [`execute_polytree_z`](@ref)."""
+mutable struct PolyTree64Z
+    children::Vector{PolyPath64Z}
+end
+PolyTree64Z() = PolyTree64Z(PolyPath64Z[])
+
+"""Return the contour stored in a `PolyPath64` or `PolyPath64Z` node."""
+contour(n::Union{PolyPath64, PolyPath64Z}) = n.polygon
+
+"""Return whether a `PolyPath64` or `PolyPath64Z` node represents a hole."""
+ishole(n::Union{PolyPath64, PolyPath64Z}) = n.ishole
+
+"""Return the child nodes of a `PolyPath64`/`PolyTree64` or Z-aware counterpart."""
+children(n::Union{PolyPath64, PolyTree64, PolyPath64Z, PolyTree64Z}) = n.children
+
+"""
+    ClipperError(fn)
+
+Thrown when a C call reports failure (a C++ exception at the FFI boundary or
+an invalid enum value; the C++ message goes to stderr).
+"""
+struct ClipperError <: Exception
+    fn::Symbol
+end
+Base.showerror(io::IO, e::ClipperError) =
+    print(io, "Clipper2 operation failed in $(e.fn) (see stderr for the C++ message)")
+
+function _checked_handle(ptr::Ptr{Cvoid}, fn::Symbol)
+    ptr == C_NULL && throw(ClipperError(fn))
+    return ptr
 end
 
-#==============================================================#
-# ClipperOffset object
-#==============================================================#
-mutable struct ClipperOffset
-    clipper_ptr::Ptr{Cvoid}
+include("engine.jl")
+include("offset.jl")
+include("freefuncs.jl")
 
-    function ClipperOffset(miterLimit::Float64=2.0, roundPrecision::Float64=0.25)
-        clipper = new(ccall((:get_clipper_offset, libcclipper), Ptr{Cvoid},
-                            (Cdouble, Cdouble), miterLimit, roundPrecision))
-        finalizer(c -> ccall((:delete_clipper_offset, libcclipper), Cvoid, (Ptr{Cvoid},),
-                             c.clipper_ptr), clipper)
-
-        return clipper
-    end
-end
-
-function add_path!(c::ClipperOffset, path::Vector{IntPoint}, joinType::JoinType,
-                   endType::EndType)
-    return ccall((:add_offset_path, libcclipper), Cvoid,
-                 (Ptr{Cvoid}, Ptr{IntPoint}, Csize_t, Cint, Cint), c.clipper_ptr, path,
-                 length(path), Int(joinType), Int(endType))
-end
-
-function add_paths!(c::ClipperOffset, paths::Vector{Vector{IntPoint}}, joinType::JoinType,
-                    endType::EndType)
-    lengths = Vector{UInt64}()
-    for path in paths
-        push!(lengths, length(path))
-    end
-
-    return ccall((:add_offset_paths, libcclipper), Cvoid,
-                 (Ptr{Cvoid}, Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Cint),
-                 c.clipper_ptr, paths, lengths, length(paths), Int(joinType), Int(endType))
-end
-
-function clear!(c::ClipperOffset)
-    return ccall((:clear_offset, libcclipper), Cvoid, (Ptr{Cvoid},), c.clipper_ptr)
-end
-
-function execute(c::ClipperOffset, delta::Float64)
-    polys = Vector{Vector{IntPoint}}()
-    result = ccall((:execute_offset, libcclipper), Cvoid,
-                   (Ptr{Cvoid}, Cdouble, Any, Ptr{Cvoid}), c.clipper_ptr, delta, polys,
-                   @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
-
-    return polys
-end
-
-function simplify_polygons(polys::Vector{Vector{IntPoint}},
-                           filltype::PolyFillType=PolyFillTypeEvenOdd)
-    simplified = Vector{Vector{IntPoint}}()
-    counts = Csize_t.(length.(polys))
-    count = Csize_t(length(counts))
-    result = ccall((:simplify_polygons, libcclipper), Cvoid,
-                   (Ptr{Ptr{IntPoint}}, Ptr{Csize_t}, Csize_t, Cint, Any, Ptr{Cvoid}),
-                   polys, counts, count, filltype, simplified,
-                   @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint)))
-    return simplified
-end
-
-function minkowski_sum(poly1::Vector{IntPoint}, poly2::Vector{IntPoint},
-        is_closed::Bool = true)
-    polys = Vector{Vector{IntPoint}}()
-    @ccall libcclipper.minkowski_sum(
-        poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
-        poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
-        polys::Any,
-        @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint))::Ptr{Cvoid},
-        is_closed::Cuchar)::Cvoid
-    return polys
-end
-function minkowski_difference(poly1::Vector{IntPoint}, poly2::Vector{IntPoint})
-    polys = Vector{Vector{IntPoint}}()
-    @ccall libcclipper.minkowski_difference(
-        poly1::Ptr{IntPoint}, length(poly1)::Csize_t,
-        poly2::Ptr{IntPoint}, length(poly2)::Csize_t,
-        polys::Any,
-        @cfunction(append_poly!, Any, (Ptr{Cvoid}, Csize_t, IntPoint))::Ptr{Cvoid})::Cvoid
-    return polys
-end
-
-
-end
+end # module Clipper

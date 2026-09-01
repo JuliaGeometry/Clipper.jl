@@ -13,6 +13,7 @@ test/config
 *.exp
 *.o
 *.so
+*.dylib
 deps/usr
 deps/deps.jl
 deps/build.log
