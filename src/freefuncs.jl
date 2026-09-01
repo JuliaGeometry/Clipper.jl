@@ -57,7 +57,7 @@ paths overlap or carry holes.
 function rect_clip(rect::Rect64, paths)
     ps = _as_paths(paths)
     isempty(ps) && return Paths64()
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ptrs = [pointer(p) for p in ps]
     counts = Csize_t[length(p) for p in ps]
@@ -85,7 +85,7 @@ Compute the Minkowski sum of `pattern` and `path`. `closed` specifies whether
 `path` is closed.
 """
 function minkowski_sum(pattern::Path64, path::Path64, closed::Bool)
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ok = ccall(
         (:cclipper2_minkowski_sum, libcclipper2), Bool,
@@ -103,7 +103,7 @@ Compute the Minkowski difference of `pattern` and `path`. `closed` specifies
 whether `path` is closed.
 """
 function minkowski_diff(pattern::Path64, path::Path64, closed::Bool)
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ok = ccall(
         (:cclipper2_minkowski_difference, libcclipper2), Bool,
@@ -123,7 +123,7 @@ Resolve self-intersections and merge overlapping contours within `paths` using
 function union_self(paths, fillrule::FillRule)
     ps = _as_paths(paths)
     isempty(ps) && return Paths64()
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ptrs = [pointer(p) for p in ps]
     counts = Csize_t[length(p) for p in ps]
@@ -147,7 +147,7 @@ Set `is_open=true` to preserve the endpoints of open paths.
 function trim_collinear(paths; is_open::Bool = false)
     ps = _as_paths(paths)
     isempty(ps) && return Paths64()
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     ptrs = [pointer(p) for p in ps]
     counts = Csize_t[length(p) for p in ps]

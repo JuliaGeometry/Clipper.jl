@@ -8,7 +8,8 @@ engines together with convenience functions for common one-shot operations.
 
 A point is represented by [`Point64`](@ref), whose coordinates are signed
 64-bit integers. A [`Path64`](@ref) is a vector of points, and [`Paths64`](@ref)
-is a vector of paths.
+is a vector of paths. Z-aware operations use [`Point64Z`](@ref), [`Path64Z`](@ref),
+and [`Paths64Z`](@ref) to carry an additional signed 64-bit application tag.
 
 ```julia
 using Clipper
@@ -52,6 +53,15 @@ paths can be added with [`add_open_subject!`](@ref), or with
 Use [`execute_polytree`](@ref) when nesting information is required. It returns
 a [`PolyTree64`](@ref) for closed contours and a separate `Paths64` collection
 for open results.
+
+## Z-aware operations
+
+Pass `Point64Z` paths to the same `add_subject!`, `add_clip!`, and
+`add_open_subject!` functions, then call [`execute_polytree_z`](@ref). Input
+vertex tags are preserved; newly invented edge-intersection vertices carry
+[`Z_INTERSECTION`](@ref). The result is a [`PolyTree64Z`](@ref) plus open
+`Paths64Z` paths. Narrow `Point64` and tagged `Point64Z` inputs may be mixed;
+narrow inputs receive `z = 0`.
 
 ## Offsetting
 

@@ -12,7 +12,8 @@ a signed `delta`.
 value to set an explicit maximum deviation from the ideal arc.
 
 The offset engine defaults `preserve_collinear=false`, while `Clipper64` defaults
-to `preserve_collinear=true`.
+to `preserve_collinear=true`. Throws [`ClipperError`](@ref) if the engine cannot
+be created.
 """
 mutable struct ClipperOffset
     ptr::Ptr{Cvoid}
@@ -26,6 +27,7 @@ mutable struct ClipperOffset
             Float64(miter_limit), Float64(arc_tolerance),
             preserve_collinear, reverse_solution
         )
+        _checked_handle(p, :clipperoffset_create)
         c = new(p)
         finalizer(c) do x
             if x.ptr != C_NULL
@@ -83,7 +85,7 @@ Offset all added paths by `delta` (positive inflates, negative deflates) and ret
 the result.
 """
 function execute(o::ClipperOffset, delta::Real)
-    sink = _PathsSink(Point64[])
+    sink = _PathsSink(Point64)
     cb = @cfunction(_paths_append, Cvoid, (Ptr{Cvoid}, Csize_t, Point64))
     # `o` and `sink` are ccall arguments and stay rooted for the duration of the
     # call, even if a GC pass runs inside the append callback.

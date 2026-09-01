@@ -16,6 +16,8 @@ integer-coordinate polygon clipping and offsetting API.
   contours within a path collection.
 - Open paths are first-class: both `execute` and `execute_polytree` return
   `(closed, open)`.
+- Z-aware paths use `Point64Z` with the same add functions and
+  `execute_polytree_z`; invented intersections carry `Z_INTERSECTION`.
 - Boolean convenience functions require an explicit `FillRule`; offset
   convenience functions require explicit `JoinType` and `EndType` values.
 - The C ABI is likewise Clipper2-native: `clipper64_*` / `clipperoffset_*`
@@ -26,7 +28,7 @@ integer-coordinate polygon clipping and offsetting API.
 
 | Layer | Symbols |
 |-------|---------|
-| Engine | `Clipper64`, `add_subject!`, `add_clip!`, `add_open_subject!`, `execute`, `execute_polytree`, `clear!` |
+| Engine | `Clipper64`, `add_subject!`, `add_clip!`, `add_open_subject!`, `execute`, `execute_polytree`, `execute_polytree_z`, `clear!` |
 | Offset | `ClipperOffset(; miter_limit, arc_tolerance, preserve_collinear, reverse_solution)`, `add_path!`, `execute`, `clear!` |
 | Free functions | `union_paths`, `intersect_paths`, `difference_paths`, `xor_paths`, `inflate_paths`, `minkowski_sum`, `minkowski_diff`, `union_self`, `trim_collinear`, `rect_clip`, `area`, `is_positive`, `point_in_polygon` |
 
@@ -170,8 +172,8 @@ product once it is available.
 
 - The engine, offset, free-function, and Z-aware APIs are covered by the
   standalone test suite in `test/runtests.jl`.
-- Only integer coordinates (`Path64`) are supported. Double-precision `PathD`
-  support could be added in the future.
+- Only integer coordinates (`Path64` and `Path64Z`) are supported. Double-precision
+  `PathD` support could be added in the future.
 - The canonical C wrapper source is in `deps/cwrapper/`; the Yggdrasil recipe
   pulls that directory when building `libcclipper2`.
 

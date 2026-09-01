@@ -13,6 +13,7 @@ This module exposes Clipper2's integer-coordinate API:
     - `add_path!` to add geometry
     - `JoinType` and `EndType` enums to specify offsetting behavior
     - `execute` and `clear!`
+  - Z-aware `Point64Z` input and `execute_polytree_z` results for vertex provenance
   - Free functions such as `union_paths`, `intersect_paths`, `difference_paths`,
     `xor_paths`, `inflate_paths`, and `minkowski_sum`
 
@@ -32,8 +33,9 @@ export EndType, EndTypePolygon, EndTypeJoined, EndTypeButt, EndTypeSquare, EndTy
 
 # Engine
 export Clipper64, ClipperError, Path64, Paths64, Point64, PolyPath64, PolyTree64, Rect64
+export Path64Z, Paths64Z, Point64Z, PolyPath64Z, PolyTree64Z, Z_INTERSECTION
 export add_clip!, add_open_subject!, add_subject!, children, clear!, contour, execute,
-    execute_polytree, ishole
+    execute_polytree, execute_polytree_z, ishole
 
 # Offsetting
 export ClipperOffset
@@ -128,11 +130,33 @@ struct Point64
     y::Int64
 end
 
+"""
+    Point64Z(x, y, z)
+
+An integer-coordinate 2D point carrying a signed 64-bit application tag. Z-aware
+operations preserve input tags and mark vertices invented at edge intersections
+with [`Z_INTERSECTION`](@ref).
+"""
+struct Point64Z
+    x::Int64
+    y::Int64
+    z::Int64
+end
+
+"""Sentinel tag assigned to vertices invented at edge intersections."""
+const Z_INTERSECTION = typemin(Int64)
+
 """A polygon or polyline represented by a vector of [`Point64`](@ref) values."""
 const Path64 = Vector{Point64}
 
 """A collection of [`Path64`](@ref) values."""
 const Paths64 = Vector{Path64}
+
+"""A tagged polygon or polyline represented by a vector of [`Point64Z`](@ref) values."""
+const Path64Z = Vector{Point64Z}
+
+"""A collection of [`Path64Z`](@ref) values."""
+const Paths64Z = Vector{Path64Z}
 
 """
     Rect64(left, top, right, bottom)
@@ -171,26 +195,49 @@ mutable struct PolyTree64
 end
 PolyTree64() = PolyTree64(PolyPath64[])
 
-"""Return the contour stored in a [`PolyPath64`](@ref) node."""
-contour(n::PolyPath64) = n.polygon
+"""
+    PolyPath64Z(polygon, ishole, children)
 
-"""Return whether a [`PolyPath64`](@ref) node represents a hole."""
-ishole(n::PolyPath64) = n.ishole
+A tagged node in a [`PolyTree64Z`](@ref), analogous to [`PolyPath64`](@ref).
+"""
+mutable struct PolyPath64Z
+    polygon::Path64Z
+    ishole::Bool
+    children::Vector{PolyPath64Z}
+end
+PolyPath64Z() = PolyPath64Z(Point64Z[], false, PolyPath64Z[])
 
-"""Return the child nodes of a [`PolyPath64`](@ref) or [`PolyTree64`](@ref)."""
-children(n::Union{PolyPath64, PolyTree64}) = n.children
+"""The root of a tagged polygon hierarchy returned by [`execute_polytree_z`](@ref)."""
+mutable struct PolyTree64Z
+    children::Vector{PolyPath64Z}
+end
+PolyTree64Z() = PolyTree64Z(PolyPath64Z[])
+
+"""Return the contour stored in a `PolyPath64` or `PolyPath64Z` node."""
+contour(n::Union{PolyPath64, PolyPath64Z}) = n.polygon
+
+"""Return whether a `PolyPath64` or `PolyPath64Z` node represents a hole."""
+ishole(n::Union{PolyPath64, PolyPath64Z}) = n.ishole
+
+"""Return the child nodes of a `PolyPath64`/`PolyTree64` or Z-aware counterpart."""
+children(n::Union{PolyPath64, PolyTree64, PolyPath64Z, PolyTree64Z}) = n.children
 
 """
     ClipperError(fn)
 
-Thrown when a result-producing C call reports failure (a C++ exception at the
-FFI boundary or an invalid enum value; the C++ message goes to stderr).
+Thrown when a C call reports failure (a C++ exception at the FFI boundary or
+an invalid enum value; the C++ message goes to stderr).
 """
 struct ClipperError <: Exception
     fn::Symbol
 end
 Base.showerror(io::IO, e::ClipperError) =
     print(io, "Clipper2 operation failed in $(e.fn) (see stderr for the C++ message)")
+
+function _checked_handle(ptr::Ptr{Cvoid}, fn::Symbol)
+    ptr == C_NULL && throw(ClipperError(fn))
+    return ptr
+end
 
 include("engine.jl")
 include("offset.jl")
