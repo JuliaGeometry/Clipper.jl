@@ -3,9 +3,10 @@ uuid = "c8f6d549-b3ab-5508-a0d1-48fe138e8cc1"
 version = "0.7.0"
 
 [deps]
-Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+cclipper2_jll = "9d8c294e-5560-5f71-915d-6f08fd7b9904"
 
 [compat]
+cclipper2_jll = "0.1"
 julia = "1.6"
 
 [extras]

@@ -22,7 +22,7 @@ which calls Clipper2's C++ API. Results are returned via Julia callbacks.
 """
 module Clipper
 
-import Libdl
+using cclipper2_jll: libcclipper2
 
 # Enums
 export ClipType, ClipTypeNone, ClipTypeIntersection, ClipTypeUnion, ClipTypeDifference,
@@ -45,21 +45,6 @@ export add_path!
 export area, difference_paths, inflate_paths, intersect_paths, is_positive, minkowski_diff,
     minkowski_sum, point_in_polygon, rect_clip, trim_collinear, union_paths, union_self,
     xor_paths
-
-# ============================================================
-# Library handle
-# ============================================================
-# Local builds place the platform-specific C shim in deps/.
-const libcclipper2 = abspath(
-    joinpath(@__DIR__, "..", "deps", "libcclipper2.$(Libdl.dlext)"),
-)
-
-function __init__()
-    return isfile(libcclipper2) || error(
-        "libcclipper2 not found at $libcclipper2. Build it from " *
-            "deps/cwrapper/cclipper2.cpp — see \"Testing this draft\" in README.md.",
-    )
-end
 
 # ============================================================
 # Enums — the wrapper-owned ABI values defined in cclipper2.cpp (mapped to

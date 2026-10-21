@@ -152,21 +152,21 @@ containment) rather than exact path-vector order. Use
 `Clipper64(; preserve_collinear=false)` or `trim_collinear` when minimal-vertex
 contours are required.
 
-## Testing this draft
+## Binary dependency
 
-The `libcclipper2` product is being added to `Clipper2_jll` by
-[JuliaPackaging/Yggdrasil#14270](https://github.com/JuliaPackaging/Yggdrasil/pull/14270).
-Until that JLL is published, place a matching local library at
-`deps/libcclipper2.so`, `deps/libcclipper2.dylib`, or `deps/libcclipper2.dll`.
-It must be built from `deps/cwrapper/cclipper2.cpp` with `-DUSINGZ` against the
-patched Clipper2 2.0.1 used by that Yggdrasil recipe. Then run:
+The C shim `libcclipper2` comes from `cclipper2_jll`, built by the Yggdrasil
+recipe [`C/cclipper2`](https://github.com/JuliaPackaging/Yggdrasil/tree/master/C/cclipper2)
+from `deps/cwrapper/` at a pinned Clipper.jl commit. It links `libClipper2Z` from
+`Clipper2_jll`: Clipper2 2.0.1 with the
+[`C/Clipper2` patches](https://github.com/JuliaPackaging/Yggdrasil/tree/master/C/Clipper2/bundled/patches),
+built with `USINGZ` and `CLIPPER2_HI_PRECISION`. The Z-provenance tests depend on
+`z-fill-join-split.patch` and fail against a stock Clipper2 build.
 
-```sh
-julia --project -e 'using Pkg; Pkg.test()'
-```
-
-The package loader and `Project.toml` will use the `Clipper2_jll.libcclipper2`
-product once it is available.
+Changes to `deps/cwrapper/` take effect only once a new `cclipper2_jll` is built
+from them. To test such changes locally, build `cclipper2.cpp` with the recipe's
+flags against `Clipper2_jll`, then point `cclipper2_jll` at the result with an
+[`Overrides.toml`](https://pkgdocs.julialang.org/v1/artifacts/#Overriding-artifact-locations)
+entry.
 
 ## Status / roadmap
 
@@ -174,8 +174,8 @@ product once it is available.
   standalone test suite in `test/runtests.jl`.
 - Only integer coordinates (`Path64` and `Path64Z`) are supported. Double-precision
   `PathD` support could be added in the future.
-- The canonical C wrapper source is in `deps/cwrapper/`; the Yggdrasil recipe
-  pulls that directory when building `libcclipper2`.
+- The canonical C wrapper source is in `deps/cwrapper/`; see
+  [Binary dependency](#binary-dependency) for how it is built and shipped.
 
 ## License
 

@@ -408,14 +408,15 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
 
     @testset "Z provenance through join/split paths" begin
         # A z of zero here would mean an engine path applied no z policy. This
-        # geometry reaches one of the patched join/split paths.
+        # geometry reaches one of the patched join/split paths whether Clipper2
+        # truncates or rounds (CLIPPER2_HI_PRECISION) intersection points.
         subject = Point64Z[
-            Point64Z(15, 10, 1001), Point64Z(26, 38, 1002),
-            Point64Z(17, 10, 1003), Point64Z(10, 2, 1004),
+            Point64Z(19, 14, 1001), Point64Z(27, 5, 1002),
+            Point64Z(6, 27, 1003), Point64Z(24, 38, 1004),
         ]
         clip = Point64Z[
-            Point64Z(-8, 8, 5001), Point64Z(37, -1, 5002),
-            Point64Z(39, 33, 5003), Point64Z(-9, 35, 5004),
+            Point64Z(17, 30, 5001), Point64Z(21, 8, 5002),
+            Point64Z(40, 37, 5003), Point64Z(21, 12, 5004),
         ]
 
         c = Clipper64()
@@ -425,11 +426,11 @@ const RECT = Point64[Point64(0, 0), Point64(10, 0), Point64(10, 10), Point64(0, 
         @test length(children(root)) == 1
         result = contour(children(root)[1])
         zof = Dict((p.x, p.y) => p.z for p in result)
-        @test Set(keys(zof)) == Set([(15, 10), (26, 38), (17, 10), (11, 4)])
-        @test zof[(15, 10)] == 1001
-        @test zof[(26, 38)] == 1002
-        @test zof[(17, 10)] == 1003
-        @test zof[(11, 4)] == Z_INTERSECTION  # 0 without the Clipper2 patch
+        @test Set(keys(zof)) == Set([(19, 14), (24, 38), (6, 27), (20, 12)])
+        @test zof[(19, 14)] == 1001
+        @test zof[(24, 38)] == 1004
+        @test zof[(6, 27)] == 1003
+        @test zof[(20, 12)] == Z_INTERSECTION  # 0 without the Clipper2 patch
         @test !any(p -> p.z == 0, result)
     end
 
