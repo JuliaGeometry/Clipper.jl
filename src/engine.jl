@@ -52,18 +52,22 @@ function _new_tree_child!(parent::Union{PolyTree64Z, PolyPath64Z}, ish::Bool)
 end
 
 function _tree_newnode(parent_ptr::Ptr{Cvoid}, ish::Bool)
-    parent = unsafe_pointer_to_objref(parent_ptr)
-    child = _new_tree_child!(parent, ish)
-    return pointer_from_objref(child)
+    parent = unsafe_pointer_to_objref(parent_ptr)::Union{PolyTree64, PolyPath64}
+    return pointer_from_objref(_new_tree_child!(parent, ish))
+end
+function _tree_newnode_z(parent_ptr::Ptr{Cvoid}, ish::Bool)
+    parent = unsafe_pointer_to_objref(parent_ptr)::Union{PolyTree64Z, PolyPath64Z}
+    return pointer_from_objref(_new_tree_child!(parent, ish))
 end
 
-function _tree_append!(node_ptr::Ptr{Cvoid}, pt)
-    node = unsafe_pointer_to_objref(node_ptr)
-    push!(node.polygon, pt)
+function _tree_append(node_ptr::Ptr{Cvoid}, pt::Point64)
+    push!((unsafe_pointer_to_objref(node_ptr)::PolyPath64).polygon, pt)
     return nothing
 end
-_tree_append(node_ptr::Ptr{Cvoid}, pt::Point64) = _tree_append!(node_ptr, pt)
-_tree_append_z(node_ptr::Ptr{Cvoid}, pt::Point64Z) = _tree_append!(node_ptr, pt)
+function _tree_append_z(node_ptr::Ptr{Cvoid}, pt::Point64Z)
+    push!((unsafe_pointer_to_objref(node_ptr)::PolyPath64Z).polygon, pt)
+    return nothing
+end
 
 # ------------------------------------------------------------
 # Clipper64 engine handle
@@ -261,7 +265,7 @@ Narrow `Point64` inputs may be mixed in; the C wrapper assigns them `z = 0`.
 function execute_polytree_z(c::Clipper64, cliptype::ClipType, fillrule::FillRule)
     root = PolyTree64Z()
     open_sink = _PathsSink(Point64Z)
-    newnode_cb = @cfunction(_tree_newnode, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
+    newnode_cb = @cfunction(_tree_newnode_z, Ptr{Cvoid}, (Ptr{Cvoid}, Bool))
     append_cb = @cfunction(_tree_append_z, Cvoid, (Ptr{Cvoid}, Point64Z))
     open_cb = @cfunction(_paths_append_z, Cvoid, (Ptr{Cvoid}, Csize_t, Point64Z))
     ok = ccall(
